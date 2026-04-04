@@ -64,7 +64,7 @@ That command:
 - checks whether Codex CLI is available and authenticated
 - warns instead of failing if Codex is not ready yet on the machine
 
-The strict local AI push gate is currently Codex-CLI-based. Claude contributors still use the same docs, skills, and workflow, but local automatic AI review on push currently depends on Codex being available.
+Codex review belongs at PR stage. Claude contributors still use the same docs, skills, and workflow, while local hooks keep deterministic proof and workflow evidence strict before anything is pushed.
 
 ## Verification
 
@@ -93,6 +93,8 @@ Helper commands:
 - `node ./scripts/local-review.mjs`
 - `node ./scripts/pre-commit.mjs`
 - `node ./scripts/pre-push.mjs`
+- `pnpm review:ai`
+- `pnpm ai:check`
 - `node ./scripts/review-ready.mjs`
 - `node ./scripts/reconcile-docs.mjs`
 
@@ -132,7 +134,9 @@ The expected agent flow is:
 The repo uses `.githooks` as the shared hooks path.
 
 - `pre-commit` runs verification before a commit is created
-- `pre-push` reruns verification, blocks direct pushes to protected branches, runs the local review gate, and requires Codex review by default
+- `pre-push` reruns verification, blocks direct pushes to protected branches, and runs the local review gate with workflow-evidence enforcement
+- `pnpm review:ready` runs the full local proof set before work is considered ready to publish
+- `pnpm ai:check` verifies the local Codex CLI installation and authentication state before you rely on PR-stage Codex review
 
 Review artifacts are written to `.git/pocketcurb/`.
 
@@ -140,7 +144,6 @@ Emergency overrides exist, but they are deliberate escape hatches:
 
 - `POCKETCURB_BYPASS_LOCAL_GATES=1`
 - `POCKETCURB_ALLOW_PROTECTED_PUSH=1`
-- `POCKETCURB_DISABLE_AI_REVIEW=1`
 
 ## CI and Review Discipline
 
@@ -148,14 +151,15 @@ CI installs dependencies, runs `pnpm verify`, runs lane-targeted mobile/web veri
 
 The automated audit gate currently blocks on `critical` findings. High-severity transitive issues from upstream toolchains still need human review and dependency tracking even when they are not blocking CI.
 
-CodeRabbit is configured through [.coderabbit.yaml](./.coderabbit.yaml), but it only becomes active once the GitHub app is installed on the repo or org.
+CodeRabbit is configured through [.coderabbit.yaml](./.coderabbit.yaml), but it only becomes active once the GitHub app is installed on the repo or org. Codex review belongs at PR stage rather than in the local push hook.
 
 Merge discipline is:
 
 1. local hooks
 2. CI
-3. CodeRabbit where configured
-4. mandatory human review
+3. PR-stage Codex review where configured
+4. CodeRabbit where configured
+5. mandatory human review
 
 ## Notes
 

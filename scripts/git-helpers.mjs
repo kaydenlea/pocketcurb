@@ -118,7 +118,14 @@ export function getGitDir() {
 }
 
 export function ensurePocketcurbGitDir() {
-  const dir = path.join(getGitDir(), "pocketcurb");
+  let baseDir;
+  try {
+    baseDir = getGitDir();
+  } catch {
+    baseDir = path.join(repoRoot, ".pocketcurb-artifacts");
+  }
+
+  const dir = path.join(baseDir, "pocketcurb");
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }

@@ -21,10 +21,10 @@ That command:
 - installs workspace dependencies
 - installs the repo Git hooks
 - runs repository verification
-- checks whether `codex` is available and logged in
+- checks whether `codex` is installed and authenticated
 - warns instead of failing if `codex` is not ready yet on the machine
 
-The current automatic local AI review hook uses Codex CLI. Claude users still get the same workflow guidance and mirrored skills, but the strict local push gate currently depends on Codex being available.
+Codex review belongs at the pull-request stage. Claude users still get the same workflow guidance and mirrored skills, and local hooks still enforce deterministic review before commit or push.
 
 ## Day-to-Day Flow
 
@@ -42,11 +42,12 @@ The current automatic local AI review hook uses Codex CLI. Claude users still ge
    The `pre-push` hook:
    - blocks direct pushes to protected branches
    - reruns verification
-   - runs strict Codex review by default
+   - runs the local review gate with workflow-evidence enforcement
    - writes review artifacts under `.git/pocketcurb/`
 7. Open a pull request.
-8. Let CI run.
-9. If CodeRabbit is installed, let it review too.
+8. Request or confirm PR-stage AI review.
+   Use Codex review on the PR where configured. Let CodeRabbit review too if installed.
+9. Let CI run.
 10. Complete human review before merge.
 
 ## What Is Automatic
@@ -56,10 +57,11 @@ The current automatic local AI review hook uses Codex CLI. Claude users still ge
 - local pre-commit verification
 - local pre-push verification
 - direct-push blocking on protected branches
-- strict local Codex review on push by default
+- local workflow-evidence review before push
 - lightweight static policy checks during verification
 - Supabase migration security checks during verification
 - CI on push and PR
+- PR-stage Codex review where configured
 - CodeRabbit review if the GitHub app is installed
 
 ## What Is Not Fully Automatic
@@ -96,8 +98,8 @@ In practice, this means the agent should usually know to:
 
 The setup is robust, but not absolute.
 
-- If `codex` is unavailable or not logged in, strict local AI review will block pushes.
-- Claude contributors still benefit from the same docs and mirrored skills, but the current local automatic AI push review is Codex-specific.
+- If the PR-stage Codex reviewer is not configured or temporarily unavailable, the repo still relies on local proof, CI, CodeRabbit where installed, and human review.
+- Claude contributors still benefit from the same docs and mirrored skills, and the workflow itself stays shared across both tools.
 - If someone bypasses the hooks explicitly, the local gates can be skipped.
 - If work is done outside Git or outside this repo, the hooks do not help.
 - Human judgment is still required for architecture, security nuance, and release risk.
@@ -108,7 +110,6 @@ Use these only deliberately:
 
 - `POCKETCURB_BYPASS_LOCAL_GATES=1`
 - `POCKETCURB_ALLOW_PROTECTED_PUSH=1`
-- `POCKETCURB_DISABLE_AI_REVIEW=1`
 
 ## Recommended Mental Model
 

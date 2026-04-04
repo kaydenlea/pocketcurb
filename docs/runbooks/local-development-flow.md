@@ -5,6 +5,7 @@
 0. Run `pnpm bootstrap:local` once on a fresh clone.
    If global Corepack or pnpm is unreliable on the machine, run `node ./scripts/bootstrap-local.mjs` instead.
    The bootstrap installs dependencies, installs hooks, verifies the repo, and checks Codex readiness. If Codex is not ready yet, bootstrap warns but still completes.
+   Run `pnpm ai:check` any time you need a quick Codex installation/auth sanity check before opening a PR.
 1. Create or update the correct document for the stage of work: product brief, PRD, feature spec, implementation plan, or bugfix spec.
    Prefer the reusable generators such as `pnpm new:product-brief`, `pnpm new:prd`, `pnpm new:feature-spec`, `pnpm new:implementation-plan`, and `pnpm new:bugfix-spec`.
 2. Implement in small slices.
@@ -13,8 +14,9 @@
 5. Let `pre-push` run the local gate and block unsafe pushes.
 6. Run `pnpm review:ready` when you want the full local proof and review gate before PR.
 7. Open a pull request.
-8. Let CI run, then use CodeRabbit if installed, then complete human review.
-9. If the work maps to Gate B, Gate C, or Gate D, complete `docs/runbooks/security-release-checklist.md` before merge.
+8. Request or confirm PR-stage Codex review, then let CodeRabbit review if installed.
+9. Let CI run, then complete human review.
+10. If the work maps to Gate B, Gate C, or Gate D, complete `docs/runbooks/security-release-checklist.md` before merge.
 
 ## If CodeRabbit Is Installed
 
@@ -26,10 +28,16 @@
 ## If CodeRabbit Is Not Installed
 
 - rely on local hooks and CI for deterministic checks
-- let the default pre-push Codex review run locally
+- request PR-stage Codex review if that integration is configured
 - use human review before merge
 
-Contributors may still use Claude for day-to-day authoring because workflow docs and skills are mirrored, but the current automatic local push-time AI review uses Codex CLI.
+Contributors may still use Claude for day-to-day authoring because workflow docs and skills are mirrored. PR-stage Codex review is an additional review layer, not a separate workflow.
+
+## If the AI Review Gate Fails
+
+- Run `pnpm ai:check` to confirm the Codex CLI is installed and authenticated.
+- If `pnpm ai:check` fails, fix the local CLI or auth problem first.
+- If the PR-stage Codex reviewer still fails after that, treat it as a network or GitHub-integration availability problem and rely on CI, CodeRabbit where installed, and human review until it recovers.
 
 ## Important Boundary
 

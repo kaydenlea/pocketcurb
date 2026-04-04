@@ -16,7 +16,7 @@ Use this runbook when the request is something like "fix this bug", "this crashe
 9. Verify before and after behavior where relevant, then rerun the proof set.
 10. Update docs or runbooks if the bug exposed stale guidance or a stable lesson.
 11. Apply the correct release gate if the bug touches sensitive flows.
-12. Complete PR AI review where configured and human review before merge.
+12. Complete PR-stage Codex review where configured, CodeRabbit where installed, and human review before merge.
 
 ## Useful Commands
 
@@ -25,6 +25,7 @@ Use this runbook when the request is something like "fix this bug", "this crashe
 - `pnpm test:integration`
 - `pnpm test:e2e`
 - `pnpm review:ready`
+- `pnpm ai:check`
 - `pnpm verify`
 - `pnpm docs:reconcile`
 

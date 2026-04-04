@@ -48,8 +48,7 @@ function assessWorkflowEvidence(files, tags) {
     return (
       file.startsWith("apps/") ||
       file.startsWith("packages/") ||
-      file.startsWith("supabase/") ||
-      file.startsWith(".github/")
+      file.startsWith("supabase/")
     );
   });
 
@@ -158,20 +157,37 @@ function readChangedFiles() {
     return changedFilesEnv.split(/\r?\n/).filter(Boolean);
   }
 
-  const baseRef = getComparisonBase();
-  return getChangedFilesFromBase(baseRef);
+  try {
+    const baseRef = getComparisonBase();
+    return getChangedFilesFromBase(baseRef);
+  } catch {
+    return [];
+  }
 }
 
-const branch = process.env.POCKETCURB_BRANCH || getCurrentBranch();
-const baseRef = process.env.POCKETCURB_BASE_REF || getComparisonBase();
+const branch = process.env.POCKETCURB_BRANCH || (() => {
+  try {
+    return getCurrentBranch();
+  } catch {
+    return "unknown";
+  }
+})();
+const baseRef = process.env.POCKETCURB_BASE_REF || (() => {
+  try {
+    return getComparisonBase();
+  } catch {
+    return "HEAD";
+  }
+})();
 const changedFiles = readChangedFiles();
 const tags = classifyChanges(changedFiles);
 const gate = recommendedGate(tags);
 const findings = scanRiskPatterns(changedFiles);
 const workflowEvidence = assessWorkflowEvidence(changedFiles, tags);
 const codexReview = {
-  status: process.env.POCKETCURB_CODEX_REVIEW_STATUS || (args.has("--require-ai") ? "failed" : "skipped"),
-  message: process.env.POCKETCURB_CODEX_REVIEW_MESSAGE || "Codex review status not provided"
+  status: process.env.POCKETCURB_CODEX_REVIEW_STATUS || (args.has("--require-ai") ? "failed" : "deferred"),
+  message:
+    process.env.POCKETCURB_CODEX_REVIEW_MESSAGE || "Codex review is expected at pull-request stage before merge."
 };
 
 const artifact = {
@@ -193,10 +209,21 @@ console.log(`Branch: ${branch}`);
 console.log(`Base: ${baseRef}`);
 console.log(`Recommended release gate: ${gate}`);
 console.log(`Tags: ${tags.length > 0 ? tags.join(", ") : "none"}`);
+if (changedFiles.length === 0) {
+  console.warn("Changed files could not be derived automatically. Local review coverage is reduced unless the caller provides explicit git context.");
+}
 if (workflowEvidence.warnings.length > 0) {
   for (const warning of workflowEvidence.warnings) {
     console.warn(warning);
   }
+}
+
+if (args.has("--require-workflow-evidence") && workflowEvidence.warnings.length > 0) {
+  console.error("Workflow evidence is required before this step can pass:");
+  for (const warning of workflowEvidence.warnings) {
+    console.error(`- ${warning}`);
+  }
+  process.exit(1);
 }
 
 if (findings.length > 0) {

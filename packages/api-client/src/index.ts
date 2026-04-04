@@ -10,7 +10,9 @@ import type { Database } from "@pocketcurb/supabase-types";
 
 export type PocketCurbFunctionName = "daily-guidance" | "simulate-transaction";
 
-export type EdgeInvoker = <TResponse>(name: PocketCurbFunctionName, payload: unknown) => Promise<TResponse>;
+export type EdgePayload = Record<string, unknown>;
+
+export type EdgeInvoker = <TResponse>(name: PocketCurbFunctionName, payload: EdgePayload) => Promise<TResponse>;
 
 export type PocketCurbApiClient = {
   getDailyGuidance(input: DailyGuidanceRequest): Promise<DailyGuidanceResponse>;

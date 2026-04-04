@@ -1,7 +1,7 @@
 import process from "node:process";
 import { spawnSync } from "node:child_process";
-import { commandExists, repoRoot } from "./common.mjs";
-import { getChangedFilesFromBase, getComparisonBase, getCurrentBranch, isProtectedBranch, writePocketcurbArtifact } from "./git-helpers.mjs";
+import { repoRoot } from "./common.mjs";
+import { getChangedFilesFromBase, getComparisonBase, getCurrentBranch, isProtectedBranch } from "./git-helpers.mjs";
 
 if (process.env.POCKETCURB_BYPASS_LOCAL_GATES === "1") {
   console.warn("PocketCurb local gates bypassed via POCKETCURB_BYPASS_LOCAL_GATES=1");
@@ -27,43 +27,9 @@ if ((verifyResult.status ?? 1) !== 0) {
 const baseRef = getComparisonBase();
 const changedFiles = getChangedFilesFromBase(baseRef);
 const changedFilesPayload = changedFiles.join("\n");
-const aiRequired = process.env.POCKETCURB_DISABLE_AI_REVIEW !== "1";
-
-let codexReviewStatus = "skipped";
-let codexReviewMessage = "Codex review disabled via POCKETCURB_DISABLE_AI_REVIEW=1";
-
-if (aiRequired) {
-  if (!commandExists("codex")) {
-    console.error(
-      "Codex CLI is not installed or not on PATH. Install Codex CLI or use POCKETCURB_DISABLE_AI_REVIEW=1 only when an explicit bypass is justified.",
-    );
-    process.exit(1);
-  }
-
-  const argsForReview = baseRef === "HEAD" ? ["review", "--commit", "HEAD"] : ["review", "--base", baseRef];
-  const codexResult = spawnSync("codex", argsForReview, {
-    cwd: repoRoot,
-    encoding: "utf8",
-    timeout: 45000
-  });
-
-  const stdout = codexResult.stdout?.trim() ?? "";
-  const stderr = codexResult.stderr?.trim() ?? "";
-  writePocketcurbArtifact("codex-review.txt", [stdout, stderr].filter(Boolean).join("\n\n---\n\n"));
-
-  if (codexResult.status === 0) {
-    codexReviewStatus = "passed";
-    codexReviewMessage = "Codex review completed successfully";
-  } else {
-    codexReviewStatus = "failed";
-    codexReviewMessage = stderr || stdout || "Codex review failed or timed out";
-    console.error(codexReviewMessage);
-    process.exit(1);
-  }
-}
 
 console.log("Running PocketCurb local review gate...");
-const reviewResult = spawnSync(process.execPath, ["./scripts/local-review.mjs"], {
+const reviewResult = spawnSync(process.execPath, ["./scripts/local-review.mjs", "--require-workflow-evidence"], {
   cwd: repoRoot,
   stdio: "inherit",
   env: {
@@ -71,8 +37,8 @@ const reviewResult = spawnSync(process.execPath, ["./scripts/local-review.mjs"],
     POCKETCURB_BRANCH: branch,
     POCKETCURB_BASE_REF: baseRef,
     POCKETCURB_CHANGED_FILES: changedFilesPayload,
-    POCKETCURB_CODEX_REVIEW_STATUS: codexReviewStatus,
-    POCKETCURB_CODEX_REVIEW_MESSAGE: codexReviewMessage
+    POCKETCURB_CODEX_REVIEW_STATUS: "deferred",
+    POCKETCURB_CODEX_REVIEW_MESSAGE: "Codex review is required at pull-request stage, not during local pre-push."
   }
 });
 
