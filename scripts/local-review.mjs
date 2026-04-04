@@ -98,13 +98,17 @@ function assessWorkflowEvidence(files, tags) {
 
 function scanRiskPatterns(files) {
   const findings = [];
+  const selfScanningRuleFiles = new Set([
+    "scripts/local-review.mjs",
+    "scripts/policy-check.mjs"
+  ]);
 
   for (const file of files) {
     if (!/\.(cjs|mjs|js|jsx|ts|tsx|json|ya?ml|toml|sql|sh)$/i.test(file)) {
       continue;
     }
 
-    if (file === "scripts/local-review.mjs") {
+    if (selfScanningRuleFiles.has(file)) {
       continue;
     }
 
