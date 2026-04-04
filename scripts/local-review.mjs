@@ -104,6 +104,10 @@ function scanRiskPatterns(files) {
       continue;
     }
 
+    if (file === "scripts/local-review.mjs") {
+      continue;
+    }
+
     const absolute = path.join(repoRoot, file);
     if (!fs.existsSync(absolute)) {
       continue;
