@@ -9,6 +9,18 @@ PocketCurb uses local automation to reduce the chance that weak changes are comm
 
 The standard first-run path is `pnpm bootstrap:local`, which installs dependencies, installs hooks, verifies the repo, and checks local Codex CLI availability.
 
+## Package-Manager Discipline
+
+- Treat repeated broad install hangs as a workflow smell, not as a prompt to keep retrying the same command.
+- Prefer repo-owned package-manager entrypoints such as `node ./scripts/bootstrap-local.mjs` and `node ./scripts/pnpm.mjs`.
+- When debugging, separate package-manager bootstrap failures from repo test/runtime failures so the wrong layer does not get blamed.
+
+## Degraded Local Gate Boundary
+
+- If the local dependency layout is incomplete, local automation may fall back to a degraded pre-commit path for docs, workflow, CI, and repo-automation changes only.
+- Degraded mode must not be used to commit app code, shared package code, Supabase code, or other substantive product changes.
+- The degraded path exists to avoid endless install loops on machines with a broken local package-manager state while still protecting real product code behind the full verifier.
+
 ## Protected Branch Rule
 
 Direct pushes to `main`, `master`, and `release/*` are blocked locally by default. Use a pull request unless an emergency override is explicitly justified.

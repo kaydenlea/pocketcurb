@@ -104,6 +104,10 @@ export function dependenciesInstalled() {
   return fileExists("node_modules") && fileExists("pnpm-lock.yaml");
 }
 
+export function toolchainLinksAvailable() {
+  return fileExists("node_modules/.bin");
+}
+
 export function ensureDependenciesInstalled() {
   assert(
     dependenciesInstalled(),

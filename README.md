@@ -66,6 +66,11 @@ That command:
 
 Codex review belongs at PR stage. Claude contributors still use the same docs, skills, and workflow, while local hooks keep deterministic proof and workflow evidence strict before anything is pushed.
 
+If a machine shows flaky global Corepack behavior, prefer the repo-owned entrypoints instead of repeatedly retrying broad global install commands:
+
+- `node ./scripts/bootstrap-local.mjs`
+- `node ./scripts/pnpm.mjs <args>`
+
 ## Verification
 
 Primary commands:
@@ -164,6 +169,6 @@ Merge discipline is:
 ## Notes
 
 - The repo is pinned to `pnpm@10.6.2`.
-- The lockfile is committed and CI uses Corepack to activate the pinned package manager version.
+- The lockfile is committed and CI installs the pinned pnpm version through `pnpm/action-setup`.
 - SQLite is intentionally not the default local data path.
 - Better Auth, Clerk, Resend-in-mobile-core, and MCP-first workflows are intentionally not part of this baseline.

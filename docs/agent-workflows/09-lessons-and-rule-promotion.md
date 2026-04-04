@@ -22,3 +22,9 @@ Keep one-off details inside:
 ## Anti-Clutter Rule
 
 Do not create random instruction fragments. If a lesson is worth keeping, put it in the correct shared location and reconcile nearby docs so the system stays coherent.
+
+## Current Stable Lessons
+
+- Do not keep retrying broad workspace dependency installs after the same failure mode has already repeated. Promote that lesson immediately and switch to the narrowest viable option.
+- Prefer repo-owned package-manager entrypoints and wrapper scripts over ad hoc global Corepack commands when the machine or environment has shown flaky package-manager behavior.
+- Separate bootstrap failures from application failures. Fix CI package-manager setup first, then debug repo-level test or runtime issues independently.

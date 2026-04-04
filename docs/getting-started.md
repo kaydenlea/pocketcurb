@@ -26,6 +26,18 @@ That command:
 
 Codex review belongs at the pull-request stage. Claude users still get the same workflow guidance and mirrored skills, and local hooks still enforce deterministic review before commit or push.
 
+## Install Discipline
+
+- Do not keep retrying broad `pnpm install` or `corepack pnpm install` commands after the same hang or failure repeats.
+- Prefer the repo-owned entrypoints first:
+  - `node ./scripts/bootstrap-local.mjs`
+  - `node ./scripts/pnpm.mjs <args>`
+- If install behavior is flaky, separate the problem:
+  - CI package-manager bootstrap problem
+  - local machine package-manager problem
+  - repo test/runtime problem after dependencies already exist
+- Prefer static inspection and targeted verification before attempting another full workspace reinstall.
+
 ## Day-to-Day Flow
 
 1. Prompt Codex or Claude normally.

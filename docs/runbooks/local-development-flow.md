@@ -39,6 +39,18 @@ Contributors may still use Claude for day-to-day authoring because workflow docs
 - If `pnpm ai:check` fails, fix the local CLI or auth problem first.
 - If the PR-stage Codex reviewer still fails after that, treat it as a network or GitHub-integration availability problem and rely on CI, CodeRabbit where installed, and human review until it recovers.
 
+## If Package Installation Is Flaky
+
+- Do not keep retrying the same broad `pnpm install` or `corepack pnpm install` command after repeated hangs.
+- Prefer `node ./scripts/bootstrap-local.mjs` for first-run setup because it uses the repo-owned pnpm path.
+- Prefer `node ./scripts/pnpm.mjs <args>` over ad hoc global Corepack commands for targeted package-manager tasks.
+- Distinguish between:
+  - CI bootstrap failures, which usually mean the workflow setup order is wrong
+  - local install failures, which usually mean the machine package-manager environment is unstable
+  - post-install test/runtime failures, which should be debugged without another broad reinstall unless the dependency graph is actually invalid
+- If manifests or the lockfile did not change, prefer targeted verification over another full workspace reinstall.
+- If the local dependency layout is incomplete and you are only changing docs, CI, rules, or repo automation, the pre-commit hook may use a degraded automation-only path. That mode is intentionally blocked for app, package, and Supabase code.
+
 ## Important Boundary
 
 Local automation can catch structural mistakes, policy violations, missing docs alignment, and some risky patterns. It cannot guarantee the absence of logic bugs, race conditions, or nuanced security flaws. Human review remains mandatory for substantive work.

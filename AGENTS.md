@@ -31,6 +31,8 @@ PocketCurb is a security-first pnpm monorepo for a personal finance product that
 10. Local automation exists to prevent weak commits and pushes, but it does not replace human judgment.
 11. Do not trust agents too early, especially on cold starts, novel architectures, subtle race conditions, scale edges, or security-sensitive changes.
 12. Treat balanced elegance as the default quality bar: the simplest correct design, no brittle cleverness, no workaround chains, and no stale clutter left behind.
+13. Do not keep retrying broad dependency installs once the failure mode is already known. Prefer static inspection, targeted verification, narrow filtered installs, or repo-owned wrapper scripts before attempting another full workspace install.
+14. If the local dependency layout is degraded, do not heal it by looping broad installs. Allow a degraded local gate only for docs, workflow, and repo-automation changes. Product code, shared logic, mobile, web, and Supabase changes still require the full verifier.
 
 # Default Execution Workflow
 
