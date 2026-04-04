@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+if [ "${POCKETCURB_BYPASS_LOCAL_GATES:-0}" = "1" ]; then
+  echo "PocketCurb local gates bypassed via POCKETCURB_BYPASS_LOCAL_GATES=1"
+  exit 0
+fi
+
+if git diff --cached --quiet; then
+  echo "No staged changes. Skipping pre-commit gate."
+  exit 0
+fi
+
+node ./scripts/pre-commit.mjs

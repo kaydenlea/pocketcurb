@@ -1,0 +1,75 @@
+do $template$
+begin
+  raise exception 'Template file only. Copy this pattern into a timestamped migration and replace the example names before applying.';
+end
+$template$;
+
+-- Example pattern for a shared-household table.
+-- This assumes a membership table such as public.household_membership
+-- with at least (household_id uuid, user_id uuid, membership_status text).
+--
+-- create table public.example_household_resource (
+--   id uuid primary key default gen_random_uuid(),
+--   household_id uuid not null references public.household (id) on delete cascade,
+--   created_by_user_id uuid not null references auth.users (id) on delete restrict,
+--   note text not null,
+--   created_at timestamptz not null default timezone('utc', now())
+-- );
+--
+-- create index example_household_resource_household_id_idx
+--   on public.example_household_resource (household_id);
+--
+-- alter table public.example_household_resource enable row level security;
+--
+-- create policy "example_household_resource_select_member"
+--   on public.example_household_resource
+--   for select
+--   to authenticated
+--   using (
+--     exists (
+--       select 1
+--       from public.household_membership hm
+--       where hm.household_id = example_household_resource.household_id
+--         and hm.user_id = auth.uid()
+--         and hm.membership_status = 'active'
+--     )
+--   );
+--
+-- create policy "example_household_resource_insert_member"
+--   on public.example_household_resource
+--   for insert
+--   to authenticated
+--   with check (
+--     exists (
+--       select 1
+--       from public.household_membership hm
+--       where hm.household_id = example_household_resource.household_id
+--         and hm.user_id = auth.uid()
+--         and hm.membership_status = 'active'
+--     )
+--     and created_by_user_id = auth.uid()
+--   );
+--
+-- create policy "example_household_resource_update_member"
+--   on public.example_household_resource
+--   for update
+--   to authenticated
+--   using (
+--     exists (
+--       select 1
+--       from public.household_membership hm
+--       where hm.household_id = example_household_resource.household_id
+--         and hm.user_id = auth.uid()
+--         and hm.membership_status = 'active'
+--     )
+--   )
+--   with check (
+--     exists (
+--       select 1
+--       from public.household_membership hm
+--       where hm.household_id = example_household_resource.household_id
+--         and hm.user_id = auth.uid()
+--         and hm.membership_status = 'active'
+--     )
+--   );
+

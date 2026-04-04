@@ -1,0 +1,23 @@
+{
+  "name": "@pocketcurb/ui-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mobile-only UI primitives and patterns for the PocketCurb app.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "nativewind": "^4.1.23",
+    "react": "^18.3.1",
+    "react-native": "^0.76.7"
+  }
+}

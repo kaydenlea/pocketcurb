@@ -1,0 +1,24 @@
+{
+  "name": "@pocketcurb/api-client",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared API client contracts and wrappers for app-to-backend communication.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest --config ../../jest.config.cjs --runInBand --testPathPatterns=packages/api-client"
+  },
+  "dependencies": {
+    "@pocketcurb/core-domain": "workspace:*",
+    "@pocketcurb/schemas": "workspace:*",
+    "@pocketcurb/supabase-types": "workspace:*"
+  }
+}

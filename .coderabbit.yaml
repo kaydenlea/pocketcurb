@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+early_access: false
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  poem: false
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_instructions:
+    - path: "docs/**/*.md"
+      instructions: |
+        Review these files against AGENTS.md and the workflow docs.
+        Check for product-truth drift, missing security implications, and contradictions between docs.
+    - path: "apps/mobile/**"
+      instructions: |
+        Focus on mobile architecture, Safe-to-Spend trust, low-friction UX, secure storage, and mobile-vs-web separation.
+    - path: "apps/web/**"
+      instructions: |
+        Focus on truthful claims, waitlist or SEO separation, privacy-safe analytics, and keeping web concerns out of mobile UX.
+    - path: "packages/**"
+      instructions: |
+        Focus on domain boundaries, schema safety, shared-package discipline, and avoiding premature UI sharing across product lanes.
+    - path: "supabase/**"
+      instructions: |
+        Focus on RLS, Edge Function boundaries, secret handling, migration safety, indexing, and rollback awareness.
+chat:
+  auto_reply: true
+

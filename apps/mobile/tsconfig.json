@@ -1,0 +1,24 @@
+{
+  "extends": "../../packages/config-typescript/react-native.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["jest"],
+    "paths": {
+      "@pocketcurb/core-domain": ["../../packages/core-domain/src/index.ts"],
+      "@pocketcurb/schemas": ["../../packages/schemas/src/index.ts"],
+      "@pocketcurb/api-client": ["../../packages/api-client/src/index.ts"],
+      "@pocketcurb/supabase-types": ["../../packages/supabase-types/src/index.ts"],
+      "@pocketcurb/ui-mobile": ["../../packages/ui-mobile/src/index.tsx"]
+    }
+  },
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "*.ts",
+    "*.tsx",
+    "*.d.ts"
+  ]
+}

@@ -1,0 +1,7 @@
+project_id = "pocketcurb-local"
+
+[functions]
+enabled = true
+
+[db]
+shadow_port = 54321

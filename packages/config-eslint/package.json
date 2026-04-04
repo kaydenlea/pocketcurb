@@ -1,0 +1,17 @@
+{
+  "name": "@pocketcurb/config-eslint",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared ESLint configuration for PocketCurb workspaces.",
+  "exports": {
+    ".": "./base.mjs"
+  },
+  "peerDependencies": {
+    "@eslint/js": "^9.24.0",
+    "eslint": "^9.24.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.0.0",
+    "typescript-eslint": "^8.28.0"
+  }
+}

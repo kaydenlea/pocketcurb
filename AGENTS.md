@@ -1,0 +1,155 @@
+# Purpose of this Repository
+
+PocketCurb is a security-first pnpm monorepo for a personal finance product that prioritizes decisions over bookkeeping. The product goal is to eliminate admin work, reduce shame-driven budgeting behavior, and give users short-term clarity first through a trusted Safe-to-Spend number, a Daily Spending Meter, running balances, event and narrative intelligence, and forward-looking cash-flow guidance. Mobile is the primary product lane. Web is a separate growth and SEO lane.
+
+# Repo Map
+
+- `apps/mobile`: Expo mobile app, the primary product surface.
+- `apps/web`: website, waitlist, and later SEO or content surfaces.
+- `packages/core-domain`: business logic and financial decision rules.
+- `packages/schemas`: shared validation, contracts, and domain schemas.
+- `packages/api-client`: typed client wrappers for safe app-to-backend communication.
+- `packages/supabase-types`: generated or curated Supabase database and function types.
+- `packages/ui-mobile`: mobile-only UI primitives and composition patterns.
+- `packages/ui-web`: web-only UI primitives and composition patterns.
+- `packages/config-*`: centralized lint, TypeScript, and Jest defaults.
+- `supabase/*`: migrations, seed data, functions, and generated types.
+- `docs/*`: the canonical truth layer for product, architecture, security, runbooks, decisions, specs, and agent workflows.
+- `.claude/*` and `.codex/*`: mirrored skills and rules. Workflow parity is mandatory.
+
+# Core Working Principles
+
+1. Plan first for every non-trivial task. Planning and verification are the bottleneck, not typing.
+2. Ask clarifying questions before planning when the answer materially changes architecture, security posture, data boundaries, or user-facing behavior. Do not guess.
+3. Implement in small verified slices. Do not disappear into long autonomous runs.
+4. Prefer the simplest correct design. Avoid hacks, workaround chains, and accidental overengineering.
+5. Fix root causes, not symptoms. Preserve minimal code impact while solving the real defect.
+6. Treat security, privacy, and data minimization as first-class constraints from day one.
+7. Keep the repository aligned with reality. Specs, ADRs, and runbooks must be updated as implementation evolves.
+8. Store stable lessons in shared docs and rules. Keep task-specific findings in the task spec.
+9. Claude and Codex follow the same workflow, standards, and responsibilities. Do not invent tool-specific operating models.
+10. Local automation exists to prevent weak commits and pushes, but it does not replace human judgment.
+11. Do not trust agents too early, especially on cold starts, novel architectures, subtle race conditions, scale edges, or security-sensitive changes.
+12. Treat balanced elegance as the default quality bar: the simplest correct design, no brittle cleverness, no workaround chains, and no stale clutter left behind.
+
+# Default Execution Workflow
+
+1. Identify whether the task is trivial or non-trivial.
+   If the user prompt is short, treat it as an entry point into the workflow, not permission to skip the workflow. Examples: "add this feature", "fix this bug", "build this screen", "add the landing page", and "support shared budgets" should trigger the correct brief, PRD, spec, plan, verification, review, and release path automatically.
+2. Start from the right product context. For new product work, create or refine a product brief and PRD before feature planning when scope, positioning, or user value is still fuzzy.
+3. For non-trivial work, create or update a feature spec from `docs/specs/mobile/_template.md` or `docs/specs/web/_template.md`, and pair it with an implementation plan before coding.
+4. Clarify unknowns that materially affect architecture, data shape, security, user behavior, or launch risk before writing the plan. Do not guess.
+5. Produce a file-by-file plan that includes interfaces, design choices, edge cases, failure modes, rollback considerations, and verification criteria for each slice.
+6. Cross-check the plan with an independent reviewer or model when useful before implementation begins.
+7. Implement one slice at a time.
+8. Run verification after each slice before continuing.
+9. Stop and re-plan immediately if the plan becomes wrong.
+10. Update the spec, product docs, runbooks, and decision records as reality changes.
+11. Run an independent review again after implementation.
+12. Require PR AI review where configured and human review before final commit or merge for substantive agent-generated work.
+13. Apply the correct release gate before merge or deployment.
+14. Use the local pre-commit and pre-push gates where configured, keep strict AI review enabled by default on push, and do not bypass these gates without explicit justification.
+15. For ordinary bugs, fix them autonomously once the likely root cause and verification path are clear.
+
+# Definition of Done
+
+Work is done only when all of the following are true:
+
+- The current spec reflects the shipped behavior and the relevant design decisions.
+- The implementation respects mobile vs web boundaries and does not prematurely share UI assumptions.
+- Security, privacy, authorization, and secret-handling rules are satisfied.
+- Verification evidence exists for lint, typecheck, tests, and any task-specific checks.
+- Sensitive changes pass the correct release gate and update the applicable runbooks.
+- Open questions are either resolved or recorded in an explicit `Open Decision` section with recommendation, rationale, and decision triggers.
+- Human review is complete before final commit or merge.
+- Local verification and review artifacts are current for the changes being proposed.
+
+# Security and Data-Boundary Rules
+
+1. User data is private by default. Users may only access their own data.
+2. Use strict authorization and Row Level Security for any direct client access to Supabase data.
+3. Allow direct client to Supabase access only for safe user-scoped operations under strict RLS.
+4. Route privileged, secret-backed, integration-backed, server-authoritative, or rate-limited operations through Supabase Edge Functions.
+5. Never place service-role credentials, privileged secrets, or signing material in the client.
+6. Validate and sanitize every input path. Favor schema validation at all boundaries.
+7. Store sensitive client values in Expo SecureStore. Store only non-sensitive fast cache data in MMKV.
+8. Design for audit logging, incident response, backup and restore, alerting, and rollback from the start.
+9. Treat shared household data, privacy toggles, reimbursements, and personal pots as high-sensitivity product areas.
+
+# Documentation Rules
+
+1. `AGENTS.md` plus `docs/**` are the canonical source of truth.
+2. Use the correct document type for the current stage: product brief, PRD, feature spec, implementation plan, bugfix spec, ADR, review checklist, release checklist, or postmortem.
+3. Create a spec before non-trivial implementation and reconcile it when the work is complete.
+4. Update ADRs when a cross-cutting architectural or workflow decision changes.
+5. Keep product docs focused on user value, architecture docs focused on boundaries and data flow, and runbooks focused on operational response.
+6. Do not hide unresolved issues in prose. Use an explicit `Open Decision` section.
+7. Preserve the product thesis language: Decision layer, Safe-to-Spend, Crisis Cushion, Clarity-as-a-Service, admin work elimination, event or narrative intelligence, forward-looking cash flow, shared household with private autonomy, personal pots, and short-term clarity over retrospective cleanup.
+
+# Verification Rules
+
+1. Nothing is done without proof.
+2. Run verification after each implementation slice, not only at the end.
+3. Verify against the spec and architecture, not only the diff.
+4. Use visual verification for UI work when tooling is available.
+5. Compare before and after behavior when fixing regressions.
+6. Prefer automated checks that prevent silent drift.
+
+# Review Rules
+
+1. Human review is mandatory before final commit or merge for substantive agent-generated work.
+2. Use CodeRabbit on pull requests as an additional reviewer, not as the final authority.
+3. Review for correctness, security boundaries, rollback safety, user impact, and documentation alignment.
+4. Resolve disagreements between reviewers before proceeding.
+5. For sensitive changes, require the sensitive change gate before merge or release.
+6. If CodeRabbit is unavailable, fall back to local review gates plus human review; do not treat the absence of CodeRabbit as a reason to skip review.
+
+# Commands
+
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm test:unit`
+- `pnpm test:integration`
+- `pnpm test:e2e`
+- `pnpm hooks:install`
+- `pnpm bootstrap:local`
+- `pnpm new:spec:mobile -- <slug>`
+- `pnpm new:spec:web -- <slug>`
+- `pnpm new:product-brief -- <slug>`
+- `pnpm new:prd -- <mobile|web|shared> <slug>`
+- `pnpm new:feature-spec -- <mobile|web> <slug>`
+- `pnpm new:implementation-plan -- <mobile|web|shared> <slug>`
+- `pnpm new:bugfix-spec -- <slug>`
+- `pnpm commit:check`
+- `pnpm policy:check`
+- `pnpm supabase:check-security`
+- `pnpm push:check`
+- `pnpm review:local`
+- `pnpm review:ai`
+- `pnpm review:ready`
+- `pnpm verify`
+- `pnpm audit`
+- `pnpm approve-builds`
+- `pnpm docs:reconcile`
+- `node ./scripts/verify.mjs`
+
+# Product Lanes
+
+- Mobile lane: the primary product. Optimize for low-friction decision support, daily guidance, cash-flow clarity, reimbursements, splits, privacy toggles, and event-based organization.
+- Web lane: separate planning and delivery for landing pages, waitlist capture, trust-building messaging, SEO, and content. Do not let web SEO concerns leak into mobile UX decisions.
+- Shared packages: share business rules, schemas, contracts, Supabase types, and engineering standards. Do not prematurely share mobile and web UI.
+
+# Where to Read More
+
+- `docs/agent-workflows/*`
+- `docs/product/shared/*`
+- `docs/product/mobile/*`
+- `docs/product/web/*`
+- `docs/architecture/shared/*`
+- `docs/architecture/mobile/*`
+- `docs/architecture/web/*`
+- `docs/security/*`
+- `docs/runbooks/*`
+- `docs/decisions/*`
+- `docs/templates/*`

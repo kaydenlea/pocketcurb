@@ -1,0 +1,14 @@
+{
+  "name": "@pocketcurb/config-jest",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Shared Jest configuration for PocketCurb workspaces.",
+  "exports": {
+    ".": "./base.cjs"
+  },
+  "peerDependencies": {
+    "jest": "^29.7.0",
+    "jest-expo": "^52.0.5",
+    "ts-jest": "^29.3.1"
+  }
+}

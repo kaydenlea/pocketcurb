@@ -1,0 +1,11 @@
+{
+  "name": "@pocketcurb/config-typescript",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Shared TypeScript configuration presets for PocketCurb workspaces.",
+  "exports": {
+    "./base": "./base.json",
+    "./react-native": "./react-native.json",
+    "./web": "./web.json"
+  }
+}

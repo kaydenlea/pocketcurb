@@ -1,0 +1,55 @@
+{
+  "canonicalDocs": [
+    "AGENTS.md",
+    "docs/agent-workflows",
+    "docs/templates",
+    "docs/product",
+    "docs/architecture",
+    "docs/security",
+    "docs/runbooks",
+    "docs/decisions"
+  ],
+  "defaults": {
+    "planFirstForNonTrivialWork": true,
+    "clarifyBeforePlanningWhenRiskChanges": true,
+    "replanOnDesignDrift": true,
+    "verifyBeforeDone": true,
+    "mirrorCodexWorkflow": true,
+    "treatShortPromptsAsWorkflowEntryPoints": true,
+    "requireImplementationPlanForNonTrivialWork": true,
+    "reconcileDocsBeforeDone": true
+  },
+  "preferredGenerators": {
+    "productBrief": "pnpm new:product-brief -- <slug>",
+    "prd": "pnpm new:prd -- <mobile|web|shared> <slug>",
+    "featureSpec": "pnpm new:feature-spec -- <mobile|web> <slug>",
+    "implementationPlan": "pnpm new:implementation-plan -- <mobile|web|shared> <slug>",
+    "bugfixSpec": "pnpm new:bugfix-spec -- <slug>"
+  },
+  "workflowReminders": {
+    "featureWork": [
+      "Clarify important unknowns first.",
+      "Refine the product brief or PRD when product framing is still moving.",
+      "Create the feature spec and implementation plan before coding.",
+      "Review the plan before coding when the task is risky or cross-cutting.",
+      "Implement in slices, verify each slice, then reconcile docs before merge."
+    ],
+    "bugfixWork": [
+      "Reproduce first when possible.",
+      "Gather evidence from logs, tests, traces, or user reports.",
+      "Use a bugfix spec when the issue is non-trivial or sensitive.",
+      "State the root cause and implement the smallest correct fix.",
+      "Verify before and after behavior, then reconcile docs if the bug taught a stable lesson."
+    ]
+  },
+  "sensitivePathHints": [
+    "apps/mobile/src/lib/storage/**",
+    "apps/mobile/src/lib/supabase/**",
+    "apps/mobile/src/lib/api/**",
+    "supabase/**",
+    "docs/security/**",
+    "docs/runbooks/release-gates.md",
+    "docs/runbooks/security-release-checklist.md",
+    ".github/workflows/**"
+  ]
+}
