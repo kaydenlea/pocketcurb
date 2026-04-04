@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { execFileSync, spawnSync } from "node:child_process";
-import { repoRoot } from "./common.mjs";
+import { spawnSync } from "node:child_process";
+import { quoteForCmd, repoRoot } from "./common.mjs";
 
 function resolveGitExecutable() {
   if (process.platform !== "win32") {
@@ -30,17 +30,36 @@ function resolveGitExecutable() {
 const gitExecutable = resolveGitExecutable();
 
 export function runGit(args, options = {}) {
-  try {
-    return execFileSync(gitExecutable, args, {
+  if (process.platform === "win32") {
+    const commandLine = ["git", ...args].map(quoteForCmd).join(" ");
+    const result = spawnSync("cmd.exe", ["/d", "/s", "/c", commandLine], {
       cwd: repoRoot,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
       ...options
-    }).trim();
-  } catch (error) {
-    const stderr = error?.stderr?.toString?.().trim();
+    });
+
+    if (result.error || (result.status ?? 1) !== 0) {
+      const stderr = result.stderr?.toString?.().trim();
+      throw new Error(stderr || `git ${args.join(" ")} failed`);
+    }
+
+    return result.stdout?.toString?.().trim() ?? "";
+  }
+
+  const result = spawnSync(gitExecutable, args, {
+    cwd: repoRoot,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    ...options
+  });
+
+  if (result.error || (result.status ?? 1) !== 0) {
+    const stderr = result.stderr?.toString?.().trim();
     throw new Error(stderr || `git ${args.join(" ")} failed`);
   }
+
+  return result.stdout?.toString?.().trim() ?? "";
 }
 
 export function tryRunGit(args, options = {}) {
@@ -66,6 +85,11 @@ export function hasStagedChanges() {
   }
 
   throw new Error("Unable to determine whether staged changes exist");
+}
+
+export function getStagedFiles() {
+  const output = runGit(["diff", "--cached", "--name-only", "--diff-filter=ACMR"]);
+  return output ? output.split(/\r?\n/).filter(Boolean) : [];
 }
 
 export function getCurrentBranch() {
@@ -118,7 +142,14 @@ export function getGitDir() {
 }
 
 export function ensurePocketcurbGitDir() {
-  const dir = path.join(getGitDir(), "pocketcurb");
+  let baseDir;
+  try {
+    baseDir = getGitDir();
+  } catch {
+    baseDir = path.join(repoRoot, ".pocketcurb-artifacts");
+  }
+
+  const dir = path.join(baseDir, "pocketcurb");
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }

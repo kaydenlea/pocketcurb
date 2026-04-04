@@ -9,6 +9,18 @@ PocketCurb uses local automation to reduce the chance that weak changes are comm
 
 The standard first-run path is `pnpm bootstrap:local`, which installs dependencies, installs hooks, verifies the repo, and checks local Codex CLI availability.
 
+## Package-Manager Discipline
+
+- Treat repeated broad install hangs as a workflow smell, not as a prompt to keep retrying the same command.
+- Prefer repo-owned package-manager entrypoints such as `node ./scripts/bootstrap-local.mjs` and `node ./scripts/pnpm.mjs`.
+- When debugging, separate package-manager bootstrap failures from repo test/runtime failures so the wrong layer does not get blamed.
+
+## Degraded Local Gate Boundary
+
+- If the local dependency layout is incomplete, local automation may fall back to a degraded pre-commit path for docs, workflow, CI, and repo-automation changes only.
+- Degraded mode must not be used to commit app code, shared package code, Supabase code, or other substantive product changes.
+- The degraded path exists to avoid endless install loops on machines with a broken local package-manager state while still protecting real product code behind the full verifier.
+
 ## Protected Branch Rule
 
 Direct pushes to `main`, `master`, and `release/*` are blocked locally by default. Use a pull request unless an emergency override is explicitly justified.
@@ -21,14 +33,13 @@ The local review gate includes:
 - change classification and release-gate recommendation
 - security-sensitive path detection
 - lightweight policy scanning for high-risk patterns
-- workflow-evidence signaling when implementation changes without a task spec update
-- Codex CLI review by default during `pre-push`
+- workflow-evidence enforcement when implementation changes land without the expected spec, plan, security-doc, or runbook evidence
 
-The workflow-evidence layer is intentionally conservative. It prefers warnings over brittle hard failures when implementation changes land without the expected spec, plan, security-doc, or runbook updates. This is deliberate: trivial work still exists, and the automation should steer contributors back toward the documented workflow without turning normal development into noise.
+The workflow-evidence layer is intentionally conservative, but `pre-push` and `review:ready` now require the expected workflow evidence before the change is treated as ready for publication. This keeps local review thorough even though Codex review itself has moved to pull-request stage.
 
 ## AI Review Boundary
 
-Do not pretend local AI review is always available. Codex review depends on a working local `codex` CLI, authentication, and network access. In the automatic hook path, strict AI review is on by default and pushes fail closed if Codex review does not complete successfully. Claude and Codex still share the same workflow and mirrored skills, but the current local push-time AI review adapter is Codex-specific. Use the explicit emergency override only when that behavior must be bypassed deliberately.
+Do not pretend AI review replaces the rest of the workflow. In PocketCurb, Codex review belongs at pull-request stage rather than in the local push hook. Local gates stay deterministic and fail closed on verification or workflow-evidence gaps, while PR-stage AI review adds another review layer before merge. Claude and Codex still share the same workflow and mirrored skills.
 
 ## Deliberately Manual
 
@@ -43,4 +54,3 @@ The automation layer does not replace:
 
 - `POCKETCURB_BYPASS_LOCAL_GATES=1`: bypass local hooks entirely. Use only for emergencies.
 - `POCKETCURB_ALLOW_PROTECTED_PUSH=1`: allow a direct push to a protected branch. Use only for emergencies.
-- `POCKETCURB_DISABLE_AI_REVIEW=1`: disable the default Codex review requirement. Use only for emergencies.

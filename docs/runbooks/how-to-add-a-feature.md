@@ -22,7 +22,8 @@ Use this runbook when the request is something like "add this feature", "build t
 10. Update the spec and any affected docs during implementation.
 11. Run post-implementation review:
    [docs/agent-workflows/06-cross-model-review.md](../agent-workflows/06-cross-model-review.md),
-   PR AI review where configured,
+   PR-stage Codex review where configured,
+   CodeRabbit where installed,
    and human review.
 12. Reconcile docs with `pnpm docs:reconcile`.
 13. Apply the correct release gate from [docs/runbooks/release-gates.md](./release-gates.md) and merge only after the gate is satisfied.
@@ -34,6 +35,7 @@ Use this runbook when the request is something like "add this feature", "build t
 - `pnpm new:feature-spec -- <mobile|web> <slug>`
 - `pnpm new:implementation-plan -- <mobile|web|shared> <slug>`
 - `pnpm review:ready`
+- `pnpm ai:check`
 - `pnpm verify`
 - `pnpm docs:reconcile`
 

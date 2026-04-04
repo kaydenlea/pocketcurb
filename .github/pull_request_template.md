@@ -30,5 +30,6 @@ If this is Gate B, Gate C, or Gate D, link the completed `docs/runbooks/security
 ## Review
 
 - [ ] human review required
+- [ ] Codex PR review requested or completed where configured
 - [ ] CodeRabbit review completed if installed
 - [ ] local review artifact checked if CodeRabbit is unavailable

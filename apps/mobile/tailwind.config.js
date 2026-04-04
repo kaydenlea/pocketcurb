@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  presets: [require("nativewind/preset")],
   content: ["./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}", "../../packages/ui-mobile/src/**/*.{ts,tsx}"],
   theme: {
     extend: {

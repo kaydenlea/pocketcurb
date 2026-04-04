@@ -16,7 +16,7 @@ Planning and verification are the bottleneck, not typing. Agents can execute a w
 6. Verify after each slice.
 7. Re-plan immediately if the design drifts or the plan becomes wrong.
 8. Reconcile the spec, PRD, ADRs, runbooks, and other docs as reality changes.
-9. Run independent review, PR AI review where configured, and mandatory human review.
+9. Run independent review, PR-stage AI review where configured, and mandatory human review.
 10. Apply the correct release gate before merge or deployment.
 
 ## Interpreting Short Prompts

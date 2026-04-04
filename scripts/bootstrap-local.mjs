@@ -14,14 +14,13 @@ try {
 
   if (!commandExists("codex")) {
     console.warn("\nWarning: Codex CLI was not found on this machine.");
-    console.warn("The repository is still set up and ready for local coding, but the default pre-push AI review gate will fail until Codex CLI is installed or intentionally bypassed.");
+    console.warn("The repository is still set up and ready for local coding, but Codex pull-request review will not be available from this machine until Codex CLI is installed.");
   } else {
     try {
-      runStep("Check Codex availability", "codex", ["--version"]);
-      runStep("Check Codex login status", "codex", ["login", "status"]);
+      runStep("Check Codex readiness", process.execPath, ["./scripts/check-ai-review-readiness.mjs"]);
     } catch {
       console.warn("\nWarning: Codex CLI is installed but not fully ready.");
-      console.warn("The repository is still set up and ready for local coding, but the default pre-push AI review gate will fail until Codex CLI authentication is fixed or intentionally bypassed.");
+      console.warn("The repository is still set up and ready for local coding, but Codex pull-request review will not be available until Codex CLI authentication is fixed.");
     }
   }
 

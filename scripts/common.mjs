@@ -80,8 +80,32 @@ export function commandExists(command) {
   return (result.status ?? 1) === 0;
 }
 
+export function resolveCommandPath(command) {
+  const lookup = process.platform === "win32" ? "where.exe" : "which";
+  const result = spawnSync(lookup, [command], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    shell: false
+  });
+
+  if (result.error || (result.status ?? 1) !== 0) {
+    return null;
+  }
+
+  const firstMatch = result.stdout
+    ?.split(/\r?\n/u)
+    .map((line) => line.trim())
+    .find(Boolean);
+
+  return firstMatch || null;
+}
+
 export function dependenciesInstalled() {
   return fileExists("node_modules") && fileExists("pnpm-lock.yaml");
+}
+
+export function toolchainLinksAvailable() {
+  return fileExists("node_modules/.bin");
 }
 
 export function ensureDependenciesInstalled() {
@@ -114,12 +138,35 @@ export function runCommand(command, args, options = {}) {
   return result;
 }
 
-function quoteForCmd(argument) {
+export function quoteForCmd(argument) {
   if (!/[ \t"]/u.test(argument)) {
     return argument;
   }
 
   return `"${argument.replaceAll('"', '\\"')}"`;
+}
+
+export function spawnCommand(command, args, options = {}) {
+  const resolvedCommand = resolveCommandPath(command) ?? command;
+  const baseOptions = {
+    cwd: options.cwd ? resolveRepoPath(options.cwd) : repoRoot,
+    env: {
+      ...process.env,
+      COREPACK_HOME: corepackHome,
+      ...(options.env ?? {})
+    },
+    encoding: options.encoding,
+    timeout: options.timeout,
+    stdio: options.stdio,
+    shell: false
+  };
+
+  if (process.platform === "win32") {
+    const commandLine = [resolvedCommand, ...args].map(quoteForCmd).join(" ");
+    return spawnSync("cmd.exe", ["/d", "/s", "/c", commandLine], baseOptions);
+  }
+
+  return spawnSync(resolvedCommand, args, baseOptions);
 }
 
 export function runPnpm(args, options = {}) {

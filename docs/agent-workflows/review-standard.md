@@ -7,7 +7,7 @@ Human judgment remains mandatory for cold-start architecture, scale risks, subtl
 ## Required Review Layers
 
 - author self-review against the active spec
-- independent AI review or cross-model review where useful, including CodeRabbit on pull requests where configured
+- independent AI review or cross-model review where useful, including PR-stage Codex review and CodeRabbit on pull requests where configured
 - human review before merge or release
 - local deterministic review gates before push where configured
 
@@ -28,7 +28,7 @@ Disagreement between reviewers is valuable. Resolve it before merging by reconci
 
 ## If CodeRabbit Is Unavailable
 
-Use the local gates, local AI review when available, and human review. CodeRabbit is additive; its absence must not create a no-review workflow.
+Use the local gates, PR-stage Codex review where configured, and human review. CodeRabbit is additive; its absence must not create a no-review workflow.
 
 ## Review Output
 

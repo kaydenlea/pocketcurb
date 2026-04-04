@@ -31,6 +31,8 @@ PocketCurb is a security-first pnpm monorepo for a personal finance product that
 10. Local automation exists to prevent weak commits and pushes, but it does not replace human judgment.
 11. Do not trust agents too early, especially on cold starts, novel architectures, subtle race conditions, scale edges, or security-sensitive changes.
 12. Treat balanced elegance as the default quality bar: the simplest correct design, no brittle cleverness, no workaround chains, and no stale clutter left behind.
+13. Do not keep retrying broad dependency installs once the failure mode is already known. Prefer static inspection, targeted verification, narrow filtered installs, or repo-owned wrapper scripts before attempting another full workspace install.
+14. If the local dependency layout is degraded, do not heal it by looping broad installs. Allow a degraded local gate only for docs, workflow, and repo-automation changes. Product code, shared logic, mobile, web, and Supabase changes still require the full verifier.
 
 # Default Execution Workflow
 
@@ -46,9 +48,9 @@ PocketCurb is a security-first pnpm monorepo for a personal finance product that
 9. Stop and re-plan immediately if the plan becomes wrong.
 10. Update the spec, product docs, runbooks, and decision records as reality changes.
 11. Run an independent review again after implementation.
-12. Require PR AI review where configured and human review before final commit or merge for substantive agent-generated work.
+12. Require PR-stage AI review where configured and human review before final commit or merge for substantive agent-generated work.
 13. Apply the correct release gate before merge or deployment.
-14. Use the local pre-commit and pre-push gates where configured, keep strict AI review enabled by default on push, and do not bypass these gates without explicit justification.
+14. Use the local pre-commit and pre-push gates where configured, keep strict deterministic review enabled locally, and require AI review at the pull-request stage before merge.
 15. For ordinary bugs, fix them autonomously once the likely root cause and verification path are clear.
 
 # Definition of Done
@@ -98,7 +100,7 @@ Work is done only when all of the following are true:
 # Review Rules
 
 1. Human review is mandatory before final commit or merge for substantive agent-generated work.
-2. Use CodeRabbit on pull requests as an additional reviewer, not as the final authority.
+2. Use PR-stage Codex review where configured, and use CodeRabbit on pull requests as an additional reviewer, not as the final authority.
 3. Review for correctness, security boundaries, rollback safety, user impact, and documentation alignment.
 4. Resolve disagreements between reviewers before proceeding.
 5. For sensitive changes, require the sensitive change gate before merge or release.
@@ -127,6 +129,7 @@ Work is done only when all of the following are true:
 - `pnpm push:check`
 - `pnpm review:local`
 - `pnpm review:ai`
+- `pnpm ai:check`
 - `pnpm review:ready`
 - `pnpm verify`
 - `pnpm audit`
