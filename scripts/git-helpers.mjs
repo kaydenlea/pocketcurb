@@ -37,12 +37,14 @@ function spawnGit(args, options = {}) {
     ...options
   };
 
-  if (process.platform === "win32") {
+  const directResult = spawnSync(gitExecutable, args, baseOptions);
+
+  if (process.platform === "win32" && directResult.error?.code === "EPERM") {
     const commandLine = [gitExecutable, ...args].map(quoteForCmd).join(" ");
     return spawnSync("cmd.exe", ["/d", "/s", "/c", commandLine], baseOptions);
   }
 
-  return spawnSync(gitExecutable, args, baseOptions);
+  return directResult;
 }
 
 export function runGit(args, options = {}) {
