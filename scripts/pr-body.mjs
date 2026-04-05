@@ -76,6 +76,21 @@ function readStoredReviewContext() {
   };
 }
 
+function collectLiveChangedFiles(baseRef) {
+  const collected = [];
+
+  try {
+    collected.push(...getChangedFilesFromBase(baseRef));
+  } catch {
+    // fall through to other local git views
+  }
+
+  collected.push(...getHeadCommitFiles());
+  collected.push(...getWorkingTreeFiles());
+
+  return unique(collected);
+}
+
 function getWorkingTreeFiles() {
   const trackedOutput = tryRunGit(["diff", "--name-only", "HEAD"]);
   const untrackedOutput = tryRunGit(["ls-files", "--others", "--exclude-standard"]);
@@ -126,6 +141,10 @@ function inferTags(files) {
 
     if (file.startsWith("docs/")) {
       tags.add("docs");
+    }
+
+    if (file.startsWith("docs/runbooks/")) {
+      tags.add("ops");
     }
 
     if (
@@ -293,12 +312,12 @@ function inferWorkstreams(tags, files) {
 }
 
 function inferReleaseGate(files, tags) {
-  if (tags.includes("security-sensitive")) {
-    return "Gate B";
+  if (tags.includes("release-infra") || tags.includes("ops")) {
+    return "Gate C";
   }
 
-  if (files.some((file) => file.startsWith(".github/workflows/"))) {
-    return "Gate C";
+  if (tags.includes("security-sensitive")) {
+    return "Gate B";
   }
 
   return "Gate A";
@@ -460,54 +479,55 @@ function releaseGateChecklistEvidenceLine(releaseGate) {
 
 export function buildPrBody() {
   const storedReviewContext = readStoredReviewContext();
-  const branch =
-    process.env.POCKETCURB_BRANCH ||
-    storedReviewContext.branch ||
+  const branchFromGit =
     getBranchFromGitHead() ||
     tryRunGit(["branch", "--show-current"]) ||
-    tryRunGit(["rev-parse", "--abbrev-ref", "HEAD"]) ||
+    tryRunGit(["rev-parse", "--abbrev-ref", "HEAD"]);
+  const branch =
+    process.env.POCKETCURB_BRANCH ||
+    branchFromGit ||
+    storedReviewContext.branch ||
     "unknown-branch";
 
   const changedFilesFromEnv = process.env.POCKETCURB_CHANGED_FILES
     ? splitLines(process.env.POCKETCURB_CHANGED_FILES)
     : null;
 
+  const canUseStoredReviewContext =
+    !process.env.POCKETCURB_BRANCH &&
+    Boolean(storedReviewContext.branch) &&
+    storedReviewContext.branch === branch;
+
   const baseRef =
     process.env.POCKETCURB_BASE_REF ||
-    storedReviewContext.baseRef ||
     (() => {
       try {
         return getComparisonBase();
       } catch {
-        return "HEAD";
+        return canUseStoredReviewContext ? storedReviewContext.baseRef || "HEAD" : "HEAD";
       }
     })();
 
-  const files = changedFilesFromEnv && changedFilesFromEnv.length > 0
+  const liveChangedFiles = changedFilesFromEnv && changedFilesFromEnv.length > 0
     ? changedFilesFromEnv
-    : (() => {
-        if (storedReviewContext.changedFiles.length > 0) {
-          return storedReviewContext.changedFiles;
-        }
+    : collectLiveChangedFiles(baseRef);
 
-        const collected = [];
-
-        try {
-          collected.push(...getChangedFilesFromBase(baseRef));
-        } catch {
-          // fall through to the other local git views
-        }
-
-        collected.push(...getHeadCommitFiles());
-        collected.push(...getWorkingTreeFiles());
-
-        return unique(collected);
-      })();
-  const tags = files.length > 0 ? inferTags(files) : storedReviewContext.tags;
+  const files = liveChangedFiles.length > 0
+    ? liveChangedFiles
+    : canUseStoredReviewContext
+      ? storedReviewContext.changedFiles
+      : [];
+  const tags = files.length > 0
+    ? inferTags(files)
+    : canUseStoredReviewContext
+      ? storedReviewContext.tags
+      : [];
   const artifacts = collectArtifacts(files);
   const releaseGate = files.length > 0
     ? inferReleaseGate(files, tags)
-    : storedReviewContext.recommendedGate || inferReleaseGate(files, tags);
+    : canUseStoredReviewContext
+      ? storedReviewContext.recommendedGate || inferReleaseGate(files, tags)
+      : inferReleaseGate(files, tags);
   const codexReviewPrompt = inferCodexReviewPrompt(tags, releaseGate);
   const releaseChecklistLine = releaseGateChecklistEvidenceLine(releaseGate);
 

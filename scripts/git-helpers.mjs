@@ -101,7 +101,7 @@ export function refExists(ref) {
 
 export function getComparisonBase() {
   const requested = process.env.POCKETCURB_REVIEW_BASE;
-  const candidates = [requested, "main", "origin/main", "master", "origin/master"].filter(Boolean);
+  const candidates = [requested, "origin/main", "main", "origin/master", "master"].filter(Boolean);
 
   for (const candidate of candidates) {
     if (refExists(candidate)) {
@@ -136,9 +136,17 @@ export function getGitDir() {
 }
 
 export function ensurePocketcurbGitDir() {
-  const [dir] = getPocketcurbArtifactDirectories();
-  fs.mkdirSync(dir, { recursive: true });
-  return dir;
+  for (const dir of getPocketcurbArtifactDirectories()) {
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      fs.accessSync(dir, fs.constants.W_OK);
+      return dir;
+    } catch {
+      // try the next artifact directory candidate
+    }
+  }
+
+  throw new Error("Unable to find a writable PocketCurb artifact directory.");
 }
 
 export function getPocketcurbArtifactPath(filename) {
@@ -161,9 +169,18 @@ export function getPocketcurbArtifactDirectories() {
 }
 
 export function writePocketcurbArtifact(filename, content) {
-  const target = getPocketcurbArtifactPath(filename);
-  fs.writeFileSync(target, content, "utf8");
-  return target;
+  for (const directory of getPocketcurbArtifactDirectories()) {
+    try {
+      fs.mkdirSync(directory, { recursive: true });
+      const target = path.join(directory, filename);
+      fs.writeFileSync(target, content, "utf8");
+      return target;
+    } catch {
+      // try the next artifact directory candidate
+    }
+  }
+
+  throw new Error(`Unable to write PocketCurb artifact: ${filename}`);
 }
 
 export function readPocketcurbArtifact(filename) {
