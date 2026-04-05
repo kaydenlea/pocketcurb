@@ -24,6 +24,28 @@ Reviewers must check:
 - documentation alignment and ADR impact
 - test adequacy and missing verification
 
+## PR-Stage Codex Review
+
+Codex review quality depends on the repo context and the PR body quality, not only on the trigger phrase.
+
+- Keep durable review rules in `AGENTS.md` plus `docs/**`.
+- Make the PR body explicit and current before requesting review.
+- Link the active product brief if any, PRD, feature spec or bugfix spec, and implementation plan in `Planning Artifacts`.
+- State the release gate with a plain-language meaning, not only `Gate A/B/C/D`.
+- Ensure deterministic proof already exists before asking for AI review.
+
+Recommended baseline trigger:
+
+```text
+@codex review against the linked planning artifacts in the PR body. Focus on correctness, security boundaries, rollback safety, documentation alignment, and missing verification.
+```
+
+Recommended stronger trigger for sensitive or complex changes:
+
+```text
+@codex review against the linked planning artifacts in the PR body. Focus on auth, authorization, RLS, secrets, secure storage, privacy, rollback safety, release risk, and whether verification evidence is sufficient.
+```
+
 ## Handling Disagreement
 
 Disagreement between reviewers is valuable. Resolve it before merging by reconciling the spec, design intent, and verification evidence.

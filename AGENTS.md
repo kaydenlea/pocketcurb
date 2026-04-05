@@ -116,6 +116,27 @@ Work is done only when all of the following are true:
 6. If CodeRabbit is unavailable, fall back to local review gates plus human review; do not treat the absence of CodeRabbit as a reason to skip review.
 7. If both Claude and Codex are not available together, use the strongest available fallback stack: fresh-context independent review in the available tool, PR-stage AI review where configured, deterministic local and CI checks, and human review.
 
+# Codex PR Review Contract
+
+1. The repo itself must carry the durable review context. Keep the review bar, security posture, architecture boundaries, workflow rules, and release expectations in `AGENTS.md` plus `docs/**`, not only in tool-specific files or ad hoc PR comments.
+2. For PR-stage Codex review, treat the PR body as required context, not optional decoration. The PR body must include:
+   - Summary
+   - Planning Artifacts
+   - Release Gate
+   - Verification
+   - Docs and Ops
+   - Review
+3. The `Planning Artifacts` section must link the active product brief if any, PRD, feature spec or bugfix spec, and implementation plan when they exist. If an artifact was not required, say so explicitly.
+4. The `Release Gate` section must state the gate and plain-language meaning, not only a letter label.
+5. Before requesting PR-stage Codex review, make sure local and CI proof is already current enough to review:
+   - `pnpm review:ready`
+   - `pnpm verify`
+   - lane-specific verification when relevant
+6. `@codex review` by itself is acceptable as a trigger, but the best default for substantive PRs is a scoped request that points Codex at the active planning artifacts and risk areas.
+7. Do not assume PR-stage Codex review will infer every repo-specific expectation from `.codex/*` or `.claude/*` alone. Keep critical review requirements in normal repo files and in the PR body.
+8. For security-sensitive, release-sensitive, or architecture-heavy changes, add a focused follow-up review comment after the trigger. Mention the exact risk areas such as auth, RLS, secrets, secure storage, rollback safety, mobile-vs-web separation, or release readiness.
+9. Codex review is an additional review layer, not the final authority. Human review remains mandatory.
+
 # Commands
 
 - `pnpm lint`

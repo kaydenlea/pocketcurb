@@ -49,3 +49,13 @@ If this is Gate B, Gate C, or Gate D, link the completed `docs/runbooks/security
 - [ ] Codex PR review requested or completed where configured
 - [ ] CodeRabbit review completed if installed
 - [ ] local review artifact checked if CodeRabbit is unavailable
+
+## Codex Review Prompt
+
+Paste one ready-to-use prompt as a PR comment so reviewers do not need to guess:
+
+- Routine: `@codex review against the linked planning artifacts in the PR body. Focus on correctness, security boundaries, rollback safety, documentation alignment, and missing verification.`
+- Security-sensitive: `@codex review against the linked planning artifacts in the PR body. Focus on auth, authorization, RLS, secrets, secure storage, privacy, rollback safety, and whether negative-path verification is sufficient.`
+- Mobile-heavy: `@codex review against the linked planning artifacts in the PR body. Focus on mobile architecture, Safe-to-Spend trust, secure storage, regression risk, and mobile-vs-web separation.`
+- Web-heavy: `@codex review against the linked planning artifacts in the PR body. Focus on truthful claims, waitlist or SEO separation, privacy-safe analytics, release risk, and missing verification.`
+- Release/CI: `@codex review against the linked planning artifacts in the PR body. Focus on release readiness, rollback safety, CI or deployment regressions, monitoring and alerting impact, and whether the stated release gate is correct.`

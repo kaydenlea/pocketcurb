@@ -84,10 +84,20 @@ if (!/Gate [ABCD]\b/u.test(releaseGate)) {
   );
 }
 
-if (!/(Product brief:|PRD:|Feature spec or bugfix spec:|Implementation plan:)/u.test(planning)) {
+const requiredPlanningLabels = [
+  "Product brief:",
+  "PRD:",
+  "Feature spec or bugfix spec:",
+  "Implementation plan:"
+];
+
+const missingPlanningLabels = requiredPlanningLabels.filter((label) => !planning.includes(label));
+
+if (missingPlanningLabels.length > 0) {
   fail(
     [
       'Pull request "Planning Artifacts" section must describe the brief, PRD, spec or bugfix spec, and implementation plan state.',
+      `Missing planning label(s): ${missingPlanningLabels.join(", ")}`,
       "Use pnpm pr:body to generate the expected structure."
     ].join("\n"),
   );

@@ -149,6 +149,34 @@ function formatArtifactLine(label, paths, fallback) {
   return `- ${label} ${links ?? fallback}`;
 }
 
+function inferCodexReviewPrompt(tags, releaseGate) {
+  if (tags.includes("security-sensitive") || releaseGate === "Gate B") {
+    return "@codex review against the linked planning artifacts in the PR body. Focus on auth, authorization, RLS, secrets, secure storage, privacy, rollback safety, and whether negative-path verification is sufficient.";
+  }
+
+  if (releaseGate === "Gate C" || releaseGate === "Gate D" || tags.includes("release-infra")) {
+    return "@codex review against the linked planning artifacts in the PR body. Focus on release readiness, rollback safety, CI or deployment regressions, monitoring and alerting impact, and whether the stated release gate is correct.";
+  }
+
+  if (tags.includes("mobile")) {
+    return "@codex review against the linked planning artifacts in the PR body. Focus on mobile architecture, Safe-to-Spend trust, secure storage, regression risk, and mobile-vs-web separation.";
+  }
+
+  if (tags.includes("web")) {
+    return "@codex review against the linked planning artifacts in the PR body. Focus on truthful claims, waitlist or SEO separation, privacy-safe analytics, release risk, and missing verification.";
+  }
+
+  return "@codex review against the linked planning artifacts in the PR body. Focus on correctness, security boundaries, rollback safety, documentation alignment, and missing verification.";
+}
+
+function releaseGateChecklistEvidenceLine(releaseGate) {
+  if (!["Gate B", "Gate C", "Gate D"].includes(releaseGate)) {
+    return null;
+  }
+
+  return "Security release checklist evidence: [docs/runbooks/security-release-checklist.md](docs/runbooks/security-release-checklist.md)";
+}
+
 export function buildPrBody() {
   const branch =
     process.env.POCKETCURB_BRANCH ||
@@ -183,6 +211,8 @@ export function buildPrBody() {
   const tags = inferTags(files);
   const artifacts = collectArtifacts(files);
   const releaseGate = inferReleaseGate(files, tags);
+  const codexReviewPrompt = inferCodexReviewPrompt(tags, releaseGate);
+  const releaseChecklistLine = releaseGateChecklistEvidenceLine(releaseGate);
 
   return [
     "## Summary",
@@ -199,6 +229,7 @@ export function buildPrBody() {
     "## Release Gate",
     "",
     `${releaseGate} - ${describeReleaseGate(releaseGate)}`,
+    ...(releaseChecklistLine ? ["", releaseChecklistLine] : []),
     "",
     "See `docs/runbooks/release-gates.md` for the full gate definitions.",
     "",
@@ -226,6 +257,10 @@ export function buildPrBody() {
     "- [ ] Codex PR review requested or completed where configured",
     "- [ ] CodeRabbit review completed if installed",
     "- [ ] local review artifact checked if CodeRabbit is unavailable",
+    "",
+    "## Codex Review Prompt",
+    "",
+    `- Ready to paste as a PR comment: \`${codexReviewPrompt}\``,
     ""
   ].join("\n");
 }

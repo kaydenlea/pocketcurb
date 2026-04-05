@@ -15,10 +15,45 @@
 5. Let `pre-push` run the local gate and block unsafe pushes.
 6. Run `pnpm review:ready` when you want the full local proof and review gate before PR.
 7. Generate a validator-compliant PR body with `pnpm pr:body`, or if GitHub CLI is installed use `pnpm pr:create -- --title "<title>"`.
+   The generated body now includes a `Codex Review Prompt` section with a ready-to-paste PR comment.
 8. Open or update the pull request with that generated body.
 9. Request or confirm PR-stage Codex review, then let CodeRabbit review if installed.
 10. Let CI run, then complete human review.
 11. If the work maps to Gate B, Gate C, or Gate D, complete `docs/runbooks/security-release-checklist.md` before merge.
+
+## Codex PR Review Prompts
+
+Use these as copy-paste defaults on the PR after the body is current.
+
+Routine substantive PR:
+
+```text
+@codex review against the linked planning artifacts in the PR body. Focus on correctness, security boundaries, rollback safety, documentation alignment, and missing verification.
+```
+
+Security-sensitive or data-boundary PR:
+
+```text
+@codex review against the linked planning artifacts in the PR body. Focus on auth, authorization, RLS, secrets, secure storage, privacy, rollback safety, and whether negative-path verification is sufficient.
+```
+
+Mobile-heavy PR:
+
+```text
+@codex review against the linked planning artifacts in the PR body. Focus on mobile architecture, Safe-to-Spend trust, secure storage, regression risk, and mobile-vs-web separation.
+```
+
+Web-heavy PR:
+
+```text
+@codex review against the linked planning artifacts in the PR body. Focus on truthful claims, waitlist or SEO separation, privacy-safe analytics, release risk, and missing verification.
+```
+
+Release, CI, or deployment PR:
+
+```text
+@codex review against the linked planning artifacts in the PR body. Focus on release readiness, rollback safety, CI or deployment regressions, monitoring and alerting impact, and whether the stated release gate is correct.
+```
 
 ## If CodeRabbit Is Installed
 
