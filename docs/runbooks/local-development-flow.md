@@ -4,6 +4,8 @@
 
 0. Run `pnpm bootstrap:local` once on a fresh clone.
    If global Corepack or pnpm is unreliable on the machine, run `node ./scripts/bootstrap-local.mjs` instead.
+   Install Deno first because Supabase Edge Function checking is part of the standard repo verifier.
+   Install the official VS Code Deno extension if you edit `supabase/functions/**`, because those files are intentionally handled by the Deno language server through the repo's workspace settings.
    The bootstrap installs dependencies, installs hooks, verifies the repo, and checks Codex readiness. If Codex is not ready yet, bootstrap warns but still completes.
    For the Expo app, prefer `pnpm mobile:start` or `pnpm mobile:dev` instead of raw `npx expo start`.
    Run `pnpm ai:check` any time you need a quick Codex installation/auth sanity check before opening a PR.
@@ -83,9 +85,6 @@ Contributors may still use Claude for day-to-day authoring because workflow docs
 - Prefer `node ./scripts/bootstrap-local.mjs` for first-run setup because it uses the repo-owned pnpm path.
 - Prefer `node ./scripts/pnpm.mjs <args>` over ad hoc global Corepack commands for targeted package-manager tasks.
 - Prefer `pnpm mobile:start` or `pnpm mobile:dev` over `npx expo start` so Expo uses the repo-owned pnpm path and clearer dependency checks.
-- Before any networked package-manager, Expo, or generator command, inspect machine-level environment settings such as `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `GIT_HTTP_PROXY`, `GIT_HTTPS_PROXY`, and `NPM_CONFIG_OFFLINE`.
-- If those values point to a dead loopback endpoint or force offline mode unexpectedly, stop and classify the problem as an environment issue before retrying installs or generator commands.
-- Use `pnpm env:check-tooling` or `node ./scripts/networked-tooling-env.mjs install` to confirm the machine environment before retrying a network-sensitive package-manager command.
 - Distinguish between:
   - CI bootstrap failures, which usually mean the workflow setup order is wrong
   - local install failures, which usually mean the machine package-manager environment is unstable
