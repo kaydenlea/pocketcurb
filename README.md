@@ -42,6 +42,16 @@ Web is a separate lane. It exists for landing pages, waitlist flows, trust/discl
 - Monitoring and monetization: RevenueCat, PostHog, Sentry
 - Tooling: pnpm, ESLint, Prettier, Jest, jest-expo, React Native Testing Library, CodeRabbit-ready review config
 
+Framework baselines should stay close to the official sources:
+
+- Expo mobile scaffolds should follow `create-expo-app` plus Expo Router and Expo package compatibility guidance.
+- NativeWind setup should follow NativeWind's official Expo installation guidance.
+- Web scaffolds should follow `create-next-app` and Tailwind's official Next.js installation guidance.
+- If the environment blocks those generators, reconcile the existing app against the official documented baseline before treating the setup as finished.
+
+Before any networked generator or package-manager command, check for machine-level proxy or forced-offline settings such as `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `GIT_HTTP_PROXY`, `GIT_HTTPS_PROXY`, and `NPM_CONFIG_OFFLINE`. PocketCurb should not depend on broken loopback proxies or forced offline mode.
+Use `pnpm env:check-tooling` or `node ./scripts/networked-tooling-env.mjs install` before retrying a network-sensitive package-manager command on a flaky machine.
+
 ## First Run
 
 Run once per clone or machine:
@@ -70,6 +80,10 @@ If a machine shows flaky global Corepack behavior, prefer the repo-owned entrypo
 
 - `node ./scripts/bootstrap-local.mjs`
 - `node ./scripts/pnpm.mjs <args>`
+- `pnpm mobile:start`
+- `pnpm mobile:dev`
+
+For the mobile app, prefer `pnpm mobile:start` or `pnpm mobile:dev` over raw `npx expo start`. The repo-owned entrypoint uses the pinned pnpm toolchain, strips broken proxy and forced-offline settings, and fails fast if the workspace links are incomplete.
 
 ## Verification
 
@@ -83,6 +97,8 @@ Primary commands:
 - `pnpm verify`
 - `pnpm verify:mobile`
 - `pnpm verify:web`
+- `pnpm mobile:start`
+- `pnpm mobile:dev`
 - `pnpm audit`
 - `pnpm approve-builds`
 

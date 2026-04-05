@@ -34,6 +34,8 @@ PocketCurb is a security-first pnpm monorepo for a personal finance product that
 13. Do not keep retrying broad dependency installs once the failure mode is already known. Prefer static inspection, targeted verification, narrow filtered installs, or repo-owned wrapper scripts before attempting another full workspace install.
 14. If the local dependency layout is degraded, do not heal it by looping broad installs. Allow a degraded local gate only for docs, workflow, and repo-automation changes. Product code, shared logic, mobile, web, and Supabase changes still require the full verifier.
 15. Review the relevant workflow rules and stable lessons at the start of substantive work so avoidable mistakes are caught before implementation begins.
+16. For framework scaffolds and toolchain setup, start from official generator and documentation baselines rather than inventing the shape manually. Use official sources such as `create-expo-app`, Expo Router installation docs, NativeWind installation docs, `create-next-app`, and Tailwind installation docs. If the local environment blocks generator execution, compare the existing app directly against the official documented baseline before finalizing changes.
+17. Before any networked package-manager or generator command, inspect the local environment for broken or forced networking settings such as `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `GIT_HTTP_PROXY`, `GIT_HTTPS_PROXY`, and `NPM_CONFIG_OFFLINE`. If they are pointing to a dead local endpoint or forcing offline mode, stop and classify the problem as an environment issue instead of retrying `pnpm install`, `pnpm add`, `expo install`, `create-expo-app`, or `create-next-app`.
 
 # Default Execution Workflow
 
