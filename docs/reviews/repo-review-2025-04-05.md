@@ -77,7 +77,7 @@ The Edge Function rate-limit gap is real, but the repo already treats it correct
 
 | Item | Status | Note |
 |---|---|---|
-| 1 | Implemented | Shared function CORS now uses a request-aware allowlist with loopback development support instead of wildcard `*`. |
+| 1 | Implemented | Shared function CORS now uses a request-aware allowlist with loopback support limited to local runtimes instead of wildcard `*`. |
 | 2 | Deferred to feature delivery | The explicit fail-closed blocker remains the correct current setup posture until a real sensitive endpoint is shipped. |
 | 3 | Deferred to feature delivery | Real migrations should land with the first schema-backed feature, not as standalone scaffold churn. |
 | 4 | Deferred to feature delivery | Mobile auth flow remains product work, not repo setup. |
@@ -152,7 +152,7 @@ The original review elevated missing auth flows, migrations, monitoring initiali
 
 Claude's review found several real improvements, but it overstated some security items and mixed setup concerns with expected scaffold-state backlog.
 
-The current repo is already a solid starting point for feature work. The highest-value setup fixes are small and concrete: env examples, web headers, CI permissions/concurrency, dependency automation, and `SECURITY.md`. After those, the next major work should move back to planned product delivery rather than more repo-foundation churn.
+The current repo is already a solid starting point for feature work. The highest-value setup fixes are now in place: env examples, web headers, CI permissions/concurrency, dependency automation, `SECURITY.md`, request-aware CORS tightening, MMKV guardrails, and repo-owned coverage reporting. The next major work should move back to planned product delivery rather than more repo-foundation churn.
 
 The remaining feature-dependent obligations are no longer tracked only here. They have been promoted into the durable workflow surfaces that future work must use, especially:
 

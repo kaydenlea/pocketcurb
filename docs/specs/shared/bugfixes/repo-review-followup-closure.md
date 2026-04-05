@@ -18,6 +18,13 @@ This pass focuses on four concrete areas:
 - strengthening the mobile MMKV non-sensitive-key guard
 - adding repo-owned coverage reporting support
 
+The task is reopened for a final closure slice after the follow-up review identified a few remaining setup-scope items that still belong in repo hardening rather than feature delivery:
+
+- restrict loopback browser origins so they only work when the Edge Function runtime itself is local
+- cache configured CORS origins instead of rebuilding them on each request
+- warn safely when CORS env access falls back to defaults
+- reconcile the review and release docs so the remaining items are explicitly resolved, deferred, or tracked as tooling limitations
+
 ## Failure Context
 
 Observed behavior:
@@ -86,6 +93,8 @@ Contributing factors:
 - `package.json`
 - `scripts/test-coverage.mjs`
 - `docs/reviews/repo-review-2025-04-05.md`
+- `docs/reviews/repo-review-followup-2025-04-05.md`
+- `docs/runbooks/security-release-checklist.md`
 
 ## Minimal Fix Plan
 
@@ -93,14 +102,24 @@ Contributing factors:
 2. Document the code-owned JWT verification rationale next to `verify_jwt = false`.
 3. Strengthen MMKV guardrails so keys must both avoid sensitive patterns and use approved non-sensitive prefixes.
 4. Add a repo-owned coverage-reporting command and make the review artifact track implementation status per review item.
+5. Tighten loopback CORS so local browser origins are allowed only when the Edge Function runtime is also local, while caching configured origins and warning safely on env fallback.
+6. Reconcile the follow-up review and security release checklist so no setup-scope item remains ambiguous.
 
 ## Edge Cases
 
 - non-browser Edge Function callers may not send an `Origin` header and should keep working
-- local browser development should still allow loopback origins
+- local browser development should still allow loopback origins, but production runtimes should not accept them
 - disallowed preflight requests should not accidentally receive permissive CORS headers
 - stronger MMKV key validation must not block current code paths
 - coverage reporting should not change the default test path or make normal verification materially slower
+
+## Completion Checklist
+
+- [x] original follow-up hardening slices shipped
+- [x] final CORS closure slice implemented
+- [x] review artifact reconciled so remaining items are not overstated
+- [x] release checklist updated for manual Deno dependency triage when applicable
+- [x] final verification rerun
 
 ## Verification Plan
 
@@ -133,6 +152,9 @@ Repo fix:
 - strengthened MMKV key validation with a wider sensitive-key pattern and approved non-sensitive prefixes
 - added `pnpm test:coverage` plus repo-owned coverage reporting configuration
 - updated the review artifact with an implementation-tracking table that marks items as implemented, partially resolved, deferred to feature delivery, or closed without action
+- tightened loopback-origin handling so localhost browser origins are only accepted when the Edge Function runtime itself is also loopback
+- cached configured CORS origins by env state and added a safe non-secret warning path for real env-read failures
+- updated the security release checklist so Deno function dependency changes require explicit manual triage when automation coverage is unavailable
 
 Verification:
 

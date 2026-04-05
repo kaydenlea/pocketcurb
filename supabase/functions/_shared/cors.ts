@@ -1,4 +1,9 @@
 const defaultAllowedOrigins = ["https://pocketcurb.com", "https://www.pocketcurb.com"] as const;
+const loopbackHostPattern = /^(localhost|127(?:\.\d{1,3}){3}|::1)$/iu;
+
+let cachedAllowedOriginsEnv: string | null | undefined;
+let cachedAllowedOrigins: Set<string> | null = null;
+let hasWarnedAboutAllowedOriginsEnv = false;
 
 const baseCorsHeaders = {
   "content-type": "application/json",
@@ -25,13 +30,30 @@ function normalizeOrigin(candidate: string): string | null {
   }
 }
 
+function isLoopbackHost(candidate: string): boolean {
+  return loopbackHostPattern.test(candidate.replace(/^\[(.*)\]$/u, "$1"));
+}
+
 function isLoopbackOrigin(origin: string): boolean {
   try {
     const url = new URL(origin);
-    return /^(localhost|127(?:\.\d{1,3}){3}|::1)$/iu.test(url.hostname);
+    return isLoopbackHost(url.hostname);
   } catch {
     return false;
   }
+}
+
+function isLoopbackRuntime(request: Request): boolean {
+  try {
+    const url = new URL(request.url);
+    return isLoopbackHost(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isEnvPermissionError(error: unknown): boolean {
+  return error instanceof Deno.errors.PermissionDenied || (error instanceof Error && error.name === "NotCapable");
 }
 
 function readRequestOrigin(request: Request): string | null {
@@ -39,24 +61,44 @@ function readRequestOrigin(request: Request): string | null {
   return origin ? normalizeOrigin(origin) : null;
 }
 
-function readAllowedOrigins(): Set<string> {
-  let configuredOrigins: string[] = [];
-
+function readAllowedOriginsEnv(): string | null {
   try {
-    configuredOrigins = Deno.env
-      .get("ALLOWED_ORIGINS")
-      ?.split(",")
-      .map((origin) => normalizeOrigin(origin))
-      .filter((origin): origin is string => Boolean(origin)) ?? [];
-  } catch {
-    configuredOrigins = [];
-  }
+    return Deno.env.get("ALLOWED_ORIGINS") ?? null;
+  } catch (error) {
+    if (!hasWarnedAboutAllowedOriginsEnv && !isEnvPermissionError(error)) {
+      console.warn("ALLOWED_ORIGINS could not be read; using default CORS origins only.");
+      hasWarnedAboutAllowedOriginsEnv = true;
+    }
 
-  return new Set([...defaultAllowedOrigins, ...configuredOrigins]);
+    return null;
+  }
 }
 
-export function isAllowedCorsOrigin(origin: string): boolean {
-  return isLoopbackOrigin(origin) || readAllowedOrigins().has(origin);
+function readAllowedOrigins(): Set<string> {
+  const configuredOriginsEnv = readAllowedOriginsEnv();
+
+  if (cachedAllowedOrigins && cachedAllowedOriginsEnv === configuredOriginsEnv) {
+    return cachedAllowedOrigins;
+  }
+
+  const configuredOrigins = configuredOriginsEnv
+    ?.split(",")
+    .map((origin) => normalizeOrigin(origin))
+    .filter((origin): origin is string => Boolean(origin)) ?? [];
+
+  cachedAllowedOriginsEnv = configuredOriginsEnv;
+  cachedAllowedOrigins = new Set([...defaultAllowedOrigins, ...configuredOrigins]);
+
+  return cachedAllowedOrigins;
+}
+
+export function isAllowedCorsOrigin(origin: string, request?: Request): boolean {
+  if (readAllowedOrigins().has(origin)) {
+    return true;
+  }
+
+  // Only allow loopback browser origins when the function runtime is also local.
+  return request != null && isLoopbackOrigin(origin) && isLoopbackRuntime(request);
 }
 
 export function buildCorsHeaders(request?: Request): Record<string, string> {
@@ -65,7 +107,7 @@ export function buildCorsHeaders(request?: Request): Record<string, string> {
   }
 
   const origin = readRequestOrigin(request);
-  if (!origin || !isAllowedCorsOrigin(origin)) {
+  if (!origin || !isAllowedCorsOrigin(origin, request)) {
     return { ...baseCorsHeaders };
   }
 
@@ -81,7 +123,7 @@ export function handleCorsPreflight(request: Request) {
   }
 
   const origin = readRequestOrigin(request);
-  if (!origin || !isAllowedCorsOrigin(origin)) {
+  if (!origin || !isAllowedCorsOrigin(origin, request)) {
     return new Response(JSON.stringify({ error: "CORS origin not allowed" }), {
       status: 403,
       headers: {

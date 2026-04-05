@@ -15,9 +15,20 @@ function verifyDefaultAllowedOrigin(): void {
   assert(isAllowedCorsOrigin("https://www.pocketcurb.com"), "Expected www production origin to be allowed");
 }
 
-function verifyLoopbackAllowed(): void {
-  assert(isAllowedCorsOrigin("http://localhost:54321"), "Expected localhost origin to be allowed");
-  assert(isAllowedCorsOrigin("http://127.0.0.1:3000"), "Expected loopback origin to be allowed");
+function verifyLoopbackAllowedForLocalRuntime(): void {
+  const request = new Request("http://127.0.0.1:54321/functions/v1/safe-to-spend");
+
+  assert(isAllowedCorsOrigin("http://localhost:54321", request), "Expected localhost origin to be allowed locally");
+  assert(isAllowedCorsOrigin("http://127.0.0.1:3000", request), "Expected loopback origin to be allowed locally");
+}
+
+function verifyLoopbackRejectedForNonLocalRuntime(): void {
+  const request = new Request("https://project.supabase.co/functions/v1/safe-to-spend");
+
+  assert(
+    !isAllowedCorsOrigin("http://localhost:54321", request),
+    "Expected localhost origin to be rejected for non-local runtimes",
+  );
 }
 
 function verifyDisallowedOriginRejected(): void {
@@ -49,12 +60,26 @@ async function verifyPreflightRejectsDisallowedOrigin(): Promise<void> {
   assert(response.status === 403, `Expected 403 for disallowed origin, received ${response.status}`);
 }
 
+async function verifyPreflightRejectsLoopbackOriginForNonLocalRuntime(): Promise<void> {
+  const response = handleCorsPreflight(
+    new Request("https://project.supabase.co/functions/v1/safe-to-spend", {
+      method: "OPTIONS",
+      headers: { origin: "http://localhost:54321" },
+    }),
+  );
+
+  assert(response instanceof Response, "Expected loopback preflight helper to return a response");
+  assert(response.status === 403, `Expected 403 for non-local loopback origin, received ${response.status}`);
+}
+
 async function main(): Promise<void> {
   verifyDefaultAllowedOrigin();
-  verifyLoopbackAllowed();
+  verifyLoopbackAllowedForLocalRuntime();
+  verifyLoopbackRejectedForNonLocalRuntime();
   verifyDisallowedOriginRejected();
   verifyResponseHeadersReflectAllowedOrigin();
   await verifyPreflightRejectsDisallowedOrigin();
+  await verifyPreflightRejectsLoopbackOriginForNonLocalRuntime();
 }
 
 if (import.meta.main) {

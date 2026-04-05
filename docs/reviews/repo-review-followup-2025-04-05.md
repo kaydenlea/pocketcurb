@@ -1,10 +1,10 @@
-# PocketCurb Repository Review — Follow-Up Pass
+# PocketCurb Repository Review - Follow-Up Pass
 
-Second-pass review on 2026-04-05 after adjustments from commits `2940754` and `d4b7b1b`.
+Second-pass review on 2026-04-05 after adjustments from commits `2940754` and `d4b7b1b`, then finalized with a bounded closure pass on 2026-04-05.
 
 ## Verification
 
-Full `node ./scripts/verify.mjs` run on 2026-04-05 — **all checks pass**:
+Fresh `node ./scripts/verify.mjs` run on 2026-04-05 - **all checks pass**:
 - ESLint, policy checks, Supabase security checks, Deno function checks, TypeScript, docs checks, repo contract, all tests (unit, integration, e2e)
 - 42 checks passed, 0 failed
 
@@ -16,29 +16,29 @@ Full `node ./scripts/verify.mjs` run on 2026-04-05 — **all checks pass**:
 
 | # | Finding | Resolution | Quality |
 |---|---|---|---|
-| 1 | CORS wildcard `*` | Replaced with origin allowlist + loopback dev support + `Vary: Origin` + 403 on disallowed preflight | **Solid** |
-| 5 | No `.env.example` files | Mobile and web `.env.example` created with all public vars | **Good** |
-| 6 | CI missing concurrency | `concurrency` block with `cancel-in-progress: true` added | **Good** |
-| 6 | CI missing permissions | `permissions: contents: read` added (least-privilege) | **Good** |
-| 7 | `verify_jwt = false` undocumented | Comment added in `supabase/config.toml` explaining rationale | **Good** |
-| 11 | No dependency update automation | Dependabot config with npm + GitHub Actions + semver-tiered cooldown | **Good** |
-| 12 | Web has no security headers | 6 headers added (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, HSTS) | **Solid** |
-| 13 | MMKV sensitive key guard too narrow | Regex expanded to 10+ keywords + allowlist prefix enforcement + fail-closed | **Excellent** |
-| 16 | CI missing `concurrency` | See #6 above | **Good** |
-| 20 | No `SECURITY.md` | Honest pre-launch disclosure policy added | **Good** |
+| 1 | CORS wildcard `*` | Replaced with origin allowlist, local-runtime-only loopback support, `Vary: Origin`, and 403 on disallowed preflight | Solid |
+| 5 | No `.env.example` files | Mobile and web `.env.example` created with all public vars | Good |
+| 6 | CI missing concurrency | `concurrency` block with `cancel-in-progress: true` added | Good |
+| 6 | CI missing permissions | `permissions: contents: read` added (least-privilege) | Good |
+| 7 | `verify_jwt = false` undocumented | Comment added in `supabase/config.toml` explaining rationale | Good |
+| 11 | No dependency update automation | Dependabot config with npm + GitHub Actions + semver-tiered cooldown | Good |
+| 12 | Web has no security headers | 6 headers added (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, HSTS) | Solid |
+| 13 | MMKV sensitive key guard too narrow | Regex expanded to 10+ keywords + allowlist prefix enforcement + fail-closed | Excellent |
+| 16 | CI missing `concurrency` | See #6 above | Good |
+| 20 | No `SECURITY.md` | Honest pre-launch disclosure policy added | Good |
 
 ### Properly Deferred (6 of 20)
 
 | # | Finding | Decision | Rationale |
 |---|---|---|---|
-| 2 | Rate limiting is a stub | Kept as fail-closed blocker | Correct — implementing backend state before the feature that needs it would be premature scaffold churn. The verifier enforces the blocker stays explicit. |
-| 3 | No real database migrations | Deferred to first schema feature | Correct — template-only state is expected at scaffold stage. |
-| 4 | No authentication flow | Deferred to feature delivery | Correct — product work, not repo setup. |
-| 8 | No error boundary in mobile | Deferred to product work | Acceptable — should use Expo Router's route error-boundary pattern when implemented. |
-| 9 | Monitoring is stub only | Deferred to telemetry/disclosure work | Correct — monitoring rollout should follow disclosure planning. |
+| 2 | Rate limiting is a stub | Kept as fail-closed blocker | Correct - implementing backend state before the feature that needs it would be premature scaffold churn. The verifier enforces the blocker stays explicit. |
+| 3 | No real database migrations | Deferred to first schema feature | Correct - template-only state is expected at scaffold stage. |
+| 4 | No authentication flow | Deferred to feature delivery | Correct - product work, not repo setup. |
+| 8 | No error boundary in mobile | Deferred to product work | Acceptable - should use Expo Router's route error-boundary pattern when implemented. |
+| 9 | Monitoring is stub only | Deferred to telemetry/disclosure work | Correct - monitoring rollout should follow disclosure planning. |
 | 15 | No coverage thresholds | Coverage script exists (`pnpm test:coverage`), thresholds intentionally not enforced yet | Acceptable at current test volume. |
 
-### Closed Without Change (4 of 20)
+### Closed Without Change (5 of 20)
 
 | # | Finding | Reason |
 |---|---|---|
@@ -50,69 +50,60 @@ Full `node ./scripts/verify.mjs` run on 2026-04-05 — **all checks pass**:
 
 ---
 
-## New Findings From This Pass
+## Final Closure Update
 
-### N1. CORS Loopback Allowed in Production (Medium)
+On 2026-04-05, a bounded final-closure pass resolved the remaining setup-scope CORS follow-ups and reconciled the release docs so the rest of the items are no longer ambiguous.
 
-**File:** `supabase/functions/_shared/cors.ts`
+### Resolved in the final closure pass
 
-```typescript
-function isLoopbackOrigin(origin: string): boolean {
-  try {
-    const url = new URL(origin);
-    return /^(localhost|127(?:\.\d{1,3}){3}|::1)$/iu.test(url.hostname);
-  } catch {
-    return false;
-  }
-}
-```
-
-`isLoopbackOrigin()` allows **any** localhost port and runs in production Edge Functions, not just locally. An attacker running a malicious service on `http://localhost:*` on the same machine as a user's browser could craft requests that pass the CORS check.
-
-**Practical risk is low** because:
-- Edge Functions run server-side, not in the browser
-- The browser enforces CORS; the server just sets headers
-- JWT auth is still required for data access
-
-**Recommendation:** Consider gating loopback allowance behind an environment variable (e.g., `ALLOW_LOOPBACK_CORS=true`) that's only set in local/development Supabase environments. This is a defense-in-depth improvement, not urgent.
-
-### N2. CORS Allowed Origins Set Rebuilt Per Request (Low)
+#### N1. Loopback CORS no longer applies in production runtimes
 
 **File:** `supabase/functions/_shared/cors.ts`
 
-`readAllowedOrigins()` creates a new `Set` and re-reads `ALLOWED_ORIGINS` env var on every request. For the expected request volume this is negligible, but could be cached at module scope.
+Loopback browser origins are now allowed only when the Edge Function runtime itself is also running on a loopback host. This keeps local browser development working while removing the production-runtime allowance that the earlier follow-up flagged.
 
-**Recommendation:** Cache the computed `Set` in a module-level variable, refreshed only when the environment changes (or just once at cold start). Not urgent at current scale.
-
-### N3. Silent CORS Environment Fallback (Low)
+#### N2. Allowed origins are now cached by env state
 
 **File:** `supabase/functions/_shared/cors.ts`
 
-If `ALLOWED_ORIGINS` env var parsing fails, the catch block silently falls back to defaults with no logging. This makes misconfiguration hard to debug.
+Configured CORS origins are now cached at module scope and only recomputed when the raw `ALLOWED_ORIGINS` value changes.
 
-**Recommendation:** Add `console.warn()` in the catch block to alert operators.
+#### N3. CORS env fallback is no longer silent
 
-### N4. CSP Not Yet Implemented on Web (Noted, Intentionally Deferred)
+**File:** `supabase/functions/_shared/cors.ts`
+
+If `ALLOWED_ORIGINS` cannot be read, the helper now emits a generic one-time warning and falls back to the default production origins without logging configuration values.
+
+### Explicitly deferred or tracked, not open setup defects
+
+#### N4. CSP remains intentionally deferred
 
 **File:** `apps/web/next.config.mjs`
 
-Content-Security-Policy is absent from the security headers. Per the implementation plan, this is intentionally deferred until a deliberate nonce strategy is designed. This is the correct approach — a misconfigured CSP is worse than no CSP for a pre-launch marketing site.
+This still belongs in a deliberate browser-hardening pass with a real nonce strategy. It is not an open repo-setup defect.
 
-### N5. Coverage Threshold Not Enforced (Low)
+#### N5. Coverage thresholds remain intentionally deferred
 
 **Files:** `jest.config.cjs`, `packages/config-jest/base.cjs`
 
-The `pnpm test:coverage` script works, but no `coverageThreshold` is defined anywhere. The coverage runs but doesn't fail CI on regression.
+`pnpm test:coverage` exists, but coverage thresholds still should not be made blocking at the current test volume.
 
-**Recommendation:** Add a conservative threshold once test volume grows. Current test suite (10 unit + 1 integration + 1 e2e) is too small for meaningful thresholds.
+#### N6. Deno dependency automation remains a tooling limitation, now covered by release review
 
-### N6. Dependabot Does Not Cover Deno/Supabase Functions (Low)
+**Files:** `.github/dependabot.yml`, `docs/runbooks/security-release-checklist.md`
 
-**File:** `.github/dependabot.yml`
+Dependabot still does not provide equivalent coverage for the Deno/JSR function lane used by Supabase Edge Functions in this repo. That is now handled as an explicit manual dependency-triage obligation in the security release checklist whenever `supabase/functions/**/deno.json` or `deno.lock` changes are in scope.
 
-The Dependabot config covers npm and GitHub Actions but not the Deno ecosystem used by Supabase Edge Functions (`deno.json`, `deno.lock` files).
+## Repo-Setup Closure Status
 
-**Recommendation:** Monitor for Dependabot Deno support or manually audit Deno dependencies periodically. Low priority since the Edge Functions have minimal dependencies (currently just `jose`).
+| Item | Status | Note |
+|---|---|---|
+| N1 | Resolved | Loopback browser origins are accepted only for loopback-served function runtimes. |
+| N2 | Resolved | Allowed origins are cached per env state instead of rebuilt per request. |
+| N3 | Resolved | Env fallback now warns once without exposing configuration values. |
+| N4 | Deferred by policy | CSP remains a deliberate later browser-hardening pass. |
+| N5 | Deferred by policy | Coverage thresholds remain premature at the current test surface. |
+| N6 | Tracked operationally | Manual Deno dependency triage is now required in release evidence when relevant files change. |
 
 ---
 
@@ -120,32 +111,21 @@ The Dependabot config covers npm and GitHub Actions but not the Deno ecosystem u
 
 These are **not repo setup issues** but are explicit release blockers documented in `docs/security/security-review-baseline.md`:
 
-1. **Production schema and table-by-table RLS** — triggers when first schema migration lands
-2. **Real rate limiting backend** — triggers when first sensitive function ships to users
-3. **App Attest / Play Integrity** — triggers before launch of sensitive mobile flows
-4. **Feature-specific audit-event coverage** — triggers as financial flows are implemented
+1. **Production schema and table-by-table RLS** - triggers when first schema migration lands
+2. **Real rate limiting backend** - triggers when first sensitive function ships to users
+3. **App Attest / Play Integrity** - triggers before launch of sensitive mobile flows
+4. **Feature-specific audit-event coverage** - triggers as financial flows are implemented
 
-All four are tracked with explicit verifier enforcement (the rate-limit blocker) or documented trigger rules in the security baseline.
+All four remain tracked with explicit verifier enforcement where applicable and durable trigger rules in the security baseline.
 
 ---
 
-## Summary
+## Final Assessment
 
-The repo is in strong shape for its stage. The adjustments addressed the legitimate repo-setup gaps cleanly:
+The repo setup layer is now closed for this review thread.
 
-- **Security posture improved:** CORS restricted, web headers added, MMKV guard hardened, CI permissions locked down
-- **DX improved:** `.env.example` files, `SECURITY.md`, Dependabot, `test:coverage` script
-- **Appropriate deferrals:** Feature-dependent items (auth, migrations, monitoring, error boundary) correctly left for feature delivery rather than premature scaffolding
+- **Security posture:** request-aware CORS is now tightened for real runtime context, web headers are in place, MMKV guardrails are hardened, and CI permissions remain least-privilege
+- **Workflow posture:** release evidence now covers the unsupported Deno dependency-update lane explicitly instead of implying automation that does not exist
+- **Remaining future work:** only the already-documented feature-delivery obligations and deliberate later passes such as CSP remain
 
-**Remaining actionable items by priority:**
-
-| Priority | Item | Effort |
-|---|---|---|
-| 1 | Gate loopback CORS to dev-only env (N1) | Small |
-| 2 | Add console.warn for CORS env parse failure (N3) | Tiny |
-| 3 | Cache CORS allowed origins Set (N2) | Tiny |
-| 4 | Add coverage threshold when test volume grows (N5) | Small |
-| 5 | Monitor Dependabot Deno support (N6) | None (track) |
-| 6 | Add CSP when nonce strategy is designed (N4) | Medium (planned) |
-
-No critical or high-severity issues remain in the repo setup layer.
+No open repo-setup findings remain after this closure pass.

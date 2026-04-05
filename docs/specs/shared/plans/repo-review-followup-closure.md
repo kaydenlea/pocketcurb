@@ -17,6 +17,13 @@ Lane: shared
 
 Close the remaining setup-scope review items that are still worth implementing now: CORS tightening, auth-mode rationale, MMKV guard hardening, coverage reporting support, and review-status reconciliation.
 
+This plan is reopened for the final closure slice:
+
+- allow loopback browser origins only when the Edge Function runtime itself is local
+- cache configured CORS origins once per env state instead of per request
+- warn safely when CORS env access falls back to defaults
+- update the follow-up review and security release checklist so the remaining repo-setup items are fully classified
+
 ## Preconditions
 
 - preserve the current code-owned JWT verification and explicit rate-limit blocker
@@ -39,6 +46,8 @@ Close the remaining setup-scope review items that are still worth implementing n
 - `package.json`
 - `scripts/test-coverage.mjs`
 - `docs/reviews/repo-review-2025-04-05.md`
+- `docs/reviews/repo-review-followup-2025-04-05.md`
+- `docs/runbooks/security-release-checklist.md`
 
 ## Interfaces and Data Structures
 
@@ -52,10 +61,11 @@ Close the remaining setup-scope review items that are still worth implementing n
 ## Design Choices
 
 - use a request-aware allowlist CORS helper rather than a global wildcard
-- allow loopback browser origins for current local development without requiring extra config
+- allow loopback browser origins only when the function runtime itself is also loopback, instead of allowing them in every environment
 - document `verify_jwt = false` in `config.toml` rather than creating a full new ADR for a known already-documented boundary choice
 - prefer a simple approved-prefix MMKV policy because there are no current call sites to migrate
 - add coverage reporting support without turning coverage thresholds into a blocking gate yet
+- treat unsupported Dependabot coverage for Deno lockfiles as a manual triage obligation, not as a fake automation guarantee
 
 ## Edge Cases and Failure Modes
 
@@ -72,6 +82,7 @@ Close the remaining setup-scope review items that are still worth implementing n
 - [x] slice 2 complete
 - [x] slice 3 complete
 - [x] slice 4 complete
+- [x] slice 5 complete
 - [x] verification completed
 - [x] docs reconciled
 - [x] review complete
@@ -102,6 +113,12 @@ Close the remaining setup-scope review items that are still worth implementing n
   - design: add reporting support without making coverage thresholds release-blocking yet
   - verification: `node ./scripts/test-coverage.mjs`, `node ./scripts/verify.mjs`
 
+- Slice 5: final closure hardening and durable docs
+  - files: `supabase/functions/_shared/cors.ts`, `supabase/functions/_shared/cors.verify.ts`, `docs/reviews/repo-review-2025-04-05.md`, `docs/reviews/repo-review-followup-2025-04-05.md`, `docs/runbooks/security-release-checklist.md`
+  - interfaces: loopback CORS allowance becomes local-runtime-only; release evidence calls out manual Deno dependency triage when automation coverage is missing
+  - design: solve the remaining CORS concern at the root without introducing extra config burden, then close the review artifact with explicit classifications
+  - verification: `node ./scripts/check-supabase-functions.mjs`, `node ./scripts/check-docs.mjs`, `node ./scripts/verify.mjs`
+
 ## Plan Review
 
 - independent review or cross-model review needed: fresh-context same-tool fallback after implementation
@@ -115,6 +132,7 @@ Close the remaining setup-scope review items that are still worth implementing n
 - if request-aware CORS causes drift, revert the helper changes as one slice
 - if MMKV prefix enforcement proves too strict, narrow the approved-prefix contract rather than removing the guard improvement entirely
 - if coverage reporting is noisy, keep the command but avoid pushing it into default verification
+- if local-runtime detection for loopback CORS proves unreliable, fall back to an explicit env gate rather than reopening broad wildcard behavior
 
 ## Re-Planning Triggers
 
@@ -144,4 +162,5 @@ Close the remaining setup-scope review items that are still worth implementing n
 - Slice 2 shipped with a direct `verify_jwt = false` rationale comment in `supabase/config.toml`
 - Slice 3 shipped with stricter MMKV non-sensitive key rules and secure-storage doc updates
 - Slice 4 shipped with `pnpm test:coverage`, Jest coverage reporting configuration, and explicit review-item tracking in the review artifact
+- Slice 5 shipped with local-runtime-only loopback CORS, cached configured origins, a safe env-fallback warning path, updated follow-up review closure, and a release-checklist requirement for manual Deno dependency triage when relevant
 - full proof completed with `node ./scripts/verify.mjs`

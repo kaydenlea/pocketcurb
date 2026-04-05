@@ -36,4 +36,5 @@ Use this checklist for any Gate B, Gate C, or Gate D change.
 - attach human review notes
 - attach rollback notes
 - attach audit triage if dependency findings remain open
+- when `supabase/functions/**/deno.json` or `deno.lock` changes are in scope, attach manual dependency triage because the current repo automation does not provide equivalent Dependabot coverage for that ecosystem
 - record any open decision that is intentionally deferred and what would trigger re-evaluation
