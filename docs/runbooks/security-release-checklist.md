@@ -5,6 +5,7 @@ Use this checklist for any Gate B, Gate C, or Gate D change.
 ## Boundary Review
 
 - confirm whether the change touches auth, authorization, RLS, secrets, secure storage, shared visibility, exports, deletion, billing, monitoring, or disclosures
+- confirm any applicable remaining feature-dependent obligations from `docs/security/security-review-baseline.md` are explicitly classified as addressed, deferred with rationale, or not applicable
 - confirm each affected table or endpoint still has the correct boundary class: user-owned, shared-household, or Edge-function-only
 - confirm privileged or server-authoritative work is not exposed directly to clients
 

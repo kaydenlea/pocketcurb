@@ -1,474 +1,168 @@
-# PocketCurb Repository Review — April 2025
+# PocketCurb Repository Review
 
-## Executive Summary
+Cross-check of the existing Claude repo review against the actual repository on 2026-04-05.
 
-PocketCurb is a remarkably well-architected early-stage monorepo for a decision-first personal finance mobile app (Expo/React Native) with a web marketing lane (Next.js), backed by Supabase. The project demonstrates unusually strong engineering discipline for its maturity, with comprehensive documentation, security-first design, layered verification, and a clear domain model.
+## Scope
 
-That said, there are concrete gaps, risks, and improvements to address. This review is organized by severity: **Critical**, **High**, **Medium**, and **Low/Best Practice**.
+This pass focuses on repo setup readiness, not product completeness. The goal is to answer:
 
----
+- which findings from the original review are correct
+- which findings are overstated, out of scope, or incorrect
+- what repo-level setup work should happen before substantive feature implementation
 
-## Overall Grades
+## Evidence Used
 
-| Area | Grade | Summary |
+- source inspection across `apps/*`, `packages/*`, `supabase/*`, `scripts/*`, `.github/*`, and `docs/*`
+- repo workflow and security standards in `AGENTS.md` and `docs/agent-workflows/*`
+- existing durable security and architecture docs in `docs/security/*` and `docs/architecture/*`
+- verifier run: `node ./scripts/verify.mjs` on 2026-04-05, which passed
+
+Official references checked while validating recommendations:
+
+- Supabase Edge Functions CORS headers: https://supabase.com/docs/reference/javascript/functions-cors-headers
+- Supabase Edge Function configuration and `verify_jwt`: https://supabase.com/docs/guides/functions/function-configuration
+- Supabase Edge Function auth guidance: https://supabase.com/docs/guides/functions/auth
+- Next.js response headers: https://nextjs.org/docs/app/api-reference/next-config-js/headers
+- GitHub Actions `GITHUB_TOKEN` permissions: https://docs.github.com/actions/writing-workflows/choosing-what-your-workflow-does/controlling-permissions-for-github_token
+- GitHub security policy file: https://docs.github.com/github/managing-security-vulnerabilities/adding-a-security-policy-to-your-repository
+
+## Codex Verdict
+
+The repo foundation is strong. The local verifier passes, the workflow docs are unusually complete, mirrored Claude/Codex skills are enforced, and the current scaffold already blocks several dangerous classes of drift.
+
+Status update on 2026-04-05:
+
+- implemented `apps/mobile/.env.example` and `apps/web/.env.example`
+- added baseline web security headers in `apps/web/next.config.mjs`
+- added CI `permissions` and `concurrency` in `.github/workflows/ci.yml`
+- added `.github/dependabot.yml`
+- added root `SECURITY.md`
+
+The original Claude review correctly spotted some useful repo-level gaps, but it mixed setup issues with expected product backlog. That distorted severity and priority. The most important repo-setup work before real feature delivery is:
+
+1. keep the new env example files aligned with the actual lane env surface as new public variables are introduced
+2. keep the baseline web security headers aligned with the current web lane and add CSP only in a deliberate later pass
+3. keep CI workflow hardening aligned with the real permission needs of future steps
+4. keep dependency update automation tuned so it stays useful instead of noisy
+5. keep `SECURITY.md` truthful as the reporting and ownership model matures
+
+The Edge Function rate-limit gap is real, but the repo already treats it correctly as an explicit fail-closed scaffold, not a silent missing control. The `verify_jwt = false` finding also needs nuance: in this repo it is paired with code-owned JWT verification and should be documented clearly, not treated as a standalone security bug.
+
+## Finding-by-Finding Validation
+
+| # | Original finding | Codex verdict | Codex note |
+|---|---|---|---|
+| 1 | CORS wildcard on Edge Functions | Partially valid | `supabase/functions/_shared/cors.ts` does use `*`. This is worth tightening before browser-facing production use, but the original severity was too high. Supabase's own simple CORS docs still show wildcard headers for basic setups. |
+| 2 | Rate limiting is a stub | Valid with important context | The stub is real in `supabase/functions/_shared/rate-limit.ts`, but the repo intentionally fails closed and documents this as a release blocker. This is not hidden technical debt. |
+| 3 | No real database migrations exist | Factually true, but not a repo-setup blocker | `supabase/migrations/` only contains templates. That is expected scaffold state, not a sign the repo setup is unsound. It becomes relevant when schema-backed feature work starts. |
+| 4 | No authentication flow in mobile app | Out of scope for repo setup | True as product state, but this is feature backlog, not a repo readiness defect. |
+| 5 | No `.env.example` files | Valid | This is one of the clearest setup gaps. The missing examples affect at least mobile and web. |
+| 6 | CI is a single job with no caching | Partially valid | The workflow is a single job, but it does use pnpm cache through `actions/setup-node`. Parallelization and cancellation are still worth improving. |
+| 7 | `verify_jwt = false` on `safe-to-spend` | Mostly not a defect | In this repo, `verify_jwt = false` is paired with shared code-owned JWT verification in `supabase/functions/_shared/auth.ts`. Supabase docs support explicit function auth configuration; the gap is documentation clarity, not a proven auth bug. |
+| 8 | No error boundary in mobile app | Lower-priority app concern | The absence is real, but this is not a repo setup blocker. If added, prefer Expo Router's route error-boundary pattern rather than a generic recommendation copied from React web examples. |
+| 9 | Monitoring is stub only | Factually true, but not setup-critical yet | The app only reports readiness state. That is expected at scaffold stage and should be implemented with disclosure planning when real telemetry is introduced. |
+| 10 | `skipLibCheck: true` is a problem | Weak finding | `skipLibCheck: true` is common and reasonable here. No immediate action recommended. |
+| 11 | No dependency version pinning strategy | Partially valid | Exact pinning is not required because the lockfile is committed. The real setup gap is missing Renovate or Dependabot automation. |
+| 12 | Web app has no middleware or security headers | Valid | `apps/web/next.config.mjs` has no `headers()` configuration. For the public web lane, this is a worthwhile setup improvement. |
+| 13 | MMKV sensitive-key guard is pattern-based | Valid but low severity | True, but docs already position MMKV as non-sensitive storage only. This is a defense-in-depth hardening opportunity, not a primary control failure. |
+| 14 | No Husky, custom Git hooks instead | Not a real issue | The custom `.githooks` setup is deliberate and already automated by `bootstrap:local`. No change needed. |
+| 15 | No test coverage reporting | Valid, low priority | Coverage reporting is absent. Useful, but behind the more important repo-security and DX fixes. |
+| 16 | Missing CI concurrency | Valid | Adding `concurrency` is a straightforward CI improvement. |
+| 17 | NativeWind / Tailwind version alignment | Not a useful finding | The current split is explainable by the chosen mobile/web stacks. This should not be prioritized as a repo setup issue. |
+| 18 | Supabase types package has no generated types | Invalid as written | `packages/supabase-types/src/index.ts` already contains curated shared types, and `supabase/types/README.md` explicitly reserves raw generated output separately. |
+| 19 | Edge Function shared imports should use an import map | Stylistic only | The current relative imports are fine. No meaningful setup risk here. |
+| 20 | Add `SECURITY.md` | Valid | The repo already has strong security docs, but a root `SECURITY.md` is still worth adding for disclosure routing and GitHub-native visibility. |
+
+## Implementation Tracking
+
+| Item | Status | Note |
 |---|---|---|
-| Monorepo Structure | **A** | Clean apps/packages/supabase/docs separation. pnpm workspace properly configured. |
-| Security Posture | **A-** | Excellent for early stage. CORS wildcard and missing rate-limit backend are the main gaps. |
-| Documentation | **A+** | Exceptional. Product briefs, PRDs, ADRs, runbooks, threat model, templates — well beyond industry norm. |
-| CI/CD | **B+** | Solid single-job pipeline. Lacks caching, parallelism, and deployment automation. |
-| Code Quality | **A-** | Clean domain separation, strict TypeScript, Zod validation at boundaries. Minor gaps in test coverage. |
-| Developer Experience | **A** | Bootstrap scripts, shared configs, pre-commit/pre-push hooks, repo-contract validation. |
-| Dependency Management | **B+** | Locked, audited, engine-strict. Some dependencies are heavy or could be pinned tighter. |
-| Production Readiness | **C+** | Expected at this stage — no real migrations, monitoring stubs, no deployment pipeline. |
+| 1 | Implemented | Shared function CORS now uses a request-aware allowlist with loopback development support instead of wildcard `*`. |
+| 2 | Deferred to feature delivery | The explicit fail-closed blocker remains the correct current setup posture until a real sensitive endpoint is shipped. |
+| 3 | Deferred to feature delivery | Real migrations should land with the first schema-backed feature, not as standalone scaffold churn. |
+| 4 | Deferred to feature delivery | Mobile auth flow remains product work, not repo setup. |
+| 5 | Implemented | Mobile and web `.env.example` files were added. |
+| 6 | Partially resolved | CI now has explicit `permissions` and `concurrency`; job splitting remains optional future optimization if CI pressure warrants it. |
+| 7 | Implemented | `supabase/config.toml` now documents why `verify_jwt = false` is paired with code-owned JWT verification. |
+| 8 | Deferred to product work | Not required for repo setup completion. |
+| 9 | Deferred to product work | Monitoring rollout should happen with disclosure-ready telemetry work. |
+| 10 | Closed with no change | `skipLibCheck: true` remains acceptable for current repo scope. |
+| 11 | Implemented | Dependabot now covers repo dependencies and GitHub Actions. |
+| 12 | Implemented | Baseline web security headers were added. |
+| 13 | Implemented | MMKV now rejects a wider sensitive-key set and requires approved non-sensitive prefixes. |
+| 14 | Closed with no change | Custom hooks remain the correct repo choice. |
+| 15 | Implemented | Repo-owned coverage reporting support now exists via `pnpm test:coverage`. |
+| 16 | Implemented | CI `concurrency` was added. |
+| 17 | Closed with no change | No repo action needed. |
+| 18 | Closed as invalid | Curated shared types already existed. |
+| 19 | Closed with no change | No meaningful repo benefit. |
+| 20 | Implemented | Root `SECURITY.md` was added. |
 
----
+## Additional Findings Claude Missed
 
-## Critical Issues
-
-### 1. CORS Wildcard on Edge Functions
-
-**File:** `supabase/functions/_shared/cors.ts`
-
-```typescript
-"access-control-allow-origin": "*"
-```
-
-**Problem:** The wildcard `*` allows any origin to call your Edge Functions. While Supabase Auth + JWT verification protects the data path, this is still a security concern:
-- Enables CSRF-adjacent attacks if combined with credential-bearing requests
-- Allows any malicious site to probe your API surface for error messages or timing
-- Will fail app store security reviews for production financial apps
-
-**Recommendation:**
-```typescript
-const ALLOWED_ORIGINS = [
-  "https://pocketcurb.com",
-  "https://www.pocketcurb.com",
-  // Add staging/preview URLs as needed
-];
-
-// For local development, read from env:
-// Deno.env.get("ALLOWED_ORIGINS")?.split(",") ?? ALLOWED_ORIGINS
-
-export function getCorsOrigin(request: Request): string {
-  const origin = request.headers.get("origin") ?? "";
-  if (ALLOWED_ORIGINS.includes(origin)) return origin;
-  // In development, optionally allow localhost
-  if (Deno.env.get("ENVIRONMENT") === "local" && origin.startsWith("http://localhost")) {
-    return origin;
-  }
-  return ALLOWED_ORIGINS[0]; // Default to production
-}
-```
-
-**Priority:** Must fix before any production deployment.
-
----
-
-### 2. Rate Limiting is a Stub (Release Blocker)
-
-**File:** `supabase/functions/_shared/rate-limit.ts`
-
-```typescript
-enforceFunctionRateLimit() {
-  // THROWS SensitiveFunctionRateLimitNotImplementedError
-}
-```
-
-**Problem:** This is documented as an intentional release blocker, which is good practice — but it means **no Edge Function can actually serve traffic**. The `safe-to-spend` function will 500 on every request.
-
-**Recommendation:**
-Choose an implementation strategy:
-
-| Option | Complexity | Suitability |
-|---|---|---|
-| Supabase table + upsert counter | Low | Fine for MVP, 10-50 RPS |
-| Upstash Redis (via REST API) | Medium | Better for production, sliding window |
-| Deno KV (if available in Supabase) | Medium | Native to Deno runtime |
-
-Simplest MVP approach — Supabase-backed rate limit:
-```typescript
-async function enforceFunctionRateLimit(
-  functionName: string,
-  userId: string
-): Promise<{ allowed: boolean }> {
-  const policy = readSensitiveFunctionRateLimitPolicy(functionName);
-  if (!policy) return { allowed: true };
-
-  // Use Supabase RPC or direct table query for rate check
-  // Check count of requests in window, return allowed: false if exceeded
-}
-```
-
-**Priority:** Must implement before any user-facing deployment.
-
----
-
-## High Severity
-
-### 3. No Real Database Migrations Exist
-
-**Files:** `supabase/migrations/` (only templates, no timestamped migrations)
-
-**Problem:** The migration directory contains only `_template.*` files. There are no actual tables, no `users` extension, no `household_membership`, no `transactions` — none of the entities defined in `docs/architecture/shared/data-model.md` exist in the database.
-
-**Recommendation:** Before any feature implementation, create the foundational migration:
-1. `20250405000000_create_core_tables.sql` — user profiles, accounts, transactions, events
-2. Enable RLS on every table using the existing templates as patterns
-3. Run `pnpm supabase:check-security` after each migration
-
-This is expected at early stage but should be the first implementation priority.
-
----
-
-### 4. No Authentication Flow in Mobile App
-
-**Problem:** The Supabase client is wired up with `secureStoreSessionAdapter` and `autoRefreshToken`, but there is no sign-in/sign-up screen, no auth state management, no protected route guard, and no session handling in the mobile app.
-
-**Recommendation:**
-- Add auth screens (sign-in, sign-up, forgot password)
-- Add an `AuthProvider` or hook that wraps Supabase auth state
-- Add a route guard in the root layout that redirects unauthenticated users
-- Consider Supabase Auth UI for React Native to speed up implementation
-
----
-
-### 5. No `.env.example` Files
-
-**Problem:** The policy check blocks `.env` files from being committed (good), but there are no `.env.example` files documenting required environment variables. New developers won't know what variables to set.
-
-**Recommendation:** Create `.env.example` at the root and in `apps/mobile/`:
-```env
-# apps/mobile/.env.example
-EXPO_PUBLIC_SUPABASE_URL=http://localhost:54321
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your-local-anon-key
-EXPO_PUBLIC_SENTRY_DSN=
-EXPO_PUBLIC_POSTHOG_KEY=
-EXPO_PUBLIC_REVENUECAT_APPLE_API_KEY=
-EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY=
-```
-
----
-
-### 6. CI Pipeline is a Single Job with No Caching
+### 21. CI workflow lacks explicit least-privilege `permissions`
 
 **File:** `.github/workflows/ci.yml`
 
-**Problem:**
-- All steps run sequentially in one job (~20 min timeout)
-- No dependency caching beyond pnpm store
-- No build artifact caching
-- No parallel jobs for mobile vs. web verification
-- No EAS build or preview deployment
-
-**Recommendation:**
-```yaml
-jobs:
-  install:
-    # Cache deps, export as artifact
-  lint-and-typecheck:
-    needs: install
-    # Fast feedback
-  test-mobile:
-    needs: install
-    # Mobile tests in parallel
-  test-web:
-    needs: install
-    # Web tests in parallel
-  security:
-    needs: install
-    # Audit + policy checks
-```
+The workflow does not set `permissions:`. GitHub recommends scoping `GITHUB_TOKEN` permissions explicitly. For this workflow, a minimal baseline such as `contents: read` is a better default than relying on repository or platform defaults.
 
-Also consider:
-- Add `concurrency` group to cancel outdated runs on the same PR
-- Add Expo EAS preview builds on PR
-- Add Vercel/Netlify preview deployment for web
+**Recommendation:** add an explicit top-level `permissions` block and increase only if a future step truly needs more.
 
----
+### 22. The env-example gap affects web too, not just mobile
 
-## Medium Severity
+**Files:** `apps/mobile/src/config/env.ts`, `apps/web/src/lib/site-config.ts`
 
-### 7. `safe-to-spend` Edge Function Has `verify_jwt = false`
+The original review correctly flagged missing env examples, but it under-scoped the issue. The web lane also expects `NEXT_PUBLIC_SITE_URL`, and that should be documented in an example file instead of only in prose.
 
-**File:** `supabase/config.toml`
+**Recommendation:** add lane-specific examples:
 
-```toml
-[functions.safe-to-spend]
-verify_jwt = false
-```
+- root or `apps/mobile/.env.example` for Expo public variables
+- `apps/web/.env.example` for `NEXT_PUBLIC_SITE_URL`
 
-**Problem:** Supabase's built-in JWT verification is disabled. The function does its own JWT verification via `requireAuthenticatedUser()` which is correct and more flexible, but disabling the Supabase-level gate means misconfigured functions could accidentally serve unauthenticated traffic.
+### 23. The current review priority should separate setup work from feature backlog
 
-**Recommendation:** This is an acceptable pattern **if documented as an intentional decision** in an ADR. The custom auth implementation is solid (JWKS-based, issuer-validated, error-safe). Add a comment in `config.toml` explaining the rationale, or create `ADR-008-edge-function-auth-strategy.md`.
+The original review elevated missing auth flows, migrations, monitoring initialization, and app-level error boundaries as if they were immediate setup defects. That makes the repo look less ready than it actually is.
 
----
-
-### 8. No Error Boundary in Mobile App
-
-**File:** `apps/mobile/app/_layout.tsx`
-
-**Problem:** The root layout has no error boundary. Unhandled JS errors will crash the app with a white screen or Expo's default error screen in production.
-
-**Recommendation:**
-```tsx
-import { ErrorBoundary } from "react-error-boundary";
-
-function AppErrorFallback({ error, resetErrorBoundary }) {
-  return (
-    <View>
-      <Text>Something went wrong</Text>
-      <Button onPress={resetErrorBoundary} title="Try Again" />
-    </View>
-  );
-}
+**Recommendation:** treat these as planned delivery work, not as blockers to starting feature implementation. The repo setup is ready for feature work once the smaller repo-level fixes above are in place.
 
-export default function RootLayout() {
-  return (
-    <ErrorBoundary FallbackComponent={AppErrorFallback}>
-      <AppProviders>
-        {/* ... */}
-      </AppProviders>
-    </ErrorBoundary>
-  );
-}
-```
+## Revised Priority Order
 
----
+### Immediate repo-setup work
 
-### 9. Monitoring/Observability is Stub Only
+1. Add `.env.example` files for mobile and web.
+2. Add baseline web security headers in `apps/web/next.config.mjs`.
+3. Add CI `permissions:` and `concurrency:` in `.github/workflows/ci.yml`.
+4. Add dependency update automation such as Dependabot.
+5. Add root `SECURITY.md`.
 
-**File:** `apps/mobile/src/lib/monitoring/bootstrap.ts`
+### Important, but tied to feature delivery
 
-**Problem:** The monitoring bootstrap only checks readiness of Sentry/PostHog/RevenueCat but doesn't initialize any of them. There is no:
-- Sentry initialization
-- PostHog initialization
-- Error reporting integration
-- Analytics event tracking
+1. Keep the sensitive-function rate-limit blocker until a real sensitive endpoint is ready to ship, then implement a real backend limiter as part of that feature.
+2. Create real Supabase migrations when the first schema-backed feature lands.
+3. Build mobile auth flows as product work, not as repo setup.
+4. Initialize Sentry/PostHog/RevenueCat only when the product is ready for those data flows and disclosures.
 
-**Recommendation:** Implement initialization in `AppProviders.tsx` or a dedicated `MonitoringProvider`:
-```tsx
-import * as Sentry from "sentry-expo";
+### Nice-to-have follow-ups
 
-Sentry.init({
-  dsn: mobileEnv.sentryDsn,
-  enableInExpoDevelopment: false,
-  debug: __DEV__,
-});
-```
+1. Add coverage reporting or thresholds once the test surface is larger.
+2. Consider strengthening MMKV with an allowlist when cache-key surface grows.
+3. Consider a small documentation note near `verify_jwt = false` so the custom auth boundary is obvious from `supabase/config.toml`.
 
----
+## Bottom Line
 
-### 10. TypeScript Config Uses `skipLibCheck: true`
+Claude's review found several real improvements, but it overstated some security items and mixed setup concerns with expected scaffold-state backlog.
 
-**File:** `packages/config-typescript/base.json`
+The current repo is already a solid starting point for feature work. The highest-value setup fixes are small and concrete: env examples, web headers, CI permissions/concurrency, dependency automation, and `SECURITY.md`. After those, the next major work should move back to planned product delivery rather than more repo-foundation churn.
 
-**Problem:** `skipLibCheck` skips type checking of `.d.ts` files. This can hide real type errors from dependencies, especially important in a monorepo where packages reference each other's types.
+The remaining feature-dependent obligations are no longer tracked only here. They have been promoted into the durable workflow surfaces that future work must use, especially:
 
-**Recommendation:** Keep `skipLibCheck: true` for now (it's standard practice for build performance), but add a periodic CI step or script that runs `tsc --noEmit --skipLibCheck false` to catch hidden issues. Not urgent, but worth tracking.
-
----
-
-### 11. No Dependency Version Pinning Strategy
-
-**File:** Root `package.json`, app `package.json` files
-
-**Problem:** Dependencies use caret ranges (`^`) extensively. While `pnpm-lock.yaml` pins exact versions for reproducible installs, caret ranges mean:
-- `pnpm update` could pull breaking changes
-- Security patches may lag if lockfile isn't regularly refreshed
-
-**Recommendation:**
-- Add Renovate or Dependabot configuration for automated dependency updates
-- Consider exact pinning (`"react": "19.1.0"`) for critical dependencies (React, Expo SDK, Supabase client)
-- The existing `pnpm audit --audit-level=critical` in CI is good; consider also adding `--audit-level=high`
-
----
-
-### 12. Web App Has No Middleware or Security Headers
-
-**File:** `apps/web/next.config.mjs`
-
-**Problem:** No `middleware.ts`, no security headers configured. For a financial product's public website:
-- No `Content-Security-Policy`
-- No `X-Frame-Options`
-- No `Strict-Transport-Security`
-- No `X-Content-Type-Options`
-
-**Recommendation:** Add `next.config.mjs` headers:
-```javascript
-async headers() {
-  return [{
-    source: "/(.*)",
-    headers: [
-      { key: "X-Frame-Options", value: "DENY" },
-      { key: "X-Content-Type-Options", value: "nosniff" },
-      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-      { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-      { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'" },
-    ],
-  }];
-}
-```
-
----
-
-### 13. MMKV Sensitive-Key Guard is Pattern-Based
-
-**File:** `apps/mobile/src/lib/storage/mmkv.ts`
-
-**Problem:** The `assertNonSensitiveKey` function uses a regex pattern to block sensitive keys, which is a best-effort guard:
-```typescript
-const sensitiveKeyPattern = /(token|secret|session|password|credential|auth)/i;
-```
-
-This is creative but fragile — a key named `user-access-jwt` or `api_key` would pass the check.
-
-**Recommendation:**
-- Expand the pattern to include: `jwt`, `key`, `private`, `pin`, `biometric`
-- Consider an allowlist approach instead — only permit known cache keys
-- Document that this is a defense-in-depth guard, not a primary control
-
----
-
-## Low Severity / Best Practices
-
-### 14. No Husky — Custom Git Hooks
-
-**Observation:** The project uses custom `.githooks/` with manual `git config core.hooksPath .githooks`. This is fine and avoids a Husky dependency, but:
-- New developers must run `pnpm bootstrap:local` to activate hooks
-- The hooks aren't automatically installed on `pnpm install`
-
-**Recommendation:** Already handled by the bootstrap script. Consider adding `"prepare": "node ./scripts/install-hooks.mjs"` to root `package.json` for automatic hook setup on install.
-
----
-
-### 15. No Test Coverage Reporting
-
-**Problem:** Jest is configured but there's no coverage threshold or reporting. CI doesn't enforce minimum coverage.
-
-**Recommendation:** Add to Jest config:
-```javascript
-coverageThreshold: {
-  global: {
-    branches: 60,
-    functions: 60,
-    lines: 70,
-    statements: 70
-  }
-}
-```
-
-Start conservative and increase as coverage grows.
-
----
-
-### 16. Missing `concurrency` in CI Workflow
-
-**File:** `.github/workflows/ci.yml`
-
-**Problem:** Multiple pushes to the same PR branch will run CI in parallel, wasting resources.
-
-**Recommendation:**
-```yaml
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-```
-
----
-
-### 17. NativeWind / Tailwind Version Alignment
-
-**Files:** `apps/mobile/package.json`, `packages/ui-mobile/package.json`
-
-**Problem:** The mobile app uses NativeWind with Tailwind CSS 3.x, while the industry has moved to Tailwind CSS 4.x. The web app uses `@tailwindcss/postcss` (v4 ecosystem). This version split could cause confusion.
-
-**Recommendation:** NativeWind currently requires Tailwind 3.x, so this split is necessary. Document it to avoid confusion. When NativeWind supports Tailwind 4, align both.
-
----
-
-### 18. Supabase Types Package Has No Generated Types
-
-**Observation:** `packages/supabase-types/` contains placeholder files. No generated database types exist yet.
-
-**Recommendation:** Once real migrations exist, set up the type generation pipeline:
-```bash
-supabase gen types typescript --local > packages/supabase-types/src/database.ts
-```
-
-Add this as a script in root `package.json`.
-
----
-
-### 19. Edge Function Shared Code Import Paths
-
-**File:** `supabase/functions/safe-to-spend/index.ts`
-
-**Observation:** Shared imports use relative paths (`../_shared/auth.ts`). Deno supports import maps, which would make these cleaner.
-
-**Recommendation:** Add an import map to the root `supabase/functions/deno.json`:
-```json
-{
-  "imports": {
-    "@shared/": "./_shared/"
-  }
-}
-```
-
-Then imports become: `import { requireAuthenticatedUser } from "@shared/auth.ts"`
-
----
-
-### 20. Consider Adding a `SECURITY.md`
-
-**Problem:** While the `docs/security/` directory is comprehensive, there's no root-level `SECURITY.md` file for responsible disclosure.
-
-**Recommendation:** Add a `SECURITY.md` with:
-- How to report vulnerabilities
-- Expected response timeline
-- Scope of the security policy
-
----
-
-## What's Working Well
-
-These deserve explicit recognition — they represent best-in-class practices:
-
-1. **Agent workflow documentation** — AGENTS.md, CLAUDE.md, .claude/rules, .codex/ mirroring — is one of the most thorough agent-assisted development setups in any open-source or startup codebase.
-
-2. **Security-first culture** — Policy checks blocking `eval()`, `innerHTML`, service-role leaks, and .env commits at the pre-commit level. RLS enforcement tooling for Supabase. Separate storage tiers (SecureStore vs MMKV) with guards.
-
-3. **Error sanitization** — The `UserSafeApiError` mapping pattern in the mobile client prevents backend error leakage to users. The policy check enforces this exists.
-
-4. **Domain-driven shared packages** — `core-domain` contains pure business logic, `schemas` provides Zod contracts, `api-client` validates at boundaries. Clean separation.
-
-5. **Repo contract validation** — `repo-contract.mjs` enforcing 218+ required files, required headings, and skill parity is unusually disciplined.
-
-6. **Release gate system** — Gate A/B/C/D with explicit checklists, PR templates, and local enforcement is production-grade release management.
-
-7. **Documentation ecosystem** — Product briefs, PRDs, feature specs, ADRs, runbooks, threat models, compliance matrices, postmortem templates — a complete documentation system.
-
----
-
-## Recommended Priority Order
-
-| Priority | Item | Effort |
-|---|---|---|
-| 1 | Fix CORS wildcard (#1) | Small |
-| 2 | Add `.env.example` files (#5) | Small |
-| 3 | Add web security headers (#12) | Small |
-| 4 | Add error boundary to mobile (#8) | Small |
-| 5 | Add CI concurrency group (#16) | Tiny |
-| 6 | Implement rate limiting (#2) | Medium |
-| 7 | Create foundational migration (#3) | Medium |
-| 8 | Add auth flow to mobile (#4) | Large |
-| 9 | Initialize monitoring SDKs (#9) | Medium |
-| 10 | Split CI into parallel jobs (#6) | Medium |
-| 11 | Add dependency update automation (#11) | Small |
-| 12 | Add `SECURITY.md` (#20) | Small |
-| 13 | Add test coverage reporting (#15) | Small |
-| 14 | Expand MMKV sensitive key guard (#13) | Small |
-| 15 | Document `verify_jwt = false` rationale (#7) | Small |
-
----
-
-*Review performed by comprehensive static analysis of all configuration files, source code, scripts, CI workflows, Supabase functions, shared packages, documentation, and agent customization files across the PocketCurb monorepo.*
+- `docs/security/security-review-baseline.md`
+- `AGENTS.md`
+- `docs/agent-workflows/planning-standard.md`
+- `docs/agent-workflows/02-feature-lifecycle.md`
+- `docs/agent-workflows/review-standard.md`
+- `docs/runbooks/how-to-add-a-feature.md`
+- `docs/runbooks/security-release-checklist.md`
+- `docs/runbooks/release-gates.md`
+- `.github/pull_request_template.md`
+- the feature, implementation-plan, bugfix, and release-checklist templates
