@@ -13,7 +13,16 @@ If any artifact was not required, explain why.
 
 ## Release Gate
 
-State whether this change is Gate A, Gate B, Gate C, or Gate D.
+State the gate and plain-language meaning:
+
+- Gate A: routine feature, maintenance, or docs work without sensitive security or release posture change
+- Gate B: sensitive auth, privacy, secrets, billing, deletion, RLS, or other trust-critical change
+- Gate C: release, deployment, CI/release infrastructure, or production-like shipping change
+- Gate D: public launch, app-store submission, legal/disclosure, or compliance-sensitive change
+
+Example: `Gate A - routine product and tooling work`
+
+See `docs/runbooks/release-gates.md` for the full definitions.
 If this is Gate B, Gate C, or Gate D, link the completed `docs/runbooks/security-release-checklist.md` evidence.
 
 ## Verification

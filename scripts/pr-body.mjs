@@ -72,6 +72,21 @@ function inferReleaseGate(files, tags) {
   return "Gate A";
 }
 
+function describeReleaseGate(gate) {
+  switch (gate) {
+    case "Gate A":
+      return "routine product, maintenance, or docs work";
+    case "Gate B":
+      return "sensitive security, privacy, billing, deletion, auth, or trust-critical work";
+    case "Gate C":
+      return "release, deployment, CI, or production-like shipping work";
+    case "Gate D":
+      return "launch, app-store, legal/disclosure, or compliance-sensitive work";
+    default:
+      return "review docs/runbooks/release-gates.md";
+  }
+}
+
 function inferSummary(branch, tags) {
   const described = [];
 
@@ -183,7 +198,9 @@ export function buildPrBody() {
     "",
     "## Release Gate",
     "",
-    `${releaseGate}`,
+    `${releaseGate} - ${describeReleaseGate(releaseGate)}`,
+    "",
+    "See `docs/runbooks/release-gates.md` for the full gate definitions.",
     "",
     "## Verification",
     "",

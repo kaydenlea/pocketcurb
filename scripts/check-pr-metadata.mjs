@@ -75,7 +75,13 @@ ensureMeaningful("Release Gate", releaseGate, [
 ]);
 
 if (!/Gate [ABCD]\b/u.test(releaseGate)) {
-  fail('Pull request "Release Gate" section must state Gate A, Gate B, Gate C, or Gate D.');
+  fail(
+    [
+      'Pull request "Release Gate" section must state Gate A, Gate B, Gate C, or Gate D.',
+      "Add a plain-language description after the gate if helpful, for example: Gate A - routine product and tooling work.",
+      "See docs/runbooks/release-gates.md for definitions."
+    ].join("\n"),
+  );
 }
 
 if (!/(Product brief:|PRD:|Feature spec or bugfix spec:|Implementation plan:)/u.test(planning)) {
