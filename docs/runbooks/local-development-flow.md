@@ -14,10 +14,11 @@
 4. Push a feature branch, not `main`.
 5. Let `pre-push` run the local gate and block unsafe pushes.
 6. Run `pnpm review:ready` when you want the full local proof and review gate before PR.
-7. Open a pull request.
-8. Request or confirm PR-stage Codex review, then let CodeRabbit review if installed.
-9. Let CI run, then complete human review.
-10. If the work maps to Gate B, Gate C, or Gate D, complete `docs/runbooks/security-release-checklist.md` before merge.
+7. Generate a validator-compliant PR body with `pnpm pr:body`, or if GitHub CLI is installed use `pnpm pr:create -- --title "<title>"`.
+8. Open or update the pull request with that generated body.
+9. Request or confirm PR-stage Codex review, then let CodeRabbit review if installed.
+10. Let CI run, then complete human review.
+11. If the work maps to Gate B, Gate C, or Gate D, complete `docs/runbooks/security-release-checklist.md` before merge.
 
 ## If CodeRabbit Is Installed
 

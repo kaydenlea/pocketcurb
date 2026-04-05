@@ -36,7 +36,12 @@ const sections = [
 
 for (const heading of sections) {
   if (!body.includes(`## ${heading}`)) {
-    fail(`Pull request body is missing required section: ${heading}`);
+    fail(
+      [
+        `Pull request body is missing required section: ${heading}`,
+        "Use .github/pull_request_template.md or generate a compliant draft with pnpm pr:body."
+      ].join("\n"),
+    );
   }
 }
 
@@ -74,7 +79,12 @@ if (!/Gate [ABCD]\b/u.test(releaseGate)) {
 }
 
 if (!/(Product brief:|PRD:|Feature spec or bugfix spec:|Implementation plan:)/u.test(planning)) {
-  fail('Pull request "Planning Artifacts" section must describe the brief, PRD, spec or bugfix spec, and implementation plan state.');
+  fail(
+    [
+      'Pull request "Planning Artifacts" section must describe the brief, PRD, spec or bugfix spec, and implementation plan state.',
+      "Use pnpm pr:body to generate the expected structure."
+    ].join("\n"),
+  );
 }
 
 if (/Gate [BCD]\b/u.test(releaseGate) && !releaseGate.includes("docs/runbooks/security-release-checklist.md")) {

@@ -111,6 +111,8 @@ Helper commands:
 - `pnpm new:feature-spec -- <mobile|web> <slug>`
 - `pnpm new:implementation-plan -- <mobile|web|shared> <slug>`
 - `pnpm new:bugfix-spec -- <slug>`
+- `pnpm pr:body`
+- `pnpm pr:create -- --title "<title>"`
 - `node ./scripts/local-review.mjs`
 - `node ./scripts/pre-commit.mjs`
 - `node ./scripts/pre-push.mjs`
@@ -181,6 +183,15 @@ Merge discipline is:
 3. PR-stage Codex review where configured
 4. CodeRabbit where configured
 5. mandatory human review
+
+## Pull Requests
+
+GitHub's UI template and `gh pr create --fill` do not always leave you with a validator-compliant PR body. Prefer the repo-owned helpers:
+
+- `pnpm pr:body` prints a compliant draft body based on the current branch's changed docs and lanes
+- `pnpm pr:create -- --title "<title>"` creates a PR with that generated body when GitHub CLI is installed
+
+If `gh` is not installed, run `pnpm pr:body`, paste the output into the PR body, and then edit the checkboxes and summary before requesting review.
 
 ## Notes
 
