@@ -4,6 +4,7 @@
 
 - Safe-to-Spend computation and display
 - Daily Spending Meter and daily budget setting
+- first-session onboarding that reaches a useful answer quickly and explains why the guidance can be trusted
 - transaction entry and purchase simulation
 - today's transaction feed
 - lightweight running-balance awareness on primary decision surfaces
@@ -31,3 +32,5 @@
 ## Scope Discipline
 
 If a feature does not materially improve daily clarity, forward-looking guidance, reimbursement correctness, or privacy-first trust, it should not displace MVP work.
+
+If an insight or automation surface requires trust the product has not yet earned, it should be simplified, delayed, or shown only after the user has already reached a clear first answer.

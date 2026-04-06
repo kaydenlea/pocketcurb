@@ -10,6 +10,11 @@ The MVP should not position every included feature as equally important. The pri
 
 Automatic event grouping should be treated as a signature secondary differentiator. It is valuable because it reduces categorization work and adds narrative context in a way many mainstream budgeting apps do not emphasize, but it should strengthen the core clarity story rather than replace it.
 
+The MVP should also optimize hard for two product truths:
+
+- users need a fast first answer before they care about richer insights
+- the product needs a repeated daily or weekly habit loop, not a broad feature checklist
+
 ## MVP Features
 
 1. Daily Spending Meter.
@@ -52,5 +57,6 @@ The first release sequence should prioritize features that reduce daily friction
 That means the MVP should lead with:
 
 - daily decision support that helps users know what is safe to spend now
+- onboarding that reaches a first useful answer quickly and explains why it is trustworthy
 - shared-spend and reimbursement correctness that removes real-world admin pain
 - event-aware organization as a lower-admin, more narrative alternative to category cleanup
