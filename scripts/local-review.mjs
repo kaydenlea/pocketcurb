@@ -106,7 +106,7 @@ function assessWorkflowEvidence(files, tags) {
   });
 
   const touchedFeatureSpec = files.some((file) =>
-    /^docs\/specs\/(mobile|web)\/(?!_template\.md$)(?!plans\/).+\.md$/i.test(file),
+    /^docs\/specs\/(mobile|web|shared)\/(?!_template\.md$)(?!plans\/)(?!bugfixes\/).+\.md$/i.test(file),
   );
   const touchedImplementationPlan = files.some((file) =>
     /^docs\/specs\/(mobile|web|shared)\/plans\/.+\.md$/i.test(file),
