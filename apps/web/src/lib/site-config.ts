@@ -1,4 +1,4 @@
-const defaultSiteOrigin = "https://pocketcurb.com";
+const defaultSiteOrigin = "https://gama.money";
 
 function isLoopbackHost(candidate: string) {
   return /^(localhost|127(?:\.\d{1,3}){3}|\[?::1\]?)(?::\d+)?(?:\/|$)/iu.test(candidate);
@@ -34,13 +34,13 @@ export function normalizeSiteOrigin(rawOrigin: string | undefined | null) {
 }
 
 export const siteConfig = {
-  name: "PocketCurb",
-  title: "PocketCurb | Clarity before cleanup.",
+  name: "Gama",
+  title: "Gama | Clarity before cleanup.",
   description:
-    "PocketCurb is building a decision-first personal finance product centered on Safe-to-Spend, forward-looking cash flow, shared-spending correctness, and less admin work.",
+    "Gama is building a decision-first personal finance product centered on Safe-to-Spend, forward-looking cash flow, shared-spending correctness, and less admin work.",
   origin: normalizeSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL),
   keywords: [
-    "PocketCurb",
+    "Gama",
     "decision-first personal finance",
     "Safe-to-Spend",
     "forward-looking cash flow",

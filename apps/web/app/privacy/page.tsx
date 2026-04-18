@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MetricChip, SiteSection, SurfaceCard } from "@pocketcurb/ui-web";
+import { MetricChip, SiteSection, SurfaceCard } from "@gama/ui-web";
 import { siteCopy } from "../../src/content/site-copy";
 import { createPageMetadata } from "../../src/lib/site-metadata";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Privacy and Trust",
   description:
-    "PocketCurb's web lane is built to explain the product honestly, prepare for privacy-safe growth, and keep trust ahead of conversion pressure.",
+    "Gama's web lane is built to explain the product honestly, prepare for privacy-safe growth, and keep trust ahead of conversion pressure.",
   path: "/privacy",
-  keywords: ["PocketCurb privacy", "finance privacy", "privacy-first budgeting"]
+  keywords: ["Gama privacy", "finance privacy", "privacy-first budgeting"]
 });
 
 export default function PrivacyPage() {

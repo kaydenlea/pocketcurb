@@ -12,7 +12,7 @@ export const rootMetadata: Metadata = {
   metadataBase: new URL(siteConfig.origin),
   title: {
     default: siteConfig.title,
-    template: "%s | PocketCurb"
+    template: "%s | Gama"
   },
   description: siteConfig.description,
   keywords: [...siteConfig.keywords],

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MetricChip, SiteSection, SurfaceCard } from "@pocketcurb/ui-web";
+import { MetricChip, SiteSection, SurfaceCard } from "@gama/ui-web";
 import { siteCopy } from "../content/site-copy";
 
 export function LandingPage() {

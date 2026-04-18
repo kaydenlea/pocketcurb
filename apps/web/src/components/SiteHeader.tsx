@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SiteContainer } from "@pocketcurb/ui-web";
+import { SiteContainer } from "@gama/ui-web";
 import { siteCopy } from "../content/site-copy";
 
 export function SiteHeader() {
@@ -11,7 +11,7 @@ export function SiteHeader() {
             PC
           </div>
           <div>
-            <div className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-teal)]">PocketCurb</div>
+            <div className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-teal)]">Gama</div>
             <div className="text-xs text-[var(--color-muted)]">Landing, waitlist, and future SEO lane</div>
           </div>
         </Link>

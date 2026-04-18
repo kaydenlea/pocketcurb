@@ -1,4 +1,4 @@
-const defaultAllowedOrigins = ["https://pocketcurb.com", "https://www.pocketcurb.com"] as const;
+const defaultAllowedOrigins = ["https://gama.money", "https://www.gama.money"] as const;
 const loopbackHostPattern = /^(localhost|127(?:\.\d{1,3}){3}|::1)$/iu;
 
 let cachedAllowedOriginsEnv: string | null | undefined;

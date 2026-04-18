@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SiteContainer } from "@pocketcurb/ui-web";
+import { SiteContainer } from "@gama/ui-web";
 import { siteCopy } from "../content/site-copy";
 
 export function SiteFooter() {
@@ -7,7 +7,7 @@ export function SiteFooter() {
     <footer className="border-t border-[var(--color-line)]/70 bg-white/40 py-8">
       <SiteContainer className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-teal)]">PocketCurb</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-teal)]">Gama</p>
           <p className="mt-2 text-sm leading-7 text-[var(--color-muted)] md:text-base">{siteCopy.footer.note}</p>
         </div>
 
