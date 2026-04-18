@@ -67,7 +67,7 @@ export const siteCopy: {
   };
 } = {
   navigation: [
-    { href: "/", label: "Landing" },
+    { href: "/", label: "Home" },
     { href: "/waitlist", label: "Waitlist" },
     { href: "/privacy", label: "Privacy" }
   ],
@@ -223,7 +223,7 @@ export const siteCopy: {
     note:
       "Mobile remains the primary product lane. The website exists to explain the thesis, earn trust, capture demand, and support later SEO without distorting app decisions.",
     links: [
-      { href: "/", label: "Landing" },
+      { href: "/", label: "Home" },
       { href: "/waitlist", label: "Waitlist" },
       { href: "/privacy", label: "Privacy" }
     ]

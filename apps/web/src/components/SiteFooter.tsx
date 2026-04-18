@@ -11,7 +11,7 @@ export function SiteFooter() {
           <p className="mt-2 text-sm leading-7 text-[var(--color-muted)] md:text-base">{siteCopy.footer.note}</p>
         </div>
 
-        <nav className="flex flex-wrap gap-3 text-sm font-medium text-[var(--color-ink)]">
+        <nav aria-label="Footer" className="flex flex-wrap gap-3 text-sm font-medium text-[var(--color-ink)]">
           {siteCopy.footer.links.map((link) => (
             <Link
               key={link.href}
