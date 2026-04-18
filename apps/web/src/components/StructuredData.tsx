@@ -17,14 +17,11 @@ export function StructuredData({ data, id }: StructuredDataProps) {
   }
 
   const schemaPayload: SchemaNode | SchemaNode[] = payload.length === 1 ? payload[0] ?? {} : payload;
+  const serializedSchema = serializeStructuredData(schemaPayload);
 
   return (
-    <script
-      id={id}
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: serializeStructuredData(schemaPayload)
-      }}
-    />
+    <script id={id} type="application/ld+json">
+      {serializedSchema}
+    </script>
   );
 }

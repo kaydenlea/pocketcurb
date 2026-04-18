@@ -63,7 +63,31 @@ if (pushRefs.length > 0 && pushRefs.every(isDeletionPush)) {
   process.exit(0);
 }
 
-const branch = getCurrentBranch();
+function getBranchForReviewContext() {
+  try {
+    return getCurrentBranch();
+  } catch {
+    return "unknown";
+  }
+}
+
+function getReviewBaseContext() {
+  try {
+    return getComparisonBase();
+  } catch {
+    return "HEAD";
+  }
+}
+
+function getChangedFilesForReviewContext(baseRef) {
+  try {
+    return getChangedFilesFromBase(baseRef);
+  } catch {
+    return [];
+  }
+}
+
+const branch = getBranchForReviewContext();
 
 console.log("Running Gama pre-push verification...");
 const verifyResult = spawnSync(process.execPath, ["./scripts/verify.mjs"], {
@@ -75,8 +99,8 @@ if ((verifyResult.status ?? 1) !== 0) {
   process.exit(verifyResult.status ?? 1);
 }
 
-const baseRef = getComparisonBase();
-const changedFiles = getChangedFilesFromBase(baseRef);
+const baseRef = getReviewBaseContext();
+const changedFiles = getChangedFilesForReviewContext(baseRef);
 const changedFilesPayload = changedFiles.join("\n");
 
 console.log("Running Gama local review gate...");
