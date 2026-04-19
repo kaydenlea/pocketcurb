@@ -20,20 +20,21 @@ export function SiteHeader() {
     const onScroll = () => {
       setIsScrolled(window.scrollY > 18);
 
-      const navProbeTop = 88;
+      const navProbeTop = 72;
+      const navProbeBottom = 136;
       const darkSections = document.querySelectorAll<HTMLElement>("[data-nav-theme='dark']");
       let nextTheme: "light" | "dark" = "light";
 
       for (const section of darkSections) {
         const rect = section.getBoundingClientRect();
 
-        if (rect.top <= navProbeTop && rect.bottom >= navProbeTop) {
+        if (rect.top <= navProbeBottom && rect.bottom >= navProbeTop) {
           nextTheme = "dark";
           break;
         }
       }
 
-      setTheme(nextTheme);
+      setTheme((current) => (current === nextTheme ? current : nextTheme));
     };
 
     onScroll();

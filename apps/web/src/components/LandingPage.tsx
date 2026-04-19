@@ -132,13 +132,11 @@ async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }
         `home-signature-card-${card.id}`
       )}
     >
-      <div className="home-signature-card-preview">
-        <div className="home-signature-card-device-window">
-          <MockupPreviewPhone
-            className={joinClasses("home-signature-card-phone", `home-signature-card-phone-${card.id}`)}
-            preview={card.previewSlug}
-          />
-        </div>
+      <div className="home-signature-card-device-window">
+        <MockupPreviewPhone
+          className={joinClasses("home-signature-card-phone", `home-signature-card-phone-${card.id}`)}
+          preview={card.previewSlug}
+        />
       </div>
 
       <div className="home-signature-card-copy">

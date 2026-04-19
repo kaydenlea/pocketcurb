@@ -126,10 +126,10 @@ export function TrustFeatureCarousel({ slides }: { slides: readonly TrustSlide[]
             </div>
 
             <div className="home-trust-slide-device-wrap" aria-hidden="true">
-              <div className="home-trust-slide-device-panel">
-                <div className="home-trust-slide-device-shell">
+              <div className="home-walkthrough-device-viewport home-trust-slide-device-viewport">
+                <div className="home-walkthrough-device-shell">
                   <iframe
-                    className="home-trust-slide-frame"
+                    className="home-walkthrough-preview-frame home-walkthrough-preview-frame-active home-trust-slide-frame"
                     loading={index === activeIndex ? "eager" : "lazy"}
                     sandbox=""
                     scrolling="no"
