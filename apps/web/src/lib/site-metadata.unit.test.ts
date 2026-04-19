@@ -22,7 +22,7 @@ describe("site-metadata", () => {
     });
     expect(metadata.openGraph).toMatchObject({
       url: "https://gama.money/waitlist",
-      title: "Waitlist | Gama"
+      title: "Early Access | Gama"
     });
     expect(metadata).not.toHaveProperty("keywords");
   });

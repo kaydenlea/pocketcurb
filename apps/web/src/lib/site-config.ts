@@ -110,9 +110,9 @@ export const siteEnvironment = resolveSiteEnvironment({
 
 export const siteConfig = {
   name: "Gama",
-  title: "Gama | Clarity before cleanup.",
+  title: "Gama | Decision-first money clarity.",
   description:
-    "Gama is building a decision-first personal finance product centered on Safe-to-Spend, forward-looking cash flow, shared-spending correctness, and less admin work.",
+    "Gama is building a decision-first money product centered on Safe-to-Spend, forward-looking cash flow, shared-spending correctness, event context, and less admin work.",
   category: "personal finance",
   themeColor: "#faf7f0",
   locale: "en_US",
@@ -124,9 +124,9 @@ const homeBreadcrumb = { label: "Home", path: "/" } as const;
 export const sitePages = {
   home: {
     path: "/",
-    title: "Clarity Before Cleanup",
+    title: "Decision-First Money Clarity",
     description:
-      "Gama is building a premium decision-first finance product for Safe-to-Spend, forward-looking cash flow, shared-spending correctness, and less admin work.",
+      "Gama is building a premium decision-first money product for Safe-to-Spend, forward-looking cash flow, shared-spending correctness, and less admin work.",
     updatedAt: "2026-04-18",
     changeFrequency: "monthly",
     priority: 1,
@@ -136,21 +136,21 @@ export const sitePages = {
   },
   waitlist: {
     path: "/waitlist",
-    title: "Waitlist",
+    title: "Early Access",
     description:
-      "Gama's waitlist lane is being prepared for the MVP window with honest expectations, structured intake fields, and privacy-first follow-up.",
+      "Explore Gama's early-access story for Safe-to-Spend, forward-looking cash flow, shared-spend correctness, event receipts, and privacy-first launch expectations.",
     updatedAt: "2026-04-18",
     changeFrequency: "monthly",
     priority: 0.8,
     indexable: true,
-    breadcrumbLabel: "Waitlist",
-    breadcrumbs: [homeBreadcrumb, { label: "Waitlist", path: "/waitlist" }]
+    breadcrumbLabel: "Early Access",
+    breadcrumbs: [homeBreadcrumb, { label: "Early Access", path: "/waitlist" }]
   },
   privacy: {
     path: "/privacy",
     title: "Privacy and Trust",
     description:
-      "Gama's web lane is built to explain the product honestly, prepare for privacy-safe growth, and keep trust ahead of conversion pressure.",
+      "Learn how Gama approaches privacy-first trust, explicit sharing boundaries, and honest pre-launch expectations across the public web lane.",
     updatedAt: "2026-04-18",
     changeFrequency: "monthly",
     priority: 0.6,

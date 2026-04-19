@@ -1,38 +1,148 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { SiteContainer } from "@gama/ui-web";
 import gamaLogo from "../../app/icon.png";
 import { siteCopy } from "../content/site-copy";
 
-export function SiteHeader() {
-  return (
-    <header className="sticky top-0 z-20 border-b border-[var(--color-line)]/65 bg-[rgba(250,247,240,0.82)] py-4 backdrop-blur-xl">
-      <SiteContainer className="flex items-center justify-between gap-4">
-        <Link aria-label="Gama home" className="flex items-center gap-3" href="/">
-          <Image
-            alt="Gama logo"
-            className="h-11 w-11 rounded-[0.9rem] shadow-[0_10px_24px_rgba(17,32,51,0.16)]"
-            height={44}
-            priority
-            src={gamaLogo}
-            width={44}
-          />
-          <div>
-            <div className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-teal)]">Gama</div>
-            <div className="text-xs text-[var(--color-muted)]">Landing, waitlist, and future SEO lane</div>
-          </div>
-        </Link>
+function joinClasses(...classes: Array<string | false | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
-        <nav aria-label="Primary" className="flex flex-wrap items-center justify-end gap-3 text-sm font-medium text-[var(--color-ink)]">
-          {siteCopy.navigation.map((link) => (
-            <Link key={link.href} className="rounded-full px-3 py-2 transition-colors hover:bg-white/80" href={link.href}>
-              {link.label}
+export function SiteHeader() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 18);
+
+      const navProbeTop = 88;
+      const darkSections = document.querySelectorAll<HTMLElement>("[data-nav-theme='dark']");
+      let nextTheme: "light" | "dark" = "light";
+
+      for (const section of darkSections) {
+        const rect = section.getBoundingClientRect();
+
+        if (rect.top <= navProbeTop && rect.bottom >= navProbeTop) {
+          nextTheme = "dark";
+          break;
+        }
+      }
+
+      setTheme(nextTheme);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia("(min-width: 1100px)");
+
+    const handleChange = () => {
+      if (desktopQuery.matches) {
+        setMenuOpen(false);
+      }
+    };
+
+    handleChange();
+    desktopQuery.addEventListener("change", handleChange);
+
+    return () => {
+      desktopQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  return (
+    <header className="floating-nav-wrap">
+      <SiteContainer>
+        <div className="floating-nav-stack">
+          <div
+            className={joinClasses(
+              "floating-nav-shell",
+              theme === "dark" && "floating-nav-shell-dark",
+              !isScrolled && "floating-nav-shell-top",
+              isScrolled && "floating-nav-shell-scrolled"
+            )}
+          >
+            <Link aria-label="Gama home" className="floating-brand" href="/">
+              <Image
+                alt="Gama logo"
+                className="floating-brand-mark"
+                height={40}
+                priority
+                src={gamaLogo}
+                width={40}
+              />
+              <div className="floating-brand-copy">
+                <div className="floating-brand-name">Gama</div>
+              </div>
             </Link>
-          ))}
-          <Link className="site-link" href="/waitlist">
-            {siteCopy.hero.primaryCta.label}
-          </Link>
-        </nav>
+
+            <nav aria-label="Primary" className="floating-nav-links">
+              {siteCopy.navigation.map((link) => (
+                <Link key={link.href} className="floating-nav-link" href={link.href}>
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            <Link className={joinClasses("floating-nav-cta", !isScrolled && "floating-nav-cta-top")} href="/waitlist">
+              {siteCopy.shared.primaryCta.label}
+            </Link>
+
+            <button
+              aria-expanded={menuOpen}
+              aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+              className="floating-nav-menu"
+              onClick={() => setMenuOpen((current) => !current)}
+              type="button"
+            >
+              <svg aria-hidden="true" className="floating-nav-menu-icon" viewBox="0 0 20 20">
+                <path d="M4 6.5H16" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+                <path d="M4 10H16" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+                <path d="M4 13.5H16" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+              </svg>
+            </button>
+          </div>
+
+          <div
+            className={joinClasses(
+              "floating-nav-drawer",
+              theme === "dark" && "floating-nav-drawer-dark",
+              menuOpen && "floating-nav-drawer-open"
+            )}
+          >
+            <nav aria-label="Mobile primary" className="floating-nav-drawer-links">
+              {siteCopy.navigation.map((link) => (
+                <Link
+                  key={link.href}
+                  className="floating-nav-drawer-link"
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            <Link
+              className="floating-nav-drawer-cta"
+              href="/waitlist"
+              onClick={() => setMenuOpen(false)}
+            >
+              {siteCopy.shared.primaryCta.label}
+            </Link>
+          </div>
+        </div>
       </SiteContainer>
     </header>
   );
