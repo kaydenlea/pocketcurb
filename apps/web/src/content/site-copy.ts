@@ -57,7 +57,7 @@ type SignatureFeatureCard = {
   eyebrow: string;
   title: string;
   body: string;
-  icon: "timeline" | "map" | "receipt" | "story";
+  icon: "timeline" | "map" | "receipt" | "share" | "story";
   previewSlug: MockupPreviewSlug;
 };
 
@@ -172,7 +172,7 @@ export const siteCopy = {
       },
       {
         title: "Growth stays disclosure-safe",
-        body: "Analytics vendors, live waitlist plumbing, and broader growth mechanics remain deferred until disclosure and ownership are explicit."
+        body: "Waitlist capture stays narrow, consent-led, and separate from broader analytics or growth mechanics."
       }
     ] as const satisfies readonly CopyCard[]
   },
@@ -188,11 +188,14 @@ export const siteCopy = {
     connectMarquee: {
       label: "Connect your main banks with one tap",
       institutions: [
-        { name: "Verdant", descriptor: "Checking" },
-        { name: "Aerolith", descriptor: "Credit" },
-        { name: "Helix Forge", descriptor: "Business" },
-        { name: "Lith", descriptor: "Savings" },
-        { name: "Solvex", descriptor: "Brokerage" }
+        { name: "Chase", descriptor: "Checking" },
+        { name: "Bank of America", descriptor: "Checking" },
+        { name: "Wells Fargo", descriptor: "Checking" },
+        { name: "Citi", descriptor: "Credit" },
+        { name: "Capital One", descriptor: "Credit" },
+        { name: "American Express", descriptor: "Credit" },
+        { name: "Discover", descriptor: "Credit" },
+        { name: "U.S. Bank", descriptor: "Banking" }
       ] as const satisfies readonly MarqueeInstitution[]
     },
     signatureFeatures: {
@@ -219,10 +222,10 @@ export const siteCopy = {
         {
           id: "receipt-recap",
           eyebrow: "Receipts and recap",
-          title: "Receipts worth keeping.",
-          body: "Irregular spending leaves behind a clean artifact instead of an export.",
-          icon: "receipt",
-          previewSlug: "receipt"
+          title: "Moments ready to share.",
+          body: "Trips, dinners, and shared plans can be a polished recap.",
+          icon: "share",
+          previewSlug: "event-details"
         },
         {
           id: "money-stories",
@@ -241,7 +244,7 @@ export const siteCopy = {
     ] as const satisfies readonly Highlight[],
     walkthrough: {
       eyebrow: "Scroll the product",
-      title: "One anchored device. Five money moments that explain the launch.",
+      title: "One anchored device. Four money moments that explain the launch.",
       body:
         "The screen stays in place while the story moves through the product surfaces that make Gama feel calmer and more useful than budgeting homework.",
       steps: [
@@ -276,24 +279,14 @@ export const siteCopy = {
           highlights: ["Upcoming bills in one rail", "Cash pressure stays legible", "Forward-looking without spreadsheet rituals"]
         },
         {
-          id: "events",
+          id: "cash-flow",
           stepLabel: "Step 4",
-          eyebrow: "Events stay useful",
-          title: "Turn trips and dinners into money context worth revisiting.",
+          eyebrow: "Cash flow stays clear",
+          title: "See upcoming pressure before it changes the day.",
           body:
-            "Event budgets, place context, and curated receipts give irregular spending a home instead of leaving it scattered across banking apps and notes.",
-          previewSlug: "event-details",
-          highlights: ["Event budgets feel first-class", "Places stay with spend", "Curated receipts instead of raw dumps"]
-        },
-        {
-          id: "shared",
-          stepLabel: "Step 5",
-          eyebrow: "Shared context without surveillance",
-          title: "Handle shared money correctly without erasing private autonomy.",
-          body:
-            "Shared households, reimbursements, and fronted purchases stay explicit so the budget remains truthful without turning the app into a monitoring tool.",
-          previewSlug: "event-details-share",
-          highlights: ["Shared context when it matters", "Reimbursements kept separate", "Private autonomy stays explicit"]
+            "Bills, income timing, and short-term obligations stay visible together so the next decision reflects what is coming, not only what already happened.",
+          previewSlug: "cash-flow",
+          highlights: ["Upcoming obligations in view", "Income timing stays legible", "Forward-looking without spreadsheet rituals"]
         }
       ] as const satisfies readonly WalkthroughStep[]
     },
@@ -368,7 +361,7 @@ export const siteCopy = {
           title: "Account setup stays readable from the start.",
           body: "Search-first linking keeps the starting point explicit.",
           icon: "privacy",
-          previewSlug: "accounts"
+          previewSlug: "accounts-trust"
         },
         {
           id: "categorised",
@@ -458,21 +451,21 @@ export const siteCopy = {
       },
       {
         title: "Launch honesty over growth theater",
-        body: "The early-access flow is intentionally not live yet because privacy, follow-up, and timing should be explicit before intake opens."
+        body: "The early-access flow is intentionally narrow because privacy, follow-up, and timing should stay explicit as intake opens."
       }
     ] as const satisfies readonly CopyCard[],
     earlyAccess: {
       eyebrow: "Early-access panel",
       title: "Signal quality matters more than vanity volume.",
       body:
-        "When live intake opens, it should capture enough context to help research, prioritization, and alpha access decisions instead of collecting anonymous hype.",
-      notLiveTitle: "Not live yet",
+        "Live intake captures enough context to help research, prioritization, and alpha access decisions instead of collecting anonymous hype.",
+      notLiveTitle: "Live intake",
       notLiveBody:
-        "This page is pre-launch by design. Submission plumbing stays deferred until privacy disclosures, follow-up rules, and MVP timing are ready.",
+        "This page accepts waitlist interest through the server-owned backend path, with explicit consent and clear follow-up expectations.",
       intakeFields: [
         {
           title: "Email",
-          body: "Needed for launch updates and optional follow-up once the early-access flow is live."
+          body: "Needed for launch updates and optional follow-up tied to early access."
         },
         {
           title: "Primary pain point",
@@ -490,7 +483,7 @@ export const siteCopy = {
       expectations: [
         "Immediate follow-up should set expectations clearly instead of implying general availability.",
         "Segmentation should improve research quality, not turn the waitlist into aggressive lifecycle marketing.",
-        "Privacy language should explain what is stored and why before live capture ships.",
+        "Privacy language should explain what is stored and why while live capture is active.",
         "Referral gamification remains out of scope until message quality and trust are already strong."
       ] as const satisfies readonly string[],
       primaryCta: { href: "#early-access", label: "Stay close to launch" },
@@ -522,7 +515,7 @@ export const siteCopy = {
       title: "Data minimization and launch discipline",
       items: [
         "Collect only what materially improves decision support, trust, or operations.",
-        "Keep live waitlist capture deferred until disclosures, retention language, and operational ownership are explicit.",
+        "Keep live waitlist capture limited to explicit early-access fields with clear operational ownership.",
         "Distinguish operational monitoring from product analytics rather than quietly blending them."
       ]
     } as const satisfies BulletListSection,
@@ -537,15 +530,15 @@ export const siteCopy = {
     currentState: [
       {
         eyebrow: "Current state",
-        title: "The site is pre-launch on purpose.",
+        title: "The site is pre-launch with limited intake.",
         body:
-          "The public web lane exists to explain the thesis, build trust, and prepare for early access without pretending the launch systems are already live."
+          "The public web lane exists to explain the thesis, build trust, and capture early-access interest without implying general availability."
       },
       {
         eyebrow: "Deferred by design",
-        title: "Live intake and analytics are not quietly active.",
+        title: "Analytics and growth mechanics are not quietly active.",
         body:
-          "Waitlist backend plumbing and analytics-vendor integrations remain deferred until the disclosure and operational story is ready."
+          "The waitlist uses a server-owned submission path, while analytics-vendor integrations and referral mechanics remain deferred until the disclosure and operational story is ready."
       }
     ] as const satisfies readonly CalloutCard[],
     primaryCta: { href: "/waitlist", label: "Return to early access" },

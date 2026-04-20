@@ -11,63 +11,21 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
 type HomeSignatureFeatureCard = (typeof siteCopy.home.signatureFeatures.cards)[number];
 
 function InstitutionLogo({ name }: { name: string }) {
-  if (name === "Verdant") {
-    return (
-      <svg aria-hidden="true" className="hero-home-bank-logo" viewBox="0 0 20 20">
-        <path d="M10 15.5V7.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" />
-        <path
-          d="M10 9.2C8.2 9.2 6.9 7.8 6.9 5.9C8.7 5.9 10 7.3 10 9.2Z"
-          fill="none"
-          stroke="currentColor"
-          strokeLinejoin="round"
-          strokeWidth="1.6"
-        />
-        <path
-          d="M10 9.2C11.8 9.2 13.1 7.8 13.1 5.9C11.3 5.9 10 7.3 10 9.2Z"
-          fill="none"
-          stroke="currentColor"
-          strokeLinejoin="round"
-          strokeWidth="1.6"
-        />
-      </svg>
-    );
-  }
-
-  if (name === "Aerolith") {
-    return (
-      <svg aria-hidden="true" className="hero-home-bank-logo" viewBox="0 0 20 20">
-        <path d="M3.5 14.6L10.1 4.2L12.6 8.3L9.2 10.3H16.5L9.5 14.6H3.5Z" fill="currentColor" />
-      </svg>
-    );
-  }
-
-  if (name === "Helix Forge") {
-    return (
-      <svg aria-hidden="true" className="hero-home-bank-logo" viewBox="0 0 20 20">
-        <path d="M5 5.2L15 14.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-        <path d="M15 5.2L5 14.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-        <path d="M7.2 3.9C8.6 5.1 9.4 6.3 10 7.9" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
-        <path d="M12.8 16.1C11.4 14.9 10.6 13.7 10 12.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
-      </svg>
-    );
-  }
-
-  if (name === "Lith") {
-    return (
-      <svg aria-hidden="true" className="hero-home-bank-logo" viewBox="0 0 20 20">
-        <path d="M5.4 4.4V15.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-        <path d="M5.4 15.6H14.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-        <path d="M9.3 4.4V15.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeOpacity="0.55" strokeWidth="1.1" />
-      </svg>
-    );
-  }
+  const initialsByName: Record<string, string> = {
+    "American Express": "AX",
+    "Bank of America": "BA",
+    "Capital One": "CO",
+    Chase: "CH",
+    Citi: "CI",
+    Discover: "DI",
+    "U.S. Bank": "US",
+    "Wells Fargo": "WF"
+  };
 
   return (
-    <svg aria-hidden="true" className="hero-home-bank-logo" viewBox="0 0 20 20">
-      <path d="M10 3.8L15.1 6.8V13.1L10 16.2L4.9 13.1V6.8L10 3.8Z" fill="none" stroke="currentColor" strokeWidth="1.7" />
-      <path d="M7.1 8.1L10 6.5L12.9 8.1L10 9.8L7.1 8.1Z" fill="currentColor" />
-      <path d="M7.1 11.2L10 9.6L12.9 11.2L10 12.9L7.1 11.2Z" fill="currentColor" opacity="0.5" />
-    </svg>
+    <span aria-hidden="true" className="hero-home-bank-logo">
+      {initialsByName[name] ?? name.slice(0, 2).toUpperCase()}
+    </span>
   );
 }
 
@@ -98,18 +56,31 @@ function SignatureCardIcon({ icon }: { icon: HomeSignatureFeatureCard["icon"] })
     );
   }
 
-  if (icon === "receipt") {
+  if (icon === "share") {
     return (
       <svg aria-hidden="true" className="home-signature-card-icon-svg" viewBox="0 0 20 20">
         <path
-          d="M6 3.9H14V16.1L12.6 15.2L11.1 16.1L9.7 15.2L8.3 16.1L6.9 15.2L5.5 16.1V4.5C5.5 4.2 5.7 3.9 6 3.9Z"
+          d="M7.4 10.1H12.6"
           fill="none"
           stroke="currentColor"
-          strokeLinejoin="round"
-          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeWidth="1.55"
         />
-        <path d="M7.7 7.5H12.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
-        <path d="M7.7 10.1H12.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+        <path
+          d="M11.1 6.6L14.6 10.1L11.1 13.6"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.55"
+        />
+        <path
+          d="M5.7 15.2C4.8 15.2 4.1 14.5 4.1 13.6V6.4C4.1 5.5 4.8 4.8 5.7 4.8H8.6"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeWidth="1.55"
+        />
       </svg>
     );
   }
@@ -125,6 +96,8 @@ function SignatureCardIcon({ icon }: { icon: HomeSignatureFeatureCard["icon"] })
 }
 
 async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }) {
+  const crop = card.id === "overview-timeline" ? "events" : card.id === "receipt-recap" ? "eventDetails" : undefined;
+
   return (
     <article
       className={joinClasses(
@@ -136,6 +109,7 @@ async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }
         <MockupPreviewPhone
           className={joinClasses("home-signature-card-phone", `home-signature-card-phone-${card.id}`)}
           preview={card.previewSlug}
+          {...(crop ? { crop } : {})}
         />
       </div>
 

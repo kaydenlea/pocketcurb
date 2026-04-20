@@ -5,6 +5,7 @@ import { sitePages } from "../lib/site-config";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { ProductHeroVisual, ProofStrip, StorySceneSection } from "./ProductVisuals";
 import { Reveal } from "./Reveal";
+import { WaitlistSignupForm } from "./WaitlistSignupForm";
 
 export function WaitlistPage() {
   return (
@@ -169,34 +170,7 @@ export function WaitlistPage() {
             </div>
           </div>
 
-          <div className="glimpse-float-card">
-            <p className="site-kicker">{siteCopy.waitlist.earlyAccess.notLiveTitle}</p>
-            <p className="mt-5 text-base leading-8 text-[var(--color-muted)] md:text-lg">
-              {siteCopy.waitlist.earlyAccess.notLiveBody}
-            </p>
-
-            <div className="site-rule mt-6" />
-
-            <ul className="mt-6 grid gap-3 text-sm leading-7 text-[var(--color-muted)] md:text-base">
-              {siteCopy.waitlist.earlyAccess.expectations.map((item) => (
-                <li
-                  key={item}
-                  className="rounded-[1.4rem] border border-[var(--color-line)]/75 bg-white/80 px-4 py-4"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
-
-            <div className="cta-stack mt-6">
-              <Link className="site-link" href={siteCopy.waitlist.earlyAccess.secondaryCta.href}>
-                {siteCopy.waitlist.earlyAccess.secondaryCta.label}
-              </Link>
-              <Link className="site-link-secondary" href="/">
-                Return to home
-              </Link>
-            </div>
-          </div>
+          <WaitlistSignupForm expectations={siteCopy.waitlist.earlyAccess.expectations} />
         </div>
         </section>
       </Reveal>

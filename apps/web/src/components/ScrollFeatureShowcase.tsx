@@ -172,15 +172,9 @@ export function ScrollFeatureShowcase({
         </div>
 
         <div className="home-walkthrough-mobile-list" role="list" aria-label="Product walkthrough steps">
-          {steps.map((step, index) => (
+          {steps.map((step) => (
             <article key={step.id} className="home-walkthrough-mobile-card" role="listitem">
               <div className="home-walkthrough-mobile-copy">
-                <div className="home-walkthrough-mobile-progress">
-                  <span className="home-walkthrough-progress-count">
-                    {index + 1}/{steps.length}
-                  </span>
-                  <span className="home-walkthrough-progress-step-label">{step.eyebrow}</span>
-                </div>
                 <span className="home-walkthrough-step-index">{step.stepLabel}</span>
                 <h3>{step.title}</h3>
                 <p>{step.body}</p>

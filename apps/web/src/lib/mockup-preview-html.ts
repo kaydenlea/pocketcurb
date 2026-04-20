@@ -15,6 +15,7 @@ const STABLE_VIEWPORT = "width=393, initial-scale=1, maximum-scale=1, viewport-f
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 const previewHtmlCache = new Map<MockupPreviewSlug, Promise<string>>();
+type PreviewCrop = "events" | "eventDetails";
 
 type TailwindConfig = Record<string, unknown>;
 
@@ -213,8 +214,18 @@ async function compileTailwindCss(source: string) {
   return compiler.build(candidates);
 }
 
-function buildSharedStyle(slug: MockupPreviewSlug) {
+function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
   const preview = mockupPreviews[slug];
+  const previewRootBackground = preview.mode === "page" ? "transparent" : preview.background;
+  const cropOffsetY = crop === "events" ? -815 : crop === "eventDetails" ? -180 : 0;
+  const cropStyle =
+    cropOffsetY !== 0
+      ? `
+        body > :not(script):not(style) {
+          transform: translateY(${cropOffsetY}px) !important;
+        }
+      `
+      : "";
   const viewportStyle =
     preview.mode === "viewport"
       ? `
@@ -236,6 +247,18 @@ function buildSharedStyle(slug: MockupPreviewSlug) {
         }
       `
     : "";
+  const previewVariantStyle =
+    slug === "accounts-trust"
+      ? `
+        .preview-scale-root .mobile-container > main {
+          padding-top: 2rem !important;
+        }
+
+        .preview-scale-root .mobile-container > main > div.absolute {
+          display: none !important;
+        }
+      `
+      : "";
 
   return `
     @font-face {
@@ -251,7 +274,7 @@ function buildSharedStyle(slug: MockupPreviewSlug) {
       min-height: 100% !important;
       width: 100% !important;
       overflow-x: hidden !important;
-      background: ${preview.background} !important;
+      background: ${previewRootBackground} !important;
     }
     body {
       min-height: 100vh !important;
@@ -268,6 +291,7 @@ function buildSharedStyle(slug: MockupPreviewSlug) {
     html[data-preview-scale="managed"] body {
       position: relative !important;
       margin: 0 !important;
+      background: ${previewRootBackground} !important;
     }
     .preview-scale-root {
       position: absolute !important;
@@ -280,6 +304,7 @@ function buildSharedStyle(slug: MockupPreviewSlug) {
       min-height: ${PREVIEW_CANVAS_HEIGHT}px !important;
       max-height: ${PREVIEW_CANVAS_HEIGHT}px !important;
       overflow: hidden !important;
+      background: ${preview.background} !important;
       transform-origin: top left !important;
       will-change: transform !important;
       backface-visibility: hidden !important;
@@ -311,6 +336,8 @@ function buildSharedStyle(slug: MockupPreviewSlug) {
     }
     ${viewportStyle}
     ${fixedNavStyle}
+    ${previewVariantStyle}
+    ${cropStyle}
   `;
 }
 
@@ -367,10 +394,10 @@ function buildScalingScript() {
   `;
 }
 
-async function buildPreviewHtmlInternal(slug: MockupPreviewSlug) {
+async function buildPreviewHtmlInternal(slug: MockupPreviewSlug, crop?: PreviewCrop) {
   const source = readFileSync(join(MOCKUP_DIR, mockupPreviews[slug].file), "utf8");
   const tailwindCss = await compileTailwindCss(source);
-  const sharedStyle = buildSharedStyle(slug);
+  const sharedStyle = buildSharedStyle(slug, crop);
   const strippedSource = replaceMaterialSymbolLigatures(stabilizeViewport(stripRuntimeDependencies(source)));
   const scalingScript = buildScalingScript();
 
@@ -379,9 +406,13 @@ async function buildPreviewHtmlInternal(slug: MockupPreviewSlug) {
     .replace("</body>", `${scalingScript}</body>`);
 }
 
-export function getMockupPreviewHtml(slug: MockupPreviewSlug) {
+export function getMockupPreviewHtml(slug: MockupPreviewSlug, crop?: PreviewCrop) {
   if (isDevelopment) {
-    return buildPreviewHtmlInternal(slug);
+    return buildPreviewHtmlInternal(slug, crop);
+  }
+
+  if (crop) {
+    return buildPreviewHtmlInternal(slug, crop);
   }
 
   const cached = previewHtmlCache.get(slug);

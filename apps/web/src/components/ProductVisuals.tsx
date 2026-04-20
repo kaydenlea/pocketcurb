@@ -4,6 +4,7 @@ import { mockupPreviews, type MockupPreviewSlug } from "../content/mockup-previe
 import { getMockupPreviewHtml } from "../lib/mockup-preview-html";
 
 type StoryScene = (typeof siteCopy.shared.storyScenes)[number];
+type MockupPreviewCrop = "events" | "eventDetails";
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -11,14 +12,16 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
 
 async function DeviceShell({
   className,
+  crop,
   priority = false,
   preview = "overview-screen"
 }: {
   className?: string;
+  crop?: MockupPreviewCrop;
   priority?: boolean;
   preview?: MockupPreviewSlug;
 }) {
-  const previewHtml = await getMockupPreviewHtml(preview);
+  const previewHtml = await getMockupPreviewHtml(preview, crop);
 
   return (
     <div className={joinClasses("device-shell device-shell-framed", className)}>
@@ -41,14 +44,16 @@ async function DeviceShell({
 
 export async function MockupPreviewPhone({
   className,
+  crop,
   preview,
   priority = false
 }: {
   className?: string;
+  crop?: MockupPreviewCrop;
   preview: MockupPreviewSlug;
   priority?: boolean;
 }) {
-  return <DeviceShell className={className ?? ""} preview={preview} priority={priority} />;
+  return <DeviceShell className={className ?? ""} preview={preview} priority={priority} {...(crop ? { crop } : {})} />;
 }
 
 export async function MockupPreviewSurface({
@@ -179,14 +184,14 @@ export async function ProductHeroVisual({ compact = false }: { compact?: boolean
 
       <div className="premium-hero-card premium-hero-card-left">
         <span className="mini-insight-eyebrow">Daily clarity</span>
-        <strong>Safe-to-Spend first</strong>
-        <p>Confidence before cleanup.</p>
+        <strong>Safe today</strong>
+        <p>Clear before cleanup.</p>
       </div>
 
       <div className="premium-hero-card premium-hero-card-right">
         <span className="mini-insight-eyebrow">Forward view</span>
-        <strong>Upcoming pressure visible</strong>
-        <p>Cash flow stays in view.</p>
+        <strong>Pressure ahead</strong>
+        <p>Cash flow in view.</p>
       </div>
     </div>
   );

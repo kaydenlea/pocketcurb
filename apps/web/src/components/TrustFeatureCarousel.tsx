@@ -87,6 +87,8 @@ export function TrustFeatureCarousel({ slides }: { slides: readonly TrustSlide[]
     return null;
   }
 
+  const activeSlide = (slides[activeIndex] ?? slides[0])!;
+
   return (
     <div className="home-trust-carousel" aria-label="Trust highlights">
       <div className="home-trust-carousel-tabs" aria-label="Trust features">
@@ -108,40 +110,39 @@ export function TrustFeatureCarousel({ slides }: { slides: readonly TrustSlide[]
       </div>
 
       <div className="home-trust-carousel-stage">
-        {slides.map((slide, index) => (
-          <div
-            key={slide.id}
-            aria-hidden={index !== activeIndex}
-            className={joinClasses("home-trust-slide", index === activeIndex && "home-trust-slide-active")}
-          >
-            <div className="home-trust-slide-copy">
-              <div className="home-trust-slide-eyebrow-row">
-                <span className="home-trust-slide-icon">
-                  <TrustIcon icon={slide.icon} />
-                </span>
-                <span className="home-trust-slide-kicker">{slide.eyebrow}</span>
-              </div>
-              <h3>{slide.title}</h3>
-              <p>{slide.body}</p>
+        <div key={activeSlide.id} className="home-trust-slide home-trust-slide-active">
+          <div className="home-trust-slide-copy">
+            <div className="home-trust-slide-eyebrow-row">
+              <span className="home-trust-slide-icon">
+                <TrustIcon icon={activeSlide.icon} />
+              </span>
+              <span className="home-trust-slide-kicker">{activeSlide.eyebrow}</span>
             </div>
+            <h3>{activeSlide.title}</h3>
+            <p>{activeSlide.body}</p>
+          </div>
 
-            <div className="home-trust-slide-device-wrap" aria-hidden="true">
+          <div className="home-trust-slide-device-wrap" aria-hidden="true">
+            <div className="home-walkthrough-device-card home-trust-slide-device-card">
               <div className="home-walkthrough-device-viewport home-trust-slide-device-viewport">
                 <div className="home-walkthrough-device-shell">
                   <iframe
-                    className="home-walkthrough-preview-frame home-walkthrough-preview-frame-active home-trust-slide-frame"
-                    loading={index === activeIndex ? "eager" : "lazy"}
+                    className={joinClasses(
+                      "home-walkthrough-preview-frame home-walkthrough-preview-frame-active home-trust-preview-frame",
+                      activeSlide.id === "review" && "home-trust-preview-frame-review"
+                    )}
+                    loading="eager"
                     sandbox=""
                     scrolling="no"
-                    src={`/preview/${slide.previewSlug}`}
+                    src={`/preview/${activeSlide.previewSlug}`}
                     tabIndex={-1}
-                    title={`Gama ${slide.previewSlug} trust preview`}
+                    title={`Gama ${activeSlide.previewSlug} trust preview`}
                   />
                 </div>
               </div>
             </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );

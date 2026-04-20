@@ -71,6 +71,12 @@ export const mockupPreviews = {
     background: "#0b141a",
     hideFixedNav: true
   },
+  "accounts-trust": {
+    file: "accounts.html",
+    mode: "page",
+    background: "#0b141a",
+    hideFixedNav: true
+  },
   bills: {
     file: "bills.html",
     mode: "page",
