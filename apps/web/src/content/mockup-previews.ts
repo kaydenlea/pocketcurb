@@ -35,10 +35,22 @@ export const mockupPreviews = {
     background: "#f7fafd",
     hideFixedNav: false
   },
+  "review-transaction-trust": {
+    file: "review-transaction-trust.html",
+    mode: "page",
+    background: "#f5fafb",
+    hideFixedNav: false
+  },
   "add-transaction": {
     file: "add-transaction.html",
     mode: "page",
     background: "#f7fafd",
+    hideFixedNav: false
+  },
+  "add-transaction-trust": {
+    file: "add-transaction-trust.html",
+    mode: "page",
+    background: "#f5fafb",
     hideFixedNav: false
   },
   stories: {

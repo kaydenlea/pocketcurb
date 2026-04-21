@@ -108,7 +108,7 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
     <div className="glimpse-float-card">
       <p className="site-kicker">Join early access</p>
       <h3 className="mt-4 text-3xl font-semibold leading-tight text-[var(--color-ink)]">
-        Tell us what kind of money clarity you want first.
+        Join the Gama waitlist.
       </h3>
       <p className={`mt-4 text-sm leading-7 md:text-base ${messageTone}`} aria-live="polite">
         {message}
@@ -172,7 +172,7 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
 
         <div className="grid gap-2">
           <label className="text-sm font-semibold text-[var(--color-ink)]" htmlFor={`${formId}-biggest-pain`}>
-            What is the main money moment you want Gama to help with?
+            What should Gama help with first?
           </label>
           <textarea
             className="min-h-28 w-full resize-y rounded-[1.2rem] border border-[var(--color-line)]/80 bg-white/90 px-4 py-3 text-base leading-7 text-[var(--color-ink)] outline-none transition focus:border-[var(--color-teal)]"
@@ -180,7 +180,7 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
             id={`${formId}-biggest-pain`}
             maxLength={280}
             name="biggestPain"
-            placeholder="Safe-to-Spend, shared reimbursements, cash-flow pressure, events, places..."
+            placeholder="Safe-to-Spend, shared reimbursements, cash-flow pressure, events..."
           />
         </div>
 
@@ -192,7 +192,7 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
             required
             type="checkbox"
           />
-          <span>I agree to receive Gama waitlist updates, alpha access notes, and related product follow-up.</span>
+          <span>I agree to receive Gama waitlist updates and related product follow-up.</span>
         </label>
 
         <button className="site-link w-full justify-center disabled:cursor-wait disabled:opacity-70" disabled={isSubmitting} type="submit">

@@ -162,8 +162,8 @@ recipient for the account.
 Before production, replace the sender with a verified domain sender:
 
 ```bash
-WAITLIST_FROM_EMAIL="Gama <waitlist@yourdomain.com>"
-WAITLIST_NOTIFY_EMAIL=you@yourdomain.com
+WAITLIST_FROM_EMAIL="Gama <waitlist@gamabudget.com>"
+WAITLIST_NOTIFY_EMAIL=gamabudget@gmail.com
 ```
 
 Security rules:
@@ -319,23 +319,25 @@ When wiring the landing page form:
 3. Include a hidden honeypot input named `website`; keep it empty.
 4. Treat `accepted` and `duplicate` as success states.
 5. Show field-level validation for `400`.
-6. Show temporary unavailable copy for `502` or `503`.
+6. Show temporary unavailable copy for `429`, `502`, or `503`.
 7. Do not expose Supabase or Resend keys to the client.
 
 ## Remaining Production Work
 
 Before real public traffic:
 
-- Verify a sending domain in Resend.
-- Replace `onboarding@resend.dev` with a sender on the verified domain.
 - Add the required env vars to the deployment provider.
-- Add basic rate limiting for `POST /api/waitlist`.
-- Decide whether Resend failures should still return success when Supabase storage has already succeeded.
+- Confirm the deployment provider preserves the visitor IP in `x-forwarded-for` so rate limiting keys on the real client IP.
+- Decide whether the initial in-memory rate limiter should be replaced with a durable edge, Redis, or platform-native limiter before higher traffic.
 
-Current behavior stores first and emails second. If Resend fails after storage
-succeeds, the route returns `502` even though the signup may already exist in
-Supabase. For production, consider treating storage success as the primary
-success condition and logging notification failures for manual follow-up or retry.
+Current behavior stores first and emails second. Supabase storage success is the
+primary success condition. If Resend fails after storage succeeds, the route
+still returns `202` and logs the email failure for manual follow-up or retry.
+
+Basic rate limiting is applied before storage and email delivery. The initial
+limit is 5 submissions per 10 minutes by IP address and by email address, backed
+by process-local memory. This is enough to blunt simple abuse on one running
+server, but it is not a durable cross-instance production control.
 
 ## CLI Notes
 

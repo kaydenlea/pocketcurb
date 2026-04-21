@@ -147,24 +147,24 @@ export function WaitlistPage() {
 
       <Reveal delayMs={160}>
         <section id="early-access" className="anchor-offset early-access-freeform">
-        <div className="grid gap-8 lg:grid-cols-[1fr_0.94fr]">
-          <div>
+        <div className="early-access-grid">
+          <div className="early-access-copy">
             <p className="site-kicker">{siteCopy.waitlist.earlyAccess.eyebrow}</p>
-            <h2 className="mt-5 max-w-[12ch] text-4xl font-semibold leading-[0.95] text-[var(--color-ink)] md:text-6xl">
+            <h2 className="early-access-title">
               {siteCopy.waitlist.earlyAccess.title}
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--color-muted)] md:text-lg">
+            <p className="early-access-body">
               {siteCopy.waitlist.earlyAccess.body}
             </p>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="early-access-points">
               {siteCopy.waitlist.earlyAccess.intakeFields.map((field) => (
-                <div
-                  key={field.title}
-                  className="fluid-feature-card"
-                >
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-teal)]">{field.title}</p>
-                  <p className="mt-3 text-sm leading-7 text-[var(--color-muted)] md:text-base">{field.body}</p>
+                <div key={field.title} className="early-access-point">
+                  <span aria-hidden="true" className="early-access-point-dot" />
+                  <p>
+                    <strong>{field.title}</strong>
+                    <span>{field.body}</span>
+                  </p>
                 </div>
               ))}
             </div>

@@ -1,4 +1,5 @@
 import { siteCopy } from "../content/site-copy";
+import { HeroWaitlistForm } from "./HeroWaitlistForm";
 import { MockupPreviewPhone, ProductHeroVisual } from "./ProductVisuals";
 import { Reveal } from "./Reveal";
 import { ScrollFeatureShowcase } from "./ScrollFeatureShowcase";
@@ -144,23 +145,7 @@ export async function LandingPage() {
 
             <div className="hero-home-cta">
                 <div className="hero-email-panel">
-                  <form action="/waitlist#early-access" className="hero-waitlist-form" method="GET">
-                    <label className="sr-only" htmlFor="hero-email">
-                      Email address
-                    </label>
-                    <div className="hero-email-shell">
-                      <input
-                        className="hero-email-input"
-                        id="hero-email"
-                        name="email"
-                        placeholder="Enter your email"
-                        type="email"
-                      />
-                      <button className="hero-email-submit" type="submit">
-                        {siteCopy.home.hero.primaryCta.label}
-                      </button>
-                    </div>
-                  </form>
+                  <HeroWaitlistForm ctaLabel={siteCopy.home.hero.primaryCta.label} />
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import type { MockupPreviewSlug } from "../content/mockup-previews";
+import { mockupPreviews, type MockupPreviewSlug } from "../content/mockup-previews";
 
 type ShowcaseStep = {
   id: string;
@@ -36,6 +36,26 @@ function WalkthroughPreview({
       tabIndex={-1}
       title={`Gama ${previewSlug} walkthrough preview`}
     />
+  );
+}
+
+function MobileWalkthroughPreviewPhone({ previewSlug }: { previewSlug: MockupPreviewSlug }) {
+  return (
+    <div className="device-shell device-shell-framed home-walkthrough-device-shell-mobile" aria-hidden="true">
+      <div className="device-frame">
+        <div className="device-screen-wrap" style={{ background: mockupPreviews[previewSlug].background }}>
+          <iframe
+            className="device-iframe"
+            loading="lazy"
+            sandbox=""
+            scrolling="no"
+            src={`/preview/${previewSlug}`}
+            tabIndex={-1}
+            title={`Gama ${previewSlug} mobile walkthrough preview`}
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -183,9 +203,7 @@ export function ScrollFeatureShowcase({
               <div className="home-walkthrough-mobile-device">
                 <div className="home-walkthrough-device-card home-walkthrough-device-card-mobile">
                   <div className="home-walkthrough-device-viewport home-walkthrough-device-viewport-mobile">
-                    <div className="home-walkthrough-device-shell home-walkthrough-device-shell-mobile" aria-hidden="true">
-                      <WalkthroughPreview isActive previewSlug={step.previewSlug} />
-                    </div>
+                    <MobileWalkthroughPreviewPhone previewSlug={step.previewSlug} />
                   </div>
                 </div>
               </div>

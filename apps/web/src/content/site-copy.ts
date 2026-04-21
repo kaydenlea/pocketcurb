@@ -66,7 +66,7 @@ type TrustCarouselSlide = {
   eyebrow: string;
   title: string;
   body: string;
-  icon: "privacy" | "share" | "review";
+  icon: "privacy" | "share" | "review" | "add";
   previewSlug: MockupPreviewSlug;
 };
 
@@ -377,7 +377,15 @@ export const siteCopy = {
           title: "Bad transaction data can be fixed before it counts.",
           body: "Review stays lightweight and explicit.",
           icon: "review",
-          previewSlug: "review-transaction"
+          previewSlug: "review-transaction-trust"
+        },
+        {
+          id: "missed",
+          eyebrow: "Missed spend added fast",
+          title: "Missed transactions can be added without breaking the flow.",
+          body: "Quick add keeps cash, tips, and late memories easy to capture while the details are still clear.",
+          icon: "add",
+          previewSlug: "add-transaction-trust"
         }
       ] as const satisfies readonly TrustCarouselSlide[],
       primaryCta: { href: "/privacy", label: "Read the privacy stance" },
@@ -455,36 +463,35 @@ export const siteCopy = {
       }
     ] as const satisfies readonly CopyCard[],
     earlyAccess: {
-      eyebrow: "Early-access panel",
-      title: "Signal quality matters more than vanity volume.",
+      eyebrow: "Early access",
+      title: "Get on the list.",
       body:
-        "Live intake captures enough context to help research, prioritization, and alpha access decisions instead of collecting anonymous hype.",
+        "Tell us where Gama would help first. We will use your note to shape alpha access and product research.",
       notLiveTitle: "Live intake",
       notLiveBody:
         "This page accepts waitlist interest through the server-owned backend path, with explicit consent and clear follow-up expectations.",
       intakeFields: [
         {
           title: "Email",
-          body: "Needed for launch updates and optional follow-up tied to early access."
+          body: "Launch updates and invites."
         },
         {
-          title: "Primary pain point",
-          body: "Helps identify whether Safe-to-Spend, reimbursement drag, or cash-flow pressure is the strongest demand signal."
+          title: "Money moment",
+          body: "What you want help with first."
         },
         {
           title: "Context",
-          body: "Solo, shared household, event organizer, and travel-heavy use cases should be segmented deliberately."
+          body: "Solo, shared, household, or advisor."
         },
         {
-          title: "Research consent",
-          body: "Follow-up should stay optional and explicit rather than being quietly assumed."
+          title: "Consent",
+          body: "Only explicit waitlist follow-up."
         }
       ] as const satisfies readonly CopyCard[],
       expectations: [
-        "Immediate follow-up should set expectations clearly instead of implying general availability.",
-        "Segmentation should improve research quality, not turn the waitlist into aggressive lifecycle marketing.",
-        "Privacy language should explain what is stored and why while live capture is active.",
-        "Referral gamification remains out of scope until message quality and trust are already strong."
+        "You will get a confirmation email.",
+        "We may follow up for alpha access or product research.",
+        "No referral games or aggressive lifecycle marketing."
       ] as const satisfies readonly string[],
       primaryCta: { href: "#early-access", label: "Stay close to launch" },
       secondaryCta: { href: "/privacy", label: "Read the trust posture" }

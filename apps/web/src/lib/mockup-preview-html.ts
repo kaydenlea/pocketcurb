@@ -15,7 +15,7 @@ const STABLE_VIEWPORT = "width=393, initial-scale=1, maximum-scale=1, viewport-f
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 const previewHtmlCache = new Map<MockupPreviewSlug, Promise<string>>();
-type PreviewCrop = "events" | "eventDetails";
+export type PreviewCrop = "events" | "eventDetails";
 
 type TailwindConfig = Record<string, unknown>;
 
@@ -398,10 +398,10 @@ async function buildPreviewHtmlInternal(slug: MockupPreviewSlug, crop?: PreviewC
   const source = readFileSync(join(MOCKUP_DIR, mockupPreviews[slug].file), "utf8");
   const tailwindCss = await compileTailwindCss(source);
   const sharedStyle = buildSharedStyle(slug, crop);
-  const strippedSource = replaceMaterialSymbolLigatures(stabilizeViewport(stripRuntimeDependencies(source)));
+  const previewSource = replaceMaterialSymbolLigatures(stabilizeViewport(stripRuntimeDependencies(source)));
   const scalingScript = buildScalingScript();
 
-  return strippedSource
+  return previewSource
     .replace("</head>", `<style>${tailwindCss}\n${sharedStyle}</style></head>`)
     .replace("</body>", `${scalingScript}</body>`);
 }

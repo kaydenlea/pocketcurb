@@ -8,7 +8,7 @@ type TrustSlide = {
   eyebrow: string;
   title: string;
   body: string;
-  icon: "privacy" | "share" | "review";
+  icon: "privacy" | "share" | "review" | "add";
   previewSlug: MockupPreviewSlug;
 };
 
@@ -53,6 +53,21 @@ function TrustIcon({ icon }: { icon: TrustSlide["icon"] }) {
     );
   }
 
+  if (icon === "add") {
+    return (
+      <svg aria-hidden="true" className="home-trust-slide-icon-svg" viewBox="0 0 20 20">
+        <path
+          d="M10 17C13.9 17 17 13.9 17 10C17 6.1 13.9 3 10 3C6.1 3 3 6.1 3 10C3 13.9 6.1 17 10 17Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.55"
+        />
+        <path d="M10 6.8V13.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.55" />
+        <path d="M6.8 10H13.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.55" />
+      </svg>
+    );
+  }
+
   return (
     <svg aria-hidden="true" className="home-trust-slide-icon-svg" viewBox="0 0 20 20">
       <path d="M10 4.2V10.1L13.5 12.3" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.55" />
@@ -88,6 +103,7 @@ export function TrustFeatureCarousel({ slides }: { slides: readonly TrustSlide[]
   }
 
   const activeSlide = (slides[activeIndex] ?? slides[0])!;
+  const previewSrc = `/preview/${activeSlide.previewSlug}`;
 
   return (
     <div className="home-trust-carousel" aria-label="Trust highlights">
@@ -126,18 +142,17 @@ export function TrustFeatureCarousel({ slides }: { slides: readonly TrustSlide[]
             <div className="home-walkthrough-device-card home-trust-slide-device-card">
               <div className="home-walkthrough-device-viewport home-trust-slide-device-viewport">
                 <div className="home-walkthrough-device-shell">
-                  <iframe
-                    className={joinClasses(
-                      "home-walkthrough-preview-frame home-walkthrough-preview-frame-active home-trust-preview-frame",
-                      activeSlide.id === "review" && "home-trust-preview-frame-review"
-                    )}
-                    loading="eager"
-                    sandbox=""
-                    scrolling="no"
-                    src={`/preview/${activeSlide.previewSlug}`}
-                    tabIndex={-1}
-                    title={`Gama ${activeSlide.previewSlug} trust preview`}
-                  />
+                  <div className="home-walkthrough-preview-mask">
+                    <iframe
+                      className="home-walkthrough-preview-frame home-walkthrough-preview-frame-active home-trust-preview-frame"
+                      loading="eager"
+                      sandbox=""
+                      scrolling="no"
+                      src={previewSrc}
+                      tabIndex={-1}
+                      title={`Gama ${activeSlide.previewSlug} trust preview`}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

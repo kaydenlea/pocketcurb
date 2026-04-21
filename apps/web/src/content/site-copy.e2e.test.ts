@@ -9,8 +9,9 @@ describe("siteCopy", () => {
     expect(siteCopy.home.signatureFeatures.cards.map((card) => card.previewSlug)).toContain("event-details");
     expect(siteCopy.home.walkthrough.steps).toHaveLength(4);
     expect(siteCopy.home.walkthrough.steps.map((step) => step.previewSlug)).toContain("cash-flow");
-    expect(siteCopy.home.trustBridge.slides).toHaveLength(3);
+    expect(siteCopy.home.trustBridge.slides).toHaveLength(4);
     expect(siteCopy.home.trustBridge.slides.map((slide) => slide.previewSlug)).toContain("accounts-trust");
+    expect(siteCopy.home.trustBridge.slides.map((slide) => slide.previewSlug)).toContain("add-transaction-trust");
     expect(siteCopy.home.screenGallery.cards.map((card) => card.previewSlug)).toContain("stories");
     expect(siteCopy.waitlist.hero.body).toContain("decision-first");
     expect(siteCopy.shared.storyScenes.map((scene) => scene.body).join(" ")).toContain("shared-spend");
