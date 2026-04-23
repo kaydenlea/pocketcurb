@@ -2058,7 +2058,7 @@ a {
 
   .premium-hero-card-right {
     right: 0.45rem;
-    top: 10%;
+    top: 18%;
   }
 
   .story-visual-stage {
@@ -3178,8 +3178,8 @@ a {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  min-height: calc(min(19.5rem, 72vw) * 852 / 393 / 2);
-  height: calc(min(19.5rem, 72vw) * 852 / 393 / 2);
+  min-height: calc(min(21.5rem, 78vw) * 852 / 393 / 2);
+  height: calc(min(21.5rem, 78vw) * 852 / 393 / 2);
   min-width: 0;
   overflow: hidden;
   isolation: isolate;
@@ -3187,14 +3187,14 @@ a {
 
 .home-trust-slide-device-card {
   width: min(100%, 31rem);
-  min-height: calc(min(19.5rem, 72vw) * 852 / 393 / 2);
+  min-height: calc(min(21.5rem, 78vw) * 852 / 393 / 2);
 }
 
 .home-trust-slide-device-viewport {
-  --device-stage-phone-width: min(19.5rem, 72vw);
+  --device-stage-phone-width: min(21.5rem, 78vw);
   width: 100%;
-  height: calc(min(19.5rem, 72vw) * 852 / 393 / 2);
-  min-height: calc(min(19.5rem, 72vw) * 852 / 393 / 2);
+  height: calc(min(21.5rem, 78vw) * 852 / 393 / 2);
+  min-height: calc(min(21.5rem, 78vw) * 852 / 393 / 2);
   padding: 0;
   overflow: hidden;
 }
@@ -3511,7 +3511,31 @@ a {
   }
 
   .waitlist-clean-hero-visual {
-    margin-top: -1.2rem;
+    margin-top: 0.25rem;
+  }
+
+  .waitlist-clean-hero-visual .premium-hero-visual {
+    min-height: 520px;
+  }
+
+  .waitlist-clean-hero-visual .premium-hero-device {
+    top: 1.2rem;
+    width: min(76%, 332px);
+  }
+
+  .waitlist-clean-hero-visual .premium-hero-card {
+    max-width: 152px;
+    padding: 0.78rem;
+  }
+
+  .waitlist-clean-hero-visual .premium-hero-card-left {
+    left: 0.45rem;
+    bottom: 8%;
+  }
+
+  .waitlist-clean-hero-visual .premium-hero-card-right {
+    right: 0.45rem;
+    top: 18%;
   }
 
   .waitlist-clean-summary,
@@ -3684,20 +3708,20 @@ a {
   }
 
   .home-trust-slide-device-wrap {
-    min-height: calc(min(17.5rem, calc(100vw - 6.5rem)) * 852 / 393 / 2);
-    height: calc(min(17.5rem, calc(100vw - 6.5rem)) * 852 / 393 / 2);
+    min-height: calc(min(19rem, calc(100vw - 4.5rem)) * 852 / 393 / 2);
+    height: calc(min(19rem, calc(100vw - 4.5rem)) * 852 / 393 / 2);
     overflow: hidden;
   }
 
   .home-trust-slide-device-card {
     width: 100%;
-    min-height: calc(min(17.5rem, calc(100vw - 6.5rem)) * 852 / 393 / 2);
+    min-height: calc(min(19rem, calc(100vw - 4.5rem)) * 852 / 393 / 2);
   }
 
   .home-trust-slide-device-viewport {
-    --device-stage-phone-width: min(17.5rem, calc(100vw - 6.5rem));
-    height: calc(min(17.5rem, calc(100vw - 6.5rem)) * 852 / 393 / 2);
-    min-height: calc(min(17.5rem, calc(100vw - 6.5rem)) * 852 / 393 / 2);
+    --device-stage-phone-width: min(19rem, calc(100vw - 4.5rem));
+    height: calc(min(19rem, calc(100vw - 4.5rem)) * 852 / 393 / 2);
+    min-height: calc(min(19rem, calc(100vw - 4.5rem)) * 852 / 393 / 2);
   }
 }
 

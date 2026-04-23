@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Image from "next/image";
 import { SiteContainer } from "@gama/ui-web";
 import gamaLogo from "../../app/icon.png";
@@ -30,17 +29,6 @@ export function SiteFooter() {
 
           <div className="site-footer-meta">
             <div className="site-footer-meta-group">
-              <span className="site-footer-label">Explore</span>
-              <nav aria-label="Footer" className="site-footer-links">
-                {siteCopy.footer.utilityLinks.map((link) => (
-                  <Link key={link.href} className="site-footer-link" href={link.href}>
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-
-            <div className="site-footer-meta-group">
               <span className="site-footer-label">Contact</span>
               <a className="site-footer-link" href={siteCopy.footer.contactHref}>
                 {siteCopy.footer.contactLabel}
@@ -50,13 +38,6 @@ export function SiteFooter() {
         </div>
 
         <div className="site-footer-bottom">
-          <div className="site-footer-legal">
-            {siteCopy.footer.links.map((link) => (
-              <Link key={link.href} className="site-footer-legal-link" href={link.href}>
-                {link.label}
-              </Link>
-            ))}
-          </div>
           <p className="site-footer-meta-note">Decision-first clarity for the next money move.</p>
         </div>
       </SiteContainer>

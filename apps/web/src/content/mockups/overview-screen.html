@@ -151,21 +151,43 @@
             min-height: 100vh;
             box-shadow: 0 0 40px rgba(0,0,0,0.2);
         }
+        .overview-screen-header {
+            gap: clamp(0.45rem, 2.6vw, 0.85rem);
+        }
+        .overview-header-button {
+            width: clamp(2rem, 9.8vw, 2.55rem);
+            height: clamp(2rem, 9.8vw, 2.55rem);
+            flex: 0 0 auto;
+        }
+        .overview-header-button .material-symbols-outlined {
+            font-size: clamp(0.86rem, 4.1vw, 1.05rem);
+            line-height: 1;
+        }
+        .overview-header-pill {
+            min-width: 0;
+            flex: 0 1 8.8rem;
+            padding: clamp(0.34rem, 1.8vw, 0.46rem) clamp(0.7rem, 3.7vw, 1.08rem);
+        }
+        .overview-header-title {
+            font-size: clamp(0.48rem, 2.35vw, 0.61rem);
+            letter-spacing: clamp(0.16em, 1.05vw, 0.24em);
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body class="min-h-screen text-on-surface antialiased bg-slate-900">
 <div class="mobile-viewport">
 <!-- Top Dark Section -->
 <section class="immersive-dark-top px-6 relative pt-4 pb-12">
-<header class="flex justify-between items-center mb-10">
-<div class="glass-island-dark w-12 h-12 flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer overflow-hidden ring-1 ring-white/10">
-<span class="material-symbols-outlined text-white font-bold text-xl">person</span>
+<header class="overview-screen-header flex justify-between items-center mb-10">
+<div class="overview-header-button glass-island-dark flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer overflow-hidden ring-1 ring-white/10">
+<span class="material-symbols-outlined text-white font-bold">person</span>
 </div>
-<div class="glass-island-dark px-6 py-2 rounded-full border border-white/10 flex items-center justify-center">
-<h1 class="text-[11px] font-extrabold tracking-[0.3em] text-white/90 uppercase">Overview</h1>
+<div class="overview-header-pill glass-island-dark rounded-full border border-white/10 flex items-center justify-center">
+<h1 class="overview-header-title font-extrabold text-white/90 uppercase">Overview</h1>
 </div>
-<div class="glass-island-dark w-12 h-12 flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer ring-1 ring-white/10">
-<span class="material-symbols-outlined text-white font-bold text-xl">settings</span>
+<div class="overview-header-button glass-island-dark flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer ring-1 ring-white/10">
+<span class="material-symbols-outlined text-white font-bold">settings</span>
 </div>
 </header>
 <div class="w-full flex flex-col relative">

@@ -1,6 +1,6 @@
 import type { MockupPreviewSlug } from "./mockup-previews";
 
-type SiteRoute = "/" | "/waitlist" | "/privacy";
+type SiteRoute = "/";
 
 type NavLink = {
   href: SiteRoute;
@@ -86,14 +86,12 @@ type CalloutCard = CopyCard & {
 
 export const siteCopy = {
   navigation: [
-    { href: "/", label: "Home" },
-    { href: "/waitlist", label: "Early Access" },
-    { href: "/privacy", label: "Privacy" }
+    { href: "/", label: "Home" }
   ] as const satisfies readonly NavLink[],
   shared: {
     announcement: "Mobile-first money clarity, event context, and privacy-first trust.",
-    primaryCta: { href: "/waitlist", label: "See Early Access" },
-    secondaryCta: { href: "/privacy", label: "Why privacy comes first" },
+    primaryCta: { href: "#early-access", label: "Join early access" },
+    secondaryCta: { href: "#trust", label: "Why privacy comes first" },
     tertiaryCta: { href: "#early-access", label: "Go to the early-access panel" },
     proofStrip: [
       { label: "Safe-to-Spend", value: "A trusted daily answer" },
@@ -182,8 +180,8 @@ export const siteCopy = {
       title: "Know what your money can do next.",
       body:
         "Safe-to-Spend, forward-looking cash flow, and shared-spend clarity in one calm mobile product.",
-      primaryCta: { href: "/waitlist", label: "Join the waitlist" },
-      secondaryCta: { href: "/privacy", label: "See the trust stance" }
+      primaryCta: { href: "#main-content", label: "Join the waitlist" },
+      secondaryCta: { href: "#home-trust-title", label: "See the trust stance" }
     },
     connectMarquee: {
       label: "Connect your main banks with one tap",
@@ -388,8 +386,8 @@ export const siteCopy = {
           previewSlug: "add-transaction-trust"
         }
       ] as const satisfies readonly TrustCarouselSlide[],
-      primaryCta: { href: "/privacy", label: "Read the privacy stance" },
-      secondaryCta: { href: "/waitlist", label: "Go to early access" }
+      primaryCta: { href: "#home-trust-title", label: "Read the privacy stance" },
+      secondaryCta: { href: "#main-content", label: "Go to early access" }
     }
   },
   waitlist: {
@@ -399,7 +397,7 @@ export const siteCopy = {
       body:
         "Gama gives you short-term money clarity, then keeps trips, dinners, shared spending, and favorite places easy to revisit.",
       primaryCta: { href: "#early-access", label: "Join the early-access list" },
-      secondaryCta: { href: "/privacy", label: "See how trust is handled" },
+      secondaryCta: { href: "#early-access", label: "See how trust is handled" },
       supporting: [
         { label: "Mobile-first", value: "Built for daily check-ins" },
         { label: "Pre-launch", value: "Thoughtful rollout over hype" },
@@ -494,7 +492,7 @@ export const siteCopy = {
         "No referral games or aggressive lifecycle marketing."
       ] as const satisfies readonly string[],
       primaryCta: { href: "#early-access", label: "Stay close to launch" },
-      secondaryCta: { href: "/privacy", label: "Read the trust posture" }
+      secondaryCta: { href: "#early-access", label: "Read the trust posture" }
     },
     closing: {
       eyebrow: "A serious pre-launch product",
@@ -548,22 +546,18 @@ export const siteCopy = {
           "The waitlist uses a server-owned submission path, while analytics-vendor integrations and referral mechanics remain deferred until the disclosure and operational story is ready."
       }
     ] as const satisfies readonly CalloutCard[],
-    primaryCta: { href: "/waitlist", label: "Return to early access" },
+    primaryCta: { href: "/", label: "Return home" },
     secondaryCta: { href: "/", label: "Back to home" }
   },
   footer: {
     note: "Decision-first clarity, forward-looking cash flow, and privacy-first trust.",
     contactLabel: "Contact",
-    contactHref: "mailto:hello@gama.money",
+    contactHref: "mailto:gamabudget@gmail.com",
     utilityLinks: [
-      { href: "/", label: "Home" },
-      { href: "/waitlist", label: "Early Access" },
-      { href: "/privacy", label: "Privacy" }
+      { href: "/", label: "Home" }
     ] as const satisfies readonly FooterLink[],
     links: [
-      { href: "/", label: "Home" },
-      { href: "/waitlist", label: "Early Access" },
-      { href: "/privacy", label: "Privacy" }
+      { href: "/", label: "Home" }
     ] as const satisfies readonly NavLink[]
   }
 } as const;

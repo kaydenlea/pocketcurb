@@ -140,9 +140,9 @@ export const sitePages = {
     description:
       "Explore Gama's early-access story for Safe-to-Spend, forward-looking cash flow, shared-spend correctness, event receipts, and privacy-first launch expectations.",
     updatedAt: "2026-04-18",
-    changeFrequency: "monthly",
-    priority: 0.8,
-    indexable: true,
+    changeFrequency: "never",
+    priority: 0,
+    indexable: false,
     breadcrumbLabel: "Early Access",
     breadcrumbs: [homeBreadcrumb, { label: "Early Access", path: "/waitlist" }]
   },
@@ -152,9 +152,9 @@ export const sitePages = {
     description:
       "Learn how Gama approaches privacy-first trust, explicit sharing boundaries, and honest pre-launch expectations across the public web lane.",
     updatedAt: "2026-04-18",
-    changeFrequency: "monthly",
-    priority: 0.6,
-    indexable: true,
+    changeFrequency: "never",
+    priority: 0,
+    indexable: false,
     breadcrumbLabel: "Privacy and Trust",
     breadcrumbs: [homeBreadcrumb, { label: "Privacy and Trust", path: "/privacy" }]
   }
@@ -162,7 +162,7 @@ export const sitePages = {
 
 export const sitePageList = Object.values(sitePages);
 export const indexablePages = sitePageList.filter((page) => page.indexable);
-export const crawlDisallowPaths = ["/api/", "/preview/", "/draft/", "/private/"] as const;
+export const crawlDisallowPaths = ["/api/", "/preview/", "/draft/", "/private/", "/waitlist", "/privacy"] as const;
 
 export const aiCrawlerPolicy = {
   searchBots: ["OAI-SearchBot", "ChatGPT-User"] as const,

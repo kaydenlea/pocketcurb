@@ -13,18 +13,28 @@ describe("site-metadata", () => {
   });
 
   it("builds production page metadata with canonical URLs and indexable robots", () => {
-    const metadata = createPageMetadata(sitePages.waitlist, productionEnvironment);
+    const metadata = createPageMetadata(sitePages.home, productionEnvironment);
 
-    expect(metadata.alternates?.canonical).toBe("https://gama.money/waitlist");
+    expect(metadata.alternates?.canonical).toBe("https://gama.money/");
     expect(metadata.robots).toMatchObject({
       index: true,
       follow: true
     });
     expect(metadata.openGraph).toMatchObject({
-      url: "https://gama.money/waitlist",
-      title: "Early Access | Gama"
+      url: "https://gama.money/",
+      title: "Gama | Decision-first money clarity."
     });
     expect(metadata).not.toHaveProperty("keywords");
+  });
+
+  it("marks hidden secondary pages as noindex in production", () => {
+    const metadata = createPageMetadata(sitePages.waitlist, productionEnvironment);
+
+    expect(metadata.alternates?.canonical).toBe("https://gama.money/waitlist");
+    expect(metadata.robots).toMatchObject({
+      index: false,
+      follow: false
+    });
   });
 
   it("builds non-production root metadata with noindex robots", () => {
