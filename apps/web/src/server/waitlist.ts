@@ -42,10 +42,14 @@ export class WaitlistEmailError extends Error {
 
 export type WaitlistDependencies = {
   fetch: typeof fetch;
+  logger?: Pick<typeof console, "error">;
   now: () => Date;
 };
 
 const supabaseServiceRoleEnvKey = ["SUPABASE", "SERVICE", "ROLE", "KEY"].join("_");
+const waitlistRateLimitWindowMs = 10 * 60 * 1000;
+const waitlistRateLimitMaxSubmissions = 5;
+const waitlistRateLimitBuckets = new Map<string, number[]>();
 
 const requiredEnvKeys = [
   "SUPABASE_URL",
@@ -71,6 +75,46 @@ export function readWaitlistRuntimeConfig(env: RuntimeEnv = process.env): Waitli
   };
 }
 
+export type WaitlistRateLimitInput = {
+  email?: string | null;
+  ipAddress?: string | null;
+  nowMs?: number;
+};
+
+export type WaitlistRateLimitResult =
+  | { allowed: true }
+  | { allowed: false; retryAfterSeconds: number };
+
+export function checkWaitlistRateLimit(input: WaitlistRateLimitInput): WaitlistRateLimitResult {
+  const nowMs = input.nowMs ?? Date.now();
+  const keys = buildWaitlistRateLimitKeys(input);
+  const oldestAllowedMs = nowMs - waitlistRateLimitWindowMs;
+
+  for (const key of keys) {
+    const recentHits = (waitlistRateLimitBuckets.get(key) ?? []).filter((hitMs) => hitMs > oldestAllowedMs);
+
+    if (recentHits.length >= waitlistRateLimitMaxSubmissions) {
+      waitlistRateLimitBuckets.set(key, recentHits);
+
+      return {
+        allowed: false,
+        retryAfterSeconds: Math.max(1, Math.ceil((recentHits[0]! + waitlistRateLimitWindowMs - nowMs) / 1000))
+      };
+    }
+  }
+
+  for (const key of keys) {
+    const recentHits = (waitlistRateLimitBuckets.get(key) ?? []).filter((hitMs) => hitMs > oldestAllowedMs);
+    waitlistRateLimitBuckets.set(key, [...recentHits, nowMs]);
+  }
+
+  return { allowed: true };
+}
+
+export function resetWaitlistRateLimitForTests(): void {
+  waitlistRateLimitBuckets.clear();
+}
+
 export async function submitWaitlistSignup(
   input: unknown,
   context: WaitlistRequestContext,
@@ -85,9 +129,32 @@ export async function submitWaitlistSignup(
     return storageOutcome;
   }
 
-  await sendWaitlistEmails(signup, config, dependencies);
+  try {
+    await sendWaitlistEmails(signup, config, dependencies);
+  } catch (error) {
+    const logger = dependencies.logger ?? console;
+
+    logger.error("Waitlist signup stored, but email delivery failed.", {
+      email: signup.email,
+      error
+    });
+  }
 
   return { status: "accepted" };
+}
+
+function buildWaitlistRateLimitKeys(input: WaitlistRateLimitInput): string[] {
+  const keys = new Set<string>();
+  const ipAddress = input.ipAddress?.trim();
+  const email = input.email?.trim().toLowerCase();
+
+  keys.add(`ip:${ipAddress || "unknown"}`);
+
+  if (email) {
+    keys.add(`email:${email}`);
+  }
+
+  return Array.from(keys);
 }
 
 async function storeWaitlistSignup(

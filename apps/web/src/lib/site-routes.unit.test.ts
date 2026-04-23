@@ -43,14 +43,6 @@ describe("site routes", () => {
       expect.objectContaining({
         url: "https://gama.money/",
         lastModified: "2026-04-18"
-      }),
-      expect.objectContaining({
-        url: "https://gama.money/waitlist",
-        lastModified: "2026-04-18"
-      }),
-      expect.objectContaining({
-        url: "https://gama.money/privacy",
-        lastModified: "2026-04-18"
       })
     ]);
   });

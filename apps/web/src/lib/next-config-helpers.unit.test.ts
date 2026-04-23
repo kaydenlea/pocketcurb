@@ -45,4 +45,29 @@ describe("next-config helpers", () => {
       })
     );
   });
+
+  it("supports a route-scoped embedded preview policy without weakening the default site posture", () => {
+    const headers = buildSecurityHeaders({
+      nodeEnv: "production",
+      siteUrl: "https://gama.money",
+      allowEmbeddedPreview: true
+    });
+
+    expect(headers).toContainEqual({
+      key: "X-Frame-Options",
+      value: "SAMEORIGIN"
+    });
+    expect(headers).toContainEqual({
+      key: "Content-Security-Policy",
+      value: expect.stringContaining("frame-ancestors 'self'")
+    });
+    expect(headers).toContainEqual({
+      key: "Content-Security-Policy",
+      value: expect.stringContaining("style-src 'self' 'unsafe-inline'")
+    });
+    expect(headers).toContainEqual({
+      key: "Content-Security-Policy",
+      value: expect.stringContaining("font-src 'self' data:")
+    });
+  });
 });

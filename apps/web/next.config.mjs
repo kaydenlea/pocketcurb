@@ -9,15 +9,24 @@ const nextConfig = {
   poweredByHeader: false,
   trailingSlash: false,
   async headers() {
-    const headers = buildSecurityHeaders({
+    const defaultHeaders = buildSecurityHeaders({
       nodeEnv: process.env.NODE_ENV,
       siteUrl: process.env.NEXT_PUBLIC_SITE_URL
+    });
+    const embeddedPreviewHeaders = buildSecurityHeaders({
+      nodeEnv: process.env.NODE_ENV,
+      siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+      allowEmbeddedPreview: true
     });
 
     return [
       {
-        source: "/:path*",
-        headers
+        source: "/((?!preview/).*)",
+        headers: defaultHeaders
+      },
+      {
+        source: "/preview/:path*",
+        headers: embeddedPreviewHeaders
       }
     ];
   }
