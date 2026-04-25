@@ -2,7 +2,14 @@
 
 import { useId, useMemo, useState, type FormEvent } from "react";
 
-type SubmissionState = "idle" | "submitting" | "accepted" | "duplicate" | "invalid" | "unavailable" | "error";
+type SubmissionState =
+  | "idle"
+  | "submitting"
+  | "accepted"
+  | "duplicate"
+  | "invalid"
+  | "unavailable"
+  | "error";
 
 type WaitlistSignupFormProps = {
   expectations: readonly string[];
@@ -14,7 +21,7 @@ const personaOptions = [
   { value: "partnered", label: "Partnered" },
   { value: "household", label: "Shared household" },
   { value: "advisor", label: "Advisor or money helper" },
-  { value: "other", label: "Other" }
+  { value: "other", label: "Other" },
 ];
 
 export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
@@ -60,17 +67,20 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
       biggestPain: optionalString(formData.get("biggestPain")),
       referralSource: "waitlist-page",
       marketingConsent: formData.get("marketingConsent") === "on",
-      website
+      website,
     };
 
     try {
       const response = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
-      const body = (await response.json().catch(() => null)) as { status?: string; error?: string } | null;
+      const body = (await response.json().catch(() => null)) as {
+        status?: string;
+        error?: string;
+      } | null;
 
       if (response.ok && body?.status === "accepted") {
         setState("accepted");
@@ -118,7 +128,10 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
         <input autoComplete="off" className="hidden" name="website" tabIndex={-1} type="text" />
 
         <div className="grid gap-2">
-          <label className="text-sm font-semibold text-[var(--color-ink)]" htmlFor={`${formId}-email`}>
+          <label
+            className="text-sm font-semibold text-[var(--color-ink)]"
+            htmlFor={`${formId}-email`}
+          >
             Email
           </label>
           <input
@@ -136,7 +149,10 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
-            <label className="text-sm font-semibold text-[var(--color-ink)]" htmlFor={`${formId}-first-name`}>
+            <label
+              className="text-sm font-semibold text-[var(--color-ink)]"
+              htmlFor={`${formId}-first-name`}
+            >
               First name
             </label>
             <input
@@ -152,7 +168,10 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm font-semibold text-[var(--color-ink)]" htmlFor={`${formId}-persona`}>
+            <label
+              className="text-sm font-semibold text-[var(--color-ink)]"
+              htmlFor={`${formId}-persona`}
+            >
               Context
             </label>
             <select
@@ -171,7 +190,10 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-semibold text-[var(--color-ink)]" htmlFor={`${formId}-biggest-pain`}>
+          <label
+            className="text-sm font-semibold text-[var(--color-ink)]"
+            htmlFor={`${formId}-biggest-pain`}
+          >
             What should Gama help with first?
           </label>
           <textarea
@@ -195,16 +217,18 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
           <span>I agree to receive Gama waitlist updates and related product follow-up.</span>
         </label>
 
-        <button className="site-link w-full justify-center disabled:cursor-wait disabled:opacity-70" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Joining..." : "Join the waitlist"}
+        <button
+          className="site-link w-full justify-center disabled:cursor-wait disabled:opacity-70"
+          disabled={isSubmitting}
+          type="submit"
+        >
+          {isSubmitting ? "Joining..." : "Join waitlist"}
         </button>
       </form>
 
       <ul className="waitlist-form-expectations">
         {expectations.map((item) => (
-          <li key={item}>
-            {item}
-          </li>
+          <li key={item}>{item}</li>
         ))}
       </ul>
     </div>

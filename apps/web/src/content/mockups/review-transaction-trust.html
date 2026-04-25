@@ -121,6 +121,44 @@
           background: rgba(249, 235, 237, 0.6);
           border: 1px solid rgba(249, 235, 237, 0.8);
       }
+      .review-square-card {
+          aspect-ratio: 1 / 1;
+          min-height: 0;
+      }
+      .review-square-card > div:first-child {
+          width: 3rem;
+          height: 3rem;
+          min-width: 3rem;
+          min-height: 3rem;
+          aspect-ratio: 1 / 1;
+          border-radius: 999px;
+          flex-shrink: 0;
+          line-height: 1;
+      }
+      .review-square-card > div:first-child > span {
+          line-height: 1;
+      }
+      .review-chip {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 2rem;
+          min-height: 2rem;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+          line-height: 1.1;
+          vertical-align: middle;
+      }
+      .payment-copy {
+          min-width: 0;
+          overflow: hidden;
+      }
+      .trust-review-scale {
+          width: calc(100% + 0.6rem);
+          margin-left: -0.3rem;
+          transform: scale(0.93);
+          transform-origin: top center;
+      }
     </style>
 </head>
 <body class="bg-surface overflow-hidden min-h-screen">
@@ -128,7 +166,7 @@
 <div class="relative z-10 flex items-start justify-center min-h-screen bg-surface">
 <main class="luminous-glass w-full max-w-lg rounded-t-[3.5rem] shadow-2xl flex flex-col overflow-hidden border-b-0 h-[92vh]">
 <!-- HEADER -->
-<header class="relative px-6 pt-4 pb-2 shrink-0 flex flex-col items-center">
+<header class="relative px-3 pt-4 pb-2 shrink-0 flex flex-col items-center">
 <div class="grab-bar mb-2"></div>
 <div class="flex items-center space-x-4">
 <button class="w-9 h-9 rounded-full flex items-center justify-center island-nav shadow-sm active:scale-90 transition-all">
@@ -136,7 +174,7 @@
 </button>
 <div class="px-5 py-2 island-nav rounded-full shadow-sm flex items-center space-x-2.5 border border-white/90">
 <div class="w-1.5 h-1.5 rounded-full bg-pc-emerald animate-pulse shadow-[0_0_8px_rgba(0,96,100,0.4)]"></div>
-<span class="text-[10px] font-extrabold tracking-[0.2em] uppercase text-on-surface/70">1 OF 3 TO REVIEW</span>
+<span class="text-[10px] font-extrabold tracking-[0.2em] uppercase text-on-surface/70">1 OF 3</span>
 </div>
 <button class="w-9 h-9 rounded-full flex items-center justify-center island-nav shadow-sm active:scale-90 transition-all">
 <span class="material-symbols-outlined text-[20px] text-on-surface/50 font-bold">chevron_right</span>
@@ -144,33 +182,33 @@
 </div>
 </header>
 <!-- CONTENT -->
-<section class="px-6 pt-4 flex-1 overflow-y-auto no-scrollbar space-y-6 pb-2 pb-24">
+<section class="trust-review-scale px-2 pt-4 flex-1 overflow-y-auto no-scrollbar space-y-6 pb-2 pb-24">
 <!-- HERO SECTION -->
 <div class="text-center">
 <div class="inline-flex p-1.5 rounded-full bg-white shadow-md ring-1 ring-black/[0.03] mb-3">
-<img alt="Starbucks" class="w-11 h-11 rounded-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEhHAhgtmsni2Z6r5IYMto1Mie_r_I-13-JbDd5L-KrYh2aeGJBMfSnnpgV0mZwOl_JCWwuqB0FL3Qazn1yeCCU5napnXjJPkHGJR67-tu8enxfg_bf2YY4ocFQIomRnkJTVO_RoeE6rP5B2h6f2Ts5ywRGtsEqfPdhZhOWjZ-C9jANOVB7JIufxnNVKckyuvKSGajhlPrhfFWC1KJ7AhJJNTwbkpo2eFUI_kC3otP5GVA7yqKDC0WTcEjFd_XM9KybftFg6dWCGAD"/>
+<span aria-hidden="true" class="w-11 h-11 rounded-full object-contain flex items-center justify-center text-[1.55rem] bg-white">☕</span>
 </div>
 <p class="text-on-surface-variant/60 text-[10px] font-black uppercase tracking-[0.15em] mb-1.5">Starbucks Coffee • 09:14 AM</p>
-<h2 class="text-on-surface text-5xl font-black tracking-tighter leading-none">$4.50</h2>
+<h2 class="text-on-surface text-[44px] font-black tracking-[-0.04em] leading-none">$4.50</h2>
 </div>
 <!-- DETAILS MODULE -->
 <div class="space-y-4">
 <!-- Color-Coded Illustrative Cards -->
 <div class="grid grid-cols-2 gap-3.5">
 <!-- Category Card (Dining) -->
-<button class="bg-white/70 backdrop-blur-md rounded-[2rem] p-5 flex flex-col items-center text-center space-y-2.5 hover:bg-white/90 transition-colors group shadow-sm border border-black/5">
+<button class="review-square-card bg-white/70 backdrop-blur-md rounded-[2rem] p-4 flex flex-col items-center justify-center text-center space-y-2.5 hover:bg-white/90 transition-colors group shadow-sm border border-black/5">
 <div class="w-12 h-12 rounded-full shadow-sm flex items-center justify-center text-on-surface-variant group-active:scale-95 transition-transform bg-white ring-1 ring-black/5"><span class="text-2xl">🍴</span></div>
 <div>
 <p class="text-on-surface/50 text-[10px] font-bold uppercase tracking-wider mb-1.5">Category</p>
-<span class="bg-[#f9f1e8] text-[#8b5e34] px-3.5 py-1 rounded-full text-[13px] font-extrabold">Dining</span>
+<span class="review-chip bg-[#f9f1e8] text-[#8b5e34] px-3.5 py-1.5 rounded-full text-[13px] font-extrabold">Dining</span>
 </div>
 </button>
 <!-- Event Card (Date Night) -->
-<button class="bg-white/70 backdrop-blur-md rounded-[2rem] p-5 flex flex-col items-center text-center space-y-2.5 hover:bg-white/90 transition-colors group shadow-sm border border-black/5">
+<button class="review-square-card bg-white/70 backdrop-blur-md rounded-[2rem] p-4 flex flex-col items-center justify-center text-center space-y-2.5 hover:bg-white/90 transition-colors group shadow-sm border border-black/5">
 <div class="w-12 h-12 rounded-full shadow-sm flex items-center justify-center text-on-surface-variant group-active:scale-95 transition-transform bg-white ring-1 ring-black/5"><span class="text-2xl">🎉</span></div>
 <div>
 <p class="text-on-surface/50 text-[10px] font-bold uppercase tracking-wider mb-1.5">Event</p>
-<span class="bg-[#f9ebed] text-[#a64452] px-3.5 py-1 rounded-full text-[13px] font-extrabold whitespace-nowrap">Date Night</span>
+<span class="review-chip bg-[#f9ebed] text-[#a64452] px-3.5 py-1.5 rounded-full text-[13px] font-extrabold whitespace-nowrap">Date Night</span>
 </div>
 </button>
 </div>
@@ -178,14 +216,14 @@
 <div class="bg-white/60 backdrop-blur-md rounded-[2.5rem] px-6 py-2 flex flex-col divide-y divide-black/[0.05] border border-black/5 shadow-sm">
 <!-- Payment -->
 <div class="flex items-center justify-between py-4">
-<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-4 min-w-0 flex-1">
 <div class="w-10 h-6 bg-[#004a99] rounded-[4px] shadow-sm flex flex-col justify-between p-1 shrink-0 border border-white/10">
 <div class="w-1.5 h-1.5 bg-[#fdbd2c] rounded-full"></div>
 <div class="text-[4px] text-white font-black self-end tracking-tighter opacity-90 leading-none uppercase">Chase</div>
 </div>
-<div class="flex flex-col">
+<div class="payment-copy flex flex-col">
 <p class="text-on-surface/40 text-[8px] font-black uppercase tracking-widest leading-none mb-1">Payment Method</p>
-<p class="text-on-surface text-[14px] font-bold leading-tight">Sapphire Preferred • 4291</p>
+<p class="text-on-surface text-[14px] font-bold leading-tight truncate">Sapphire Preferred • 4291</p>
 </div>
 </div>
 <span class="material-symbols-outlined text-on-surface/20 text-[20px]">chevron_right</span>

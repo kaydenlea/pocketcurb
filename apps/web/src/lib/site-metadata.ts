@@ -48,7 +48,7 @@ export function createRootMetadata(environment: SiteEnvironment = siteEnvironmen
     applicationName: siteConfig.name,
     title: {
       default: siteConfig.title,
-      template: `%s | ${siteConfig.name}`
+      template: `${siteConfig.name} | %s`
     },
     description: siteConfig.description,
     category: siteConfig.category,

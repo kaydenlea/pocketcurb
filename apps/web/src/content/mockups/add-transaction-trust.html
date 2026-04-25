@@ -122,6 +122,16 @@
       @keyframes blink {
         from, to { opacity: 1; }
         50% { opacity: 0; }
+      }
+      .payment-copy {
+        min-width: 0;
+        overflow: hidden;
+      }
+      .trust-add-scale {
+        width: calc(100% + 0.6rem);
+        margin-left: -0.3rem;
+        transform: scale(0.93);
+        transform-origin: top center;
       }</style>
 </head>
 <body class="bg-surface overflow-hidden min-h-screen">
@@ -129,7 +139,7 @@
 <div class="relative z-10 flex items-start justify-center min-h-screen bg-surface">
 <main class="luminous-glass w-full max-w-lg rounded-t-[3.5rem] shadow-2xl flex flex-col overflow-hidden border-b-0 h-[92vh]">
 <!-- HEADER -->
-<header class="relative px-6 pt-4 pb-2 shrink-0 flex flex-col items-center">
+<header class="relative px-3 pt-4 pb-2 shrink-0 flex flex-col items-center">
 <div class="grab-bar mb-2 mx-auto"></div>
 <div class="flex items-center justify-between w-full">
 <!-- Spacer to center the label -->
@@ -143,14 +153,14 @@
 </div>
 </header>
 <!-- CONTENT -->
-<section class="px-6 pt-4 flex-1 overflow-y-auto no-scrollbar space-y-6 pb-24">
+<section class="trust-add-scale px-2 pt-4 flex-1 overflow-y-auto no-scrollbar space-y-6 pb-24">
 <!-- HERO SECTION -->
 <div class="text-center">
 <div class="flex flex-col items-center mb-1">
 <div class="flex items-center text-on-surface/40 text-[13px] font-bold mb-1">
 <span>Tap to add merchant...</span>
 </div>
-<h2 class="text-on-surface text-5xl font-black tracking-tighter leading-none">$0.00<span class="text-cursor"></span></h2>
+<h2 class="text-on-surface text-[44px] font-black tracking-[-0.04em] leading-none">$0.00<span class="text-cursor"></span></h2>
 </div>
 </div>
 <!-- DETAILS MODULE -->
@@ -176,14 +186,14 @@
 <div class="bg-white/60 backdrop-blur-md rounded-[2.5rem] px-6 py-2 flex flex-col divide-y divide-black/[0.05] border border-black/5 shadow-sm">
 <!-- Payment -->
 <div class="flex items-center justify-between py-4">
-<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-4 min-w-0 flex-1">
 <div class="w-10 h-6 bg-[#004a99] rounded-[4px] shadow-sm flex flex-col justify-between p-1 shrink-0 border border-white/10">
 <div class="w-1.5 h-1.5 bg-[#fdbd2c] rounded-full"></div>
 <div class="text-[4px] text-white font-black self-end tracking-tighter opacity-90 leading-none uppercase">Chase</div>
 </div>
-<div class="flex flex-col">
+<div class="payment-copy flex flex-col">
 <p class="text-on-surface/40 text-[8px] font-black uppercase tracking-widest leading-none mb-1">Payment Method</p>
-<p class="text-on-surface text-[14px] font-bold leading-tight">Sapphire Preferred • 4291</p>
+<p class="text-on-surface text-[14px] font-bold leading-tight truncate">Sapphire Preferred • 4291</p>
 </div>
 </div>
 <span class="material-symbols-outlined text-on-surface/20 text-[20px]">chevron_right</span>

@@ -162,8 +162,8 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .map-date-label {
-            font-size: 9px;
-            font-weight: 800;
+            font-size: 8px;
+            font-weight: 700;
             color: #0b141a;
             background: rgba(255,255,255,0.75);
             backdrop-filter: blur(8px);
@@ -173,8 +173,113 @@
             margin-top: 4px;
             border: 0.5px solid rgba(255, 255, 255, 1);
             box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            letter-spacing: 0.08em;
+            letter-spacing: 0.06em;
             font-family: 'Manrope', sans-serif;
+        }
+        .trust-nav-button {
+            width: 2.35rem;
+            height: 2.35rem;
+        }
+        .trust-nav-pill {
+            padding: 0.42rem 1rem;
+        }
+        .trust-budget-pill {
+            min-width: 124px;
+        }
+        .trust-scaled-shell {
+            width: calc(100% + 0.9rem);
+            margin-left: -0.45rem;
+            transform: scale(0.96);
+            transform-origin: top center;
+        }
+        .trust-scaled-shell .category-container {
+            padding: 1rem 1.02rem;
+        }
+        .trust-scaled-shell .transaction-card {
+            padding: 0.68rem 0.72rem !important;
+        }
+        .trust-scaled-shell > .category-container:first-child {
+            margin-top: 0.55rem;
+        }
+        .trust-category-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(11, 20, 26, 0.62);
+        }
+        .trust-budget-current {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #0b141a;
+        }
+        .trust-budget-total {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: rgba(11, 20, 26, 0.34);
+        }
+        .trust-transaction-title {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.05;
+            color: #0b141a;
+        }
+        .trust-transaction-meta {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            line-height: 1.2;
+            text-transform: uppercase;
+            color: rgba(11, 20, 26, 0.34);
+        }
+        .trust-transaction-amount {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #0b141a;
+        }
+        .category-container span.text-\[10px\].font-black.text-primary\/60.uppercase.tracking-\[0\.15em\] {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(11, 20, 26, 0.62);
+        }
+        .trust-budget-pill span.text-\[10px\].font-black.text-primary.tabular-nums {
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: -0.02em;
+            color: #0b141a;
+        }
+        .trust-budget-pill span.text-\[8px\].font-bold.text-primary\/30.tabular-nums {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: rgba(11, 20, 26, 0.34);
+        }
+        .transaction-card p.text-\[12px\].font-bold.text-primary.tracking-tight.leading-none {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.08;
+            color: #0b141a;
+        }
+        .transaction-card p.text-\[8px\].font-bold.text-primary\/30.uppercase.tracking-tight.mt-1 {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            line-height: 1.2;
+            text-transform: uppercase;
+            color: rgba(11, 20, 26, 0.34);
+        }
+        .transaction-card p.text-\[13px\].font-black.text-primary.tracking-tight {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #0b141a;
         }
     </style>
 </head>
@@ -194,16 +299,16 @@
 <div class="absolute inset-0 map-gradient-overlay"></div>
 </div>
 <!-- Header UI -->
-<div class="relative z-20 px-4 pt-2">
+<div class="relative z-20 px-3 pt-2">
 <header class="flex justify-between items-center py-4">
-<div class="glass-island-premium w-11 h-11 flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer shadow-lg overflow-hidden">
-<span class="material-symbols-outlined text-primary/80 text-xl">person</span>
+<div class="glass-island-premium trust-nav-button flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer shadow-lg overflow-hidden">
+<span class="material-symbols-outlined text-primary/80 text-[18px]">person</span>
 </div>
-<div class="glass-island-premium px-6 py-2 rounded-full flex items-center justify-center shadow-lg">
-<h1 class="text-[10px] font-extrabold tracking-[0.4em] text-primary/80 uppercase">Moments</h1>
+<div class="glass-island-premium trust-nav-pill rounded-full flex items-center justify-center shadow-lg">
+<h1 class="text-[9px] font-extrabold tracking-[0.28em] text-primary/80 uppercase">Moments</h1>
 </div>
-<div class="glass-island-premium w-11 h-11 flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer shadow-lg">
-<span class="material-symbols-outlined text-primary/80 text-xl">settings</span>
+<div class="glass-island-premium trust-nav-button flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer shadow-lg">
+<span class="material-symbols-outlined text-primary/80 text-[18px]">settings</span>
 </div>
 </header>
 </div>
@@ -222,47 +327,15 @@
 <span class="map-date-label">NOV 13</span>
 </div>
 </div>
-<!-- Map Overlay Buttons -->
-<div class="absolute bottom-16 right-4 z-30 flex flex-col gap-3">
-<button class="glass-island-premium w-10 h-10 flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer shadow-xl">
-<span class="material-symbols-outlined text-primary/80 text-lg">layers</span>
-</button>
-<button class="glass-island-premium w-10 h-10 flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer shadow-xl">
-<span class="material-symbols-outlined text-primary/80 text-lg">my_location</span>
-</button>
-</div>
 </section>
 <!-- Unified Bottom Sheet Section -->
-<main class="relative z-20 min-h-[60vh] -mt-10 shadow-[0_-24px_48px_rgba(0,0,0,0.08)] pt-8 border-t border-white/60 rounded-t-3xl px-6 pb-40 bg-slate-100" style="background-color: #f1f5f9; opacity: 1;">
+<main class="relative z-20 min-h-[60vh] -mt-10 shadow-[0_-24px_48px_rgba(0,0,0,0.08)] pt-6 border-t border-white/60 rounded-t-3xl px-2.5 pb-40 bg-slate-100" style="background-color: #f1f5f9; opacity: 1;">
 <!-- Grab Bar Handle -->
 <div class="absolute top-0 left-0 right-0 flex justify-center pt-3 pb-4">
 <div class="w-10 h-1.5 rounded-full bg-primary/10"></div>
 </div>
-<!-- Controls Row - Identical to SCREEN_728 Time Range Selector -->
-<div class="flex justify-between items-center mb-6">
-<div class="flex gap-2">
-<button class="glass-island w-10 h-10 squircle-refined flex items-center justify-center text-primary/80 hover:bg-white/60 transition-colors active:scale-95">
-<span class="material-symbols-outlined text-xl">search</span>
-</button>
-<button class="glass-island w-10 h-10 squircle-refined flex items-center justify-center text-primary/80 hover:bg-white/60 transition-colors active:scale-95">
-<span class="material-symbols-outlined text-xl">tune</span>
-</button>
-</div>
-<div class="flex items-center glass-island squircle-refined overflow-hidden">
-<button class="w-9 h-10 flex items-center justify-center text-primary/60 hover:bg-white/40 transition-colors active:scale-90">
-<span class="material-symbols-outlined text-lg">chevron_left</span>
-</button>
-<button class="flex items-center px-3 h-10 gap-1.5 border-x border-primary/10 hover:bg-white/40 transition-colors active:scale-95">
-<span class="material-symbols-outlined text-[14px] text-primary/40">calendar_today</span>
-<span class="text-[10px] font-bold text-primary/80 uppercase tracking-widest leading-none">Nov 2024</span>
-</button>
-<button class="w-9 h-10 flex items-center justify-center text-primary/60 hover:bg-white/40 transition-colors active:scale-90">
-<span class="material-symbols-outlined text-lg">chevron_right</span>
-</button>
-</div>
-</div>
 <!-- Categorized Content (Matching SCREEN_742 Structure) -->
-<div class="space-y-6">
+<div class="trust-scaled-shell space-y-6">
 <!-- Dining Category Container -->
 <div class="category-container space-y-4">
 <div class="flex items-center justify-between px-1">
@@ -270,8 +343,8 @@
 <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-base ring-1 ring-emerald-500/20 shadow-inner">🍱</div>
 <span class="text-[10px] font-black text-primary/60 uppercase tracking-[0.15em]">Dining</span>
 </div>
-<div class="relative min-w-[130px] h-7 rounded-full bg-primary/5 overflow-hidden flex items-center px-3">
-<div class="absolute left-0 top-0 bottom-0 bg-emerald-500/20" style="width: 48%;"></div>
+<div class="trust-budget-pill relative h-7 rounded-full bg-primary/5 overflow-hidden flex items-center px-3">
+<div class="absolute left-0 top-0 bottom-0 bg-emerald-500/20" style="width: 30%;"></div>
 <div class="relative flex items-baseline gap-1 w-full justify-center"><span class="text-[10px] font-black text-primary tabular-nums">$64.64</span>
 <span class="text-[8px] font-bold text-primary/30 tabular-nums">/ $150</span></div>
 </div>
@@ -306,8 +379,8 @@
 <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-base ring-1 ring-blue-500/20 shadow-inner">✈️</div>
 <span class="text-[10px] font-black text-primary/60 uppercase tracking-[0.15em]">Travel</span>
 </div>
-<div class="relative min-w-[130px] h-7 rounded-full bg-primary/5 overflow-hidden flex items-center px-3">
-<div class="absolute left-0 top-0 bottom-0 bg-orange-500/20" style="width: 85%;"></div>
+<div class="trust-budget-pill relative h-7 rounded-full bg-primary/5 overflow-hidden flex items-center px-3">
+<div class="absolute left-0 top-0 bottom-0 bg-orange-500/20" style="width: 56%;"></div>
 <div class="relative flex items-baseline gap-1 w-full justify-center"><span class="text-[10px] font-black text-primary tabular-nums">$342.00</span>
 <span class="text-[8px] font-bold text-primary/30 tabular-nums">/ $400</span></div>
 </div>
@@ -330,8 +403,8 @@
 <div class="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center text-base ring-1 ring-purple-500/20 shadow-inner">🛍️</div>
 <span class="text-[10px] font-black text-primary/60 uppercase tracking-[0.15em]">Shop</span>
 </div>
-<div class="relative min-w-[130px] h-7 rounded-full bg-primary/5 overflow-hidden flex items-center px-3">
-<div class="absolute left-0 top-0 bottom-0 bg-emerald-500/20" style="width: 25%;"></div>
+<div class="trust-budget-pill relative h-7 rounded-full bg-primary/5 overflow-hidden flex items-center px-3">
+<div class="absolute left-0 top-0 bottom-0 bg-emerald-500/20" style="width: 14%;"></div>
 <div class="relative flex items-baseline gap-1 w-full justify-center"><span class="text-[10px] font-black text-primary tabular-nums">$42.99</span>
 <span class="text-[8px] font-bold text-primary/30 tabular-nums">/ $200</span></div>
 </div>
@@ -350,7 +423,7 @@
 </div>
 </main>
 <!-- Navigation Islands - Identical to SCREEN_728 -->
-<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-full z-50 flex justify-between px-6 pointer-events-none max-w-[430px]">
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-full z-50 flex justify-between px-3 pointer-events-none max-w-[430px]">
 <div class="p-1.5 rounded-full border border-slate-200/40 shadow-[0_12px_40px_rgba(0,0,0,0.12)] flex gap-1 pointer-events-auto glass-island-premium">
 <div class="w-11 h-11 rounded-full flex items-center justify-center text-primary/40 hover:text-primary transition-all cursor-pointer">
 <span class="material-symbols-outlined text-xl">grid_view</span>

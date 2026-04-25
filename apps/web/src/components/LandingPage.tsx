@@ -96,8 +96,242 @@ function SignatureCardIcon({ icon }: { icon: HomeSignatureFeatureCard["icon"] })
   );
 }
 
+function EventTimelineSignatureVisual() {
+  const events = [
+    {
+      id: "date-night",
+      accent: "orange",
+      date: "Friday, Nov 3",
+      title: "Date Night",
+      category: "Leisure",
+      total: "$185.50",
+      marker: "\uD83C\uDF74",
+      image:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuA6L7nZ1OcDxaCoF2jFrNhkBztoURLP4wMjOk4CZJwP8rFlpEd7VeHIzxh8rvyCucy7tX_BghnLgPEEdC9cp2bawHjY8enAPdYSqF04c3YOzFxgVzqDcpYvAYKfqASwGywJibOUV6iURhfaExF2yDDnLhOEJMEGrkXDPgW4FB4DM_TKkZggTLORyUgdX4xn0G49HrsUaf4x-LGWlNOj93sy_QxoBbMCPpyQ4DccESj77vOUpVeZIYjyJYJc20KYy41JVG34ncReoZDI",
+      imageAlt: "Restaurant interior",
+      spends: [
+        { icon: "\uD83C\uDF74", value: "$120.00" },
+        { icon: "\uD83D\uDE97", value: "$25.50" }
+      ]
+    },
+    {
+      id: "japan-trip",
+      accent: "blue",
+      date: "Dec 12 - Dec 24",
+      title: "Japan Trip",
+      category: "Travel",
+      total: "$2,450",
+      marker: "\u2708\uFE0F",
+      image:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuD6JPiehLdolYJGnj_3S9vm0TiuSH93Pff3B7rkoK7LhAev1q22M0stGG7Zs8XzCEn5G5GXuR-_slA5rAPagyuIF6SytiIWlOqjPDNdiRH5o-9aAqA_uA3llcFKsAHSyC2xpNjz1hhgatxmRMFlLYM_BJdJ3wOG1fECOYQgpTF-vxfCwC4THF9khsJ_dECN6tw6tUiiH42I38c4kiYBBnSSjedG1QBOrFRXOAcasSDzoovxXAXOlgOtAIHuJ1Z_sPjYZCVLpwj9w7ji",
+      imageAlt: "Mount Fuji",
+      spends: [
+        { icon: "\u2708\uFE0F", value: "$850.00" },
+        { icon: "\uD83C\uDF63", value: "$400.00" }
+      ]
+    },
+    {
+      id: "monthly-rent",
+      accent: "green",
+      date: "Nov 01",
+      title: "Monthly Rent",
+      category: "Home",
+      total: "$1,850",
+      marker: "\uD83C\uDFE0",
+      image:
+        "https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=900&q=80",
+      imageAlt: "Apartment building interior",
+      spends: [
+        { icon: "\uD83C\uDFE0", value: "$1,850" },
+        { icon: "\u26A1\uFE0F", value: "$124" }
+      ]
+    }
+  ] as const;
+
+  return (
+    <div className="home-signature-event-timeline" aria-hidden="true">
+      <div className="home-signature-event-stage">
+        <div className="home-signature-event-viewport">
+          <div className="home-signature-event-plane">
+          <div className="home-signature-event-list">
+            <div className="home-signature-event-line" />
+            {events.map((event) => (
+              <div className="home-signature-event-item" key={event.id}>
+                <span className={`home-signature-event-marker home-signature-event-marker-${event.accent}`}>
+                  {event.marker}
+                </span>
+                <div className="home-signature-event-card">
+                  <img alt={event.imageAlt} src={event.image} />
+                  <div className="home-signature-event-card-body">
+                    <div className="home-signature-event-meta">
+                      <div className="home-signature-event-main">
+                        <span className="home-signature-event-date">{event.date}</span>
+                        <div className="home-signature-event-title-row">
+                          <strong>{event.title}</strong>
+                          <span className={`home-signature-event-chip home-signature-event-chip-${event.accent}`}>
+                            {event.category}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="home-signature-event-total">
+                        <strong>{event.total}</strong>
+                        <span>Total Spent</span>
+                      </div>
+                    </div>
+                    <div className="home-signature-event-spends">
+                      {event.spends.map((spend) => (
+                        <span key={`${event.id}-${spend.value}`}>
+                          <span className="home-signature-event-spend-icon" aria-hidden="true">
+                            {spend.icon}
+                          </span>
+                          <strong>{spend.value}</strong>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  );
+}
+
+function PlaceContextSignatureVisual() {
+  const popupActions = [
+    { id: "share", label: "Share" },
+    { id: "favorite", label: "Favorite" }
+  ] as const;
+
+  const locations = [
+    {
+      id: "flight",
+      tone: "travel",
+      title: "SFO Terminal A",
+      category: "Travel",
+      date: "NOV 11",
+      amount: "$412.00",
+      icon: "\u2708\uFE0F"
+    },
+    {
+      id: "dining",
+      tone: "dining",
+      title: "Sushi Zen Ginza",
+      category: "Dining",
+      date: "NOV 14",
+      amount: "$86.40",
+      icon: "\uD83C\uDF71"
+    },
+    {
+      id: "grocery",
+      tone: "grocery",
+      title: "Corner Market",
+      category: "Groceries",
+      date: "NOV 16",
+      amount: "$42.18",
+      icon: "\uD83D\uDED2"
+    }
+  ] as const;
+
+  return (
+    <div className="home-signature-map-visual" aria-hidden="true">
+      <div className="home-signature-map-background">
+        <div className="home-signature-map-background-camera">
+          <svg className="home-signature-map-grid" viewBox="-220 -220 840 1240" preserveAspectRatio="xMidYMid slice">
+            <path d="M -260 180 L 700 340" fill="none" opacity="0.26" stroke="#CBD5E1" strokeWidth="6" />
+            <path d="M -260 600 L 700 720" fill="none" opacity="0.2" stroke="#CBD5E1" strokeWidth="5" />
+            <path d="M -260 860 L 700 980" fill="none" opacity="0.18" stroke="#CBD5E1" strokeWidth="5" />
+          </svg>
+          <div className="home-signature-map-background-overlay" />
+        </div>
+      </div>
+      <div className="home-signature-map-frame">
+        <div className="home-signature-map-surface">
+          <div className="home-signature-map-camera">
+            <svg className="home-signature-map-grid" viewBox="-220 -220 840 1240" preserveAspectRatio="xMidYMid slice">
+              <path d="M -260 180 L 700 340" fill="none" opacity="0.3" stroke="#CBD5E1" strokeWidth="6" />
+              <path d="M -260 600 L 700 720" fill="none" opacity="0.24" stroke="#CBD5E1" strokeWidth="5" />
+              <path d="M -260 860 L 700 980" fill="none" opacity="0.22" stroke="#CBD5E1" strokeWidth="5" />
+            </svg>
+            <div className="home-signature-map-overlay" />
+
+            {locations.map((location) => (
+              <div
+                key={location.id}
+                className={joinClasses(
+                  "home-signature-map-location",
+                  `home-signature-map-location-${location.id}`,
+                  `home-signature-map-location-${location.tone}`
+                )}
+              >
+                <div className="home-signature-map-popup">
+                  <div className="home-signature-map-popup-head">
+                    <div>
+                      <strong>{location.title}</strong>
+                      <div className="home-signature-map-popup-meta">
+                        <span>{location.category}</span>
+                        <span>{location.date}</span>
+                      </div>
+                    </div>
+                    <span className="home-signature-map-popup-amount">{location.amount}</span>
+                  </div>
+                  <div className="home-signature-map-popup-actions">
+                    {popupActions.map((action) => (
+                      <span key={`${location.id}-${action.id}`}>
+                        <span className={`home-signature-map-popup-action-icon home-signature-map-popup-action-icon-${action.id}`} aria-hidden="true">
+                          {action.id === "share" ? (
+                            <svg viewBox="0 0 20 20">
+                              <path
+                                d="M7.4 10.1H12.6M11.1 6.6L14.6 10.1L11.1 13.6M5.7 15.2C4.8 15.2 4.1 14.5 4.1 13.6V6.4C4.1 5.5 4.8 4.8 5.7 4.8H8.6"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="1.7"
+                              />
+                            </svg>
+                          ) : (
+                            <svg viewBox="0 0 20 20">
+                              <path
+                                d="M10 15.7L8.9 14.7C5.2 11.3 3 9.2 3 6.6C3 4.7 4.5 3.2 6.4 3.2C7.5 3.2 8.6 3.7 9.3 4.6L10 5.4L10.7 4.6C11.4 3.7 12.5 3.2 13.6 3.2C15.5 3.2 17 4.7 17 6.6C17 9.2 14.8 11.3 11.1 14.7L10 15.7Z"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="1.6"
+                              />
+                            </svg>
+                          )}
+                        </span>
+                        {action.label}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="home-signature-map-popup-tail" />
+                </div>
+
+                <div className="home-signature-map-marker-wrap">
+                  <span className="home-signature-map-click-pulse" />
+                  <div className="home-signature-map-active-pin-ring">
+                    <span className="home-signature-map-active-pin">{location.icon}</span>
+                  </div>
+                  <span className="home-signature-map-selected">Selected</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }) {
-  const crop = card.id === "overview-timeline" ? "events" : card.id === "receipt-recap" ? "eventDetails" : undefined;
+  const cardId = card.id;
+  const previewSlug = card.previewSlug;
 
   return (
     <article
@@ -107,11 +341,30 @@ async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }
       )}
     >
       <div className="home-signature-card-device-window">
-        <MockupPreviewPhone
-          className={joinClasses("home-signature-card-phone", `home-signature-card-phone-${card.id}`)}
-          preview={card.previewSlug}
-          {...(crop ? { crop } : {})}
-        />
+        {cardId === "overview-timeline" ? (
+          <EventTimelineSignatureVisual />
+        ) : cardId === "map-context" ? (
+          <PlaceContextSignatureVisual />
+        ) : cardId === "money-stories" ? (
+          <MockupPreviewPhone
+            className={joinClasses("home-signature-card-phone", "home-signature-card-phone-money-stories")}
+            preview={previewSlug}
+          />
+        ) : cardId === "receipt-recap" ? (
+          <MockupPreviewPhone
+            className={joinClasses(
+              "home-signature-card-phone",
+              "home-signature-card-phone-money-stories",
+              "home-signature-card-phone-receipt-recap"
+            )}
+            preview={previewSlug}
+          />
+        ) : (
+          <MockupPreviewPhone
+            className={joinClasses("home-signature-card-phone", `home-signature-card-phone-${cardId}`)}
+            preview={previewSlug}
+          />
+        )}
       </div>
 
       <div className="home-signature-card-copy">
@@ -143,8 +396,8 @@ export async function LandingPage() {
               <h1 className="hero-home-title">{siteCopy.home.hero.title}</h1>
               <p className="hero-home-body">{siteCopy.home.hero.body}</p>
 
-            <div className="hero-home-cta">
-                <div className="hero-email-panel">
+              <div className="hero-home-cta">
+                <div className="hero-email-panel" id="hero-waitlist-cta">
                   <HeroWaitlistForm ctaLabel={siteCopy.home.hero.primaryCta.label} />
                 </div>
               </div>

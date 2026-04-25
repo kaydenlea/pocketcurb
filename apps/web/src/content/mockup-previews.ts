@@ -8,7 +8,7 @@ export const mockupPreviews = {
   "cash-flow": {
     file: "cash-flow.html",
     mode: "page",
-    background: "#d7e4ed",
+    background: "#f2f5f7",
     hideFixedNav: true
   },
   "event-details-share": {
@@ -92,7 +92,7 @@ export const mockupPreviews = {
   bills: {
     file: "bills.html",
     mode: "page",
-    background: "#d7e4ed",
+    background: "#f2f5f7",
     hideFixedNav: true
   }
 } as const;

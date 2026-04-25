@@ -14,6 +14,7 @@ type ShowcaseStep = {
 };
 
 const DESKTOP_BREAKPOINT_QUERY = "(min-width: 960px)";
+const PREVIEW_BUST = "20260424-1";
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -29,10 +30,10 @@ function WalkthroughPreview({
   return (
     <iframe
       className={joinClasses("home-walkthrough-preview-frame", isActive && "home-walkthrough-preview-frame-active")}
-      loading={isActive ? "eager" : "lazy"}
+      loading="eager"
       sandbox=""
       scrolling="no"
-      src={`/preview/${previewSlug}`}
+      src={`/preview/${previewSlug}?v=${PREVIEW_BUST}`}
       tabIndex={-1}
       title={`Gama ${previewSlug} walkthrough preview`}
     />
@@ -46,10 +47,10 @@ function MobileWalkthroughPreviewPhone({ previewSlug }: { previewSlug: MockupPre
         <div className="device-screen-wrap" style={{ background: mockupPreviews[previewSlug].background }}>
           <iframe
             className="device-iframe"
-            loading="lazy"
+            loading="eager"
             sandbox=""
             scrolling="no"
-            src={`/preview/${previewSlug}`}
+            src={`/preview/${previewSlug}?v=${PREVIEW_BUST}`}
             tabIndex={-1}
             title={`Gama ${previewSlug} mobile walkthrough preview`}
           />

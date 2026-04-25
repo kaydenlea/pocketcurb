@@ -88,6 +88,9 @@ export function HeroWaitlistForm({ ctaLabel }: HeroWaitlistFormProps) {
 
   const isSubmitting = state === "submitting";
   const isSuccess = state === "accepted" || state === "duplicate";
+  const statusClassName = isSuccess
+    ? "hero-waitlist-inline-status hero-waitlist-inline-status-success"
+    : "hero-waitlist-inline-status";
 
   return (
     <form className="hero-waitlist-form" onSubmit={handleSubmit}>
@@ -113,14 +116,16 @@ export function HeroWaitlistForm({ ctaLabel }: HeroWaitlistFormProps) {
       </div>
       <label className="hero-waitlist-consent">
         <input disabled={isSubmitting} name="marketingConsent" required type="checkbox" />
-        <span>I agree to receive Gama waitlist updates and related product follow-up.</span>
+        <span aria-hidden="true" className="hero-waitlist-checkmark" />
+        <span className="hero-waitlist-inline-copy">
+          <span className="hero-waitlist-inline-text">
+            I agree to receive Gama waitlist updates and related product follow-up.
+            <span aria-live="polite" className={statusClassName}>
+              {message}
+            </span>
+          </span>
+        </span>
       </label>
-      <p
-        className={isSuccess ? "hero-waitlist-message hero-waitlist-message-success" : "hero-waitlist-message"}
-        aria-live="polite"
-      >
-        {message}
-      </p>
     </form>
   );
 }

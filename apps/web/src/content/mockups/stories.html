@@ -102,7 +102,160 @@
             to { width: 100%; }
         }
         .animate-progress {
-            animation: progress 5s linear forwards;
+            animation: progress 7.6s linear infinite;
+        }
+        @keyframes story-scroll-sequence {
+            0%, 18% { transform: translateY(0); }
+            58%, 100% { transform: translateY(-214px); }
+        }
+        .story-sequence {
+            position: relative;
+            width: 100%;
+            flex: 1 1 auto;
+            overflow: hidden;
+        }
+        .story-scroll-shell {
+            animation: story-scroll-sequence 7.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+            will-change: transform;
+        }
+        @keyframes story-button-press {
+            0%, 68%, 100% { transform: scale(1); }
+            73% { transform: scale(0.96); }
+            79% { transform: scale(1.01); }
+            84% { transform: scale(1); }
+        }
+        .story-adjust-button {
+            animation: story-button-press 7.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+            will-change: transform;
+        }
+        @keyframes story-success-reveal {
+            0%, 76% {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            84%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        @keyframes story-confetti-pop {
+            0%, 79% {
+                opacity: 0;
+                transform: translateY(12px) scale(0.6);
+            }
+            88% {
+                opacity: 1;
+                transform: translateY(-6px) scale(1);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(-12px) scale(0.92);
+            }
+        }
+        .story-success-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.3rem;
+            opacity: 0;
+            transform: scale(0.96);
+            animation: story-success-reveal 7.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+            pointer-events: none;
+        }
+        .story-success-card {
+            position: relative;
+            width: 100%;
+            min-height: 100%;
+            border-radius: 1.9rem;
+            background: linear-gradient(180deg, rgba(10, 20, 14, 0.96), rgba(8, 14, 10, 0.98));
+            border: 1px solid rgba(116, 196, 76, 0.36);
+            box-shadow:
+                0 24px 56px rgba(0, 0, 0, 0.34),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            padding: 1.18rem 1.05rem 1rem;
+            overflow: hidden;
+            backdrop-filter: blur(34px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .story-success-card::before {
+            content: "";
+            position: absolute;
+            inset: -15% 25% auto;
+            height: 120px;
+            background: radial-gradient(circle, rgba(116, 196, 76, 0.44), transparent 72%);
+        }
+        .story-success-badge {
+            width: 3.4rem;
+            height: 3.4rem;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.65rem;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18), rgba(116, 196, 76, 0.28));
+            box-shadow:
+                0 0 0 1px rgba(116, 196, 76, 0.24),
+                0 0 28px rgba(116, 196, 76, 0.24);
+        }
+        .story-success-confetti {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+        .story-success-confetti span {
+            position: absolute;
+            width: 0.62rem;
+            height: 0.62rem;
+            border-radius: 0.2rem;
+            animation: story-confetti-pop 7.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+            box-shadow: 0 0 18px rgba(255, 255, 255, 0.12);
+        }
+        .story-success-confetti span:nth-child(1) {
+            left: 16%;
+            top: 18%;
+            background: #facc15;
+        }
+        .story-success-confetti span:nth-child(2) {
+            right: 18%;
+            top: 22%;
+            background: #60a5fa;
+            animation-delay: 0.08s;
+        }
+        .story-success-confetti span:nth-child(3) {
+            left: 22%;
+            bottom: 26%;
+            background: #fb7185;
+            animation-delay: 0.14s;
+        }
+        .story-success-confetti span:nth-child(4) {
+            right: 22%;
+            bottom: 20%;
+            background: #74c44c;
+            animation-delay: 0.2s;
+        }
+        .story-success-burst {
+            position: absolute;
+            inset: 1rem 1rem auto;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+        .story-success-burst span {
+            font-size: 1.1rem;
+            line-height: 1;
+            opacity: 0;
+            animation: story-confetti-pop 7.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.16));
+        }
+        .story-success-burst span:nth-child(2) {
+            animation-delay: 0.12s;
+        }
+        .story-success-burst span:nth-child(3) {
+            animation-delay: 0.2s;
         }
         .ios-26-glass {
             background: rgba(255, 255, 255, 0.05);
@@ -117,9 +270,12 @@
 <img alt="premium candlelit dining table close up" class="w-full h-full object-cover opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlQLGIdypEKv2Fqz9d875Z-j-cPuY7xw242BGOexPpidPJixuk0XAvK8poQ-cFw6LT8MzqTfb32lRcsP__WgwMjtr5BVml90JvLRJR8462WEaAwGBCR_eLan8Y6PCEISgVXitQ_lsl6LAjtqZFWgMPO1nXfk2wdbFoQAsZjEL7dJ0iYWwefGVNSiuFvDs3-nWKegqVkc33esMgwMiHStd3FOB5m7r33Fvm0dEXg_9XXrlp63R0M0da7P5F0W2AOEGufDZehAUX0JCf"/>
 <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/95"></div>
 </div>
-<!-- Header & Story Navigation -->
-<header class="fixed top-0 w-full z-50 px-6 pt-8">
-<div class="flex gap-1.5 w-full mb-5">
+<!-- Main Content Canvas -->
+<main class="relative z-10 h-full flex flex-col items-start px-3 pt-6">
+<div class="story-sequence">
+<div class="story-scroll-shell relative w-full flex flex-col items-start">
+<div class="w-full mb-5">
+<div class="flex gap-1.5 w-full">
 <div class="h-[2px] flex-1 bg-white rounded-full"></div>
 <div class="h-[2px] flex-1 bg-white/30 rounded-full overflow-hidden">
 <div class="h-full bg-white animate-progress"></div>
@@ -127,83 +283,97 @@
 <div class="h-[2px] flex-1 bg-white/30 rounded-full"></div>
 <div class="h-[2px] flex-1 bg-white/30 rounded-full"></div>
 </div>
-<div class="flex justify-between items-center">
+</div>
+<div class="w-full flex justify-between items-center mb-6">
 <button class="w-10 h-10 flex items-center justify-start active:scale-90 transition-transform">
-<span class="material-symbols-outlined text-[24px] text-white">close</span>
+<span class="material-symbols-outlined text-[22px] text-white">close</span>
 </button>
 <div class="flex flex-col items-center">
 <span class="text-[10px] font-bold tracking-[0.3em] text-white uppercase">Weekly Review</span>
 </div>
 <button class="w-10 h-10 flex items-center justify-end active:scale-90 transition-transform">
-<span class="material-symbols-outlined text-[24px] text-white">more_horiz</span>
+<span class="material-symbols-outlined text-[22px] text-white">more_horiz</span>
 </button>
 </div>
-</header>
-<!-- Main Content Canvas -->
-<main class="relative z-10 h-full flex flex-col items-start px-10 pt-40">
-<!-- Vertical Story Line (Visual Accent) -->
-<div class="absolute left-6 top-64 bottom-60 w-[1px] bg-gradient-to-b from-white/0 via-white/20 to-white/0 flex flex-col items-center justify-center">
-<div class="w-1 h-1 rounded-full bg-white ring-4 ring-white/10 mb-20"></div>
-<div class="w-1 h-1 rounded-full border border-white/40"></div>
-</div>
 <!-- Category Label -->
-<div class="mb-5 bg-white/10 backdrop-blur-md px-3 h-7 flex items-center rounded-full border border-white/10">
-<span class="text-[10px] font-bold tracking-[0.1em] text-white/90 uppercase leading-none">Top Category</span>
+<div class="mb-4 bg-white/10 backdrop-blur-md px-2.5 h-6 flex items-center rounded-full border border-white/10">
+<span class="text-[9px] font-bold tracking-[0.1em] text-white/90 uppercase leading-none">Top Category</span>
 </div>
 <!-- Headline Group -->
-<div class="mb-12 text-left">
-<h1 class="text-white text-[72px] font-extrabold tracking-tightest leading-[1.0] mb-4 text-shadow-premium">Dining.</h1>
-<p class="text-white/90 text-[18px] font-normal max-w-[280px] italic leading-[1.45] tracking-wide">
+<div class="mb-8 text-left">
+<h1 class="text-white text-[52px] font-extrabold tracking-tightest leading-[0.95] mb-3 text-shadow-premium">Dining.</h1>
+<p class="text-white/90 text-[15px] font-normal max-w-[240px] italic leading-[1.4] tracking-wide">
                 A week of savoring moments over shared plates and meaningful conversations.
             </p>
 </div>
 <!-- Budget Impact Card -->
-<div class="glass-ios w-full max-w-[320px] p-8 rounded-[2.5rem] flex flex-col gap-6 mb-12">
+<div class="glass-ios w-full max-w-[300px] p-6 rounded-[2.1rem] flex flex-col gap-5 mb-8 self-center">
 <div class="flex flex-col w-full">
-<p class="text-white/40 text-[10px] font-bold tracking-[0.2em] uppercase mb-1.5">Budget Impact</p>
+<p class="text-white/40 text-[9px] font-bold tracking-[0.18em] uppercase mb-1.5">Budget Impact</p>
 <div class="flex justify-between items-center w-full">
-<p class="text-white text-[48px] font-bold tracking-tightest leading-none">$482.50</p>
-<div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[24px] translate-y-0.5">
+<p class="text-white text-[38px] font-bold tracking-tightest leading-none">$482.50</p>
+<div class="w-10 h-10 rounded-[1.1rem] bg-white/5 border border-white/10 flex items-center justify-center text-[20px] translate-y-0.5">
       🍴
     </div>
 </div>
 </div>
-<div class="flex flex-col gap-6">
-<div class="flex items-center gap-3">
+<div class="flex flex-col gap-5">
+<div class="flex items-center gap-2.5">
 <div class="h-5 px-2 bg-red-500/20 border border-red-500/30 rounded flex items-center">
-<span class="text-red-400 text-[10px] font-extrabold tracking-widest uppercase">$32.50 OVER PLAN</span>
+<span class="text-red-400 text-[9px] font-extrabold tracking-[0.16em] uppercase">$32.50 OVER PLAN</span>
 </div>
 <div class="h-[1px] flex-1 bg-white/10"></div>
 </div>
-<button class="w-full bg-white text-black py-4 px-6 rounded-2xl flex items-center justify-center gap-2.5 shadow-xl shadow-black/40 active:scale-[0.97] transition-all hover:bg-white/90">
-<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
-<span class="text-[11px] font-extrabold tracking-[0.1em] uppercase">Adjust Budget to $450</span>
+<button class="story-adjust-button w-full bg-white text-black py-3.5 px-5 rounded-[1.1rem] flex items-center justify-center gap-2 shadow-xl shadow-black/40 active:scale-[0.97] transition-all hover:bg-white/90">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="text-[10px] font-bold tracking-[0.06em] uppercase">Adjust Budget to $450</span>
 </button>
 </div>
 </div>
 <!-- Presence Indicator (Side element) -->
-<div class="self-end flex flex-col items-end gap-1 mb-8">
-<span class="text-[9px] font-bold tracking-[0.15em] text-white/30 uppercase">Mindfulness</span>
-<div class="flex items-center gap-3">
-<p class="text-[14px] font-medium text-white/80">Presence over expense</p>
-<div class="w-1 h-10 bg-white/10 rounded-full relative overflow-hidden">
+<div class="self-end flex flex-col items-end gap-1 mb-6">
+<span class="text-[8px] font-bold tracking-[0.14em] text-white/30 uppercase">Mindfulness</span>
+<div class="flex items-center gap-2.5">
+<p class="text-[12px] font-medium text-white/80">Presence over expense</p>
+<div class="w-1 h-8 bg-white/10 rounded-full relative overflow-hidden">
 <div class="absolute top-0 left-0 w-full h-[70%] bg-brand-green rounded-full"></div>
 </div>
 </div>
 </div>
-</main>
-<!-- Fixed Bottom Section -->
-<footer class="fixed bottom-10 left-0 w-full z-30 px-10 flex flex-col items-center gap-10">
-<!-- Redesigned Secondary Nav - iOS 26 Aesthetic -->
-<div class="w-full flex justify-between items-center">
-<button class="flex items-center gap-2.5 px-6 py-3 rounded-full ios-26-glass active:scale-95 transition-transform">
-<span class="material-symbols-outlined text-white/80 text-[18px]">keyboard_arrow_up</span>
-<span class="text-[9px] font-bold tracking-[0.2em] text-white/80 uppercase">Details</span>
-</button>
-<button class="flex items-center gap-2.5 px-6 py-3 rounded-full ios-26-glass active:scale-95 transition-transform">
-<span class="material-symbols-outlined text-white/80 text-[18px]">share</span>
-<span class="text-[9px] font-bold tracking-[0.2em] text-white/80 uppercase">Share</span>
-</button>
 </div>
-</footer>
+</div>
+<div class="story-success-screen">
+<div class="story-success-card">
+<div class="story-success-confetti">
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+</div>
+<div class="story-success-burst" aria-hidden="true">
+<span>+</span>
+<span>*</span>
+<span>+</span>
+</div>
+<div class="story-success-badge">
+<span class="material-symbols-outlined text-[30px] text-brand-green" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-[8px] font-bold tracking-[0.17em] text-brand-green uppercase text-center mb-1.5">Budget Updated</p>
+<h2 class="text-[27px] font-extrabold tracking-tightest text-white text-center leading-[1.02] mb-1.5">Back on track.</h2>
+<p class="text-[12px] leading-[1.32] text-white/80 text-center max-w-[214px] mx-auto mb-3.5">
+  Dining is reset to a calmer target and the rest of the week stays protected.
+</p>
+<div class="glass-ios rounded-[1.25rem] px-3.25 py-2.25 flex items-center justify-between gap-2.5">
+  <div>
+    <p class="text-[7px] font-bold tracking-[0.14em] text-white/45 uppercase mb-0.5">New Safe-to-Spend</p>
+    <p class="text-[22px] font-extrabold tracking-tightest text-white">$94 today</p>
+  </div>
+  <div class="w-9 h-9 rounded-full bg-brand-green/20 flex items-center justify-center">
+    <span class="material-symbols-outlined text-[18px] text-brand-green" style="font-variation-settings: 'FILL' 1;">celebration</span>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</main>
 </body></html>

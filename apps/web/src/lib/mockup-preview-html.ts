@@ -15,7 +15,7 @@ const STABLE_VIEWPORT = "width=393, initial-scale=1, maximum-scale=1, viewport-f
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 const previewHtmlCache = new Map<MockupPreviewSlug, Promise<string>>();
-export type PreviewCrop = "events" | "eventDetails";
+export type PreviewCrop = "events" | "eventDetails" | "storiesSignature";
 
 type TailwindConfig = Record<string, unknown>;
 
@@ -29,6 +29,7 @@ const materialSymbolCodepoints: Record<string, string> = {
   bolt: "ea0b",
   calendar_today: "e935",
   call_split: "e0b6",
+  celebration: "ea65",
   check: "e5ca",
   check_circle: "f0be",
   chevron_left: "e5cb",
@@ -62,7 +63,7 @@ const materialSymbolCodepoints: Record<string, string> = {
   share: "e80d",
   timeline: "e922",
   trending_up: "e8e5",
-  tune: "e429"
+  tune: "e429",
 };
 
 function extractTailwindConfig(source: string): TailwindConfig {
@@ -84,22 +85,22 @@ function normalizeTailwindConfig(config: TailwindConfig): TailwindConfig {
   const extend = (theme.extend ?? {}) as Record<string, unknown>;
   const fontFamily = (extend.fontFamily ?? {}) as Record<string, unknown>;
   const stableSans = [
-    "Aptos",
-    "\"Segoe UI Variable Display\"",
-    "\"SF Pro Display\"",
-    "\"Helvetica Neue\"",
+    "Manrope",
+    '"Segoe UI Variable Display"',
+    '"SF Pro Display"',
+    '"Helvetica Neue"',
     "Arial",
-    "sans-serif"
+    "sans-serif",
   ];
   const stableMono = [
-    "\"JetBrains Mono\"",
-    "\"SFMono-Regular\"",
+    '"JetBrains Mono"',
+    '"SFMono-Regular"',
     "Menlo",
     "Monaco",
     "Consolas",
-    "\"Liberation Mono\"",
-    "\"Courier New\"",
-    "monospace"
+    '"Liberation Mono"',
+    '"Courier New"',
+    "monospace",
   ];
 
   for (const [key, value] of Object.entries(fontFamily)) {
@@ -139,16 +140,8 @@ function stripRuntimeDependencies(source: string) {
     .replace(/<script src="https:\/\/cdn\.tailwindcss\.com[^"]*"><\/script>\s*/gi, "")
     .replace(/<script id="tailwind-config">[\s\S]*?<\/script>\s*/gi, "")
     .replace(
-      /<link href="https:\/\/fonts\.googleapis\.com\/css2\?family=Manrope[^"]*" rel="stylesheet"\/>\s*/gi,
-      ""
-    )
-    .replace(
       /<link href="https:\/\/fonts\.googleapis\.com\/css2\?family=Material\+Symbols\+Outlined[^"]*" rel="stylesheet"\/>\s*/gi,
-      ""
-    )
-    .replace(
-      /font-family:\s*'Manrope',\s*sans-serif;/gi,
-      "font-family: Aptos, 'Segoe UI Variable Display', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;"
+      "",
     );
 }
 
@@ -156,7 +149,7 @@ function stabilizeViewport(source: string) {
   if (/<meta[^>]+name=["']viewport["']/i.test(source)) {
     return source.replace(
       /<meta([^>]+name=["']viewport["'][^>]+content=["'])[^"']*(["'][^>]*?)>/i,
-      `<meta$1${STABLE_VIEWPORT}$2>`
+      `<meta$1${STABLE_VIEWPORT}$2>`,
     );
   }
 
@@ -175,7 +168,7 @@ function replaceMaterialSymbolLigatures(source: string) {
       }
 
       return `${openTag}&#x${codepoint};${closeTag}`;
-    }
+    },
   );
 }
 
@@ -190,7 +183,7 @@ async function compileTailwindCss(source: string) {
       return {
         path,
         base: dirname(path),
-        module: config
+        module: config,
       };
     },
     loadStylesheet: async (id, base) => {
@@ -198,7 +191,7 @@ async function compileTailwindCss(source: string) {
         return {
           path: TAILWIND_ENTRY,
           base: dirname(TAILWIND_ENTRY),
-          content: await readFile(TAILWIND_ENTRY, "utf8")
+          content: await readFile(TAILWIND_ENTRY, "utf8"),
         };
       }
 
@@ -206,9 +199,9 @@ async function compileTailwindCss(source: string) {
       return {
         path,
         base: dirname(path),
-        content: await readFile(path, "utf8")
+        content: await readFile(path, "utf8"),
       };
-    }
+    },
   });
 
   return compiler.build(candidates);
@@ -216,6 +209,7 @@ async function compileTailwindCss(source: string) {
 
 function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
   const preview = mockupPreviews[slug];
+  const normalizeTypography = slug !== "overview-screen";
   const previewRootBackground = preview.mode === "page" ? "transparent" : preview.background;
   const cropOffsetY = crop === "events" ? -815 : crop === "eventDetails" ? -180 : 0;
   const cropStyle =
@@ -258,9 +252,112 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
           display: none !important;
         }
       `
+      : slug === "transactions-categorized" ||
+          slug === "review-transaction-trust" ||
+          slug === "add-transaction-trust"
+        ? `
+        .preview-scale-root {
+          font-size: 0.92rem !important;
+        }
+      `
+        : "";
+  const storySignatureStyle =
+    crop === "storiesSignature"
+      ? `
+        .preview-scale-root > header,
+        .preview-scale-root > footer,
+        .preview-scale-root > footer * {
+          display: none !important;
+        }
+
+        .preview-scale-root > main {
+          min-height: 100% !important;
+          height: 100% !important;
+          padding-top: 1.25rem !important;
+          padding-left: 1rem !important;
+          padding-right: 1rem !important;
+          padding-bottom: 1.2rem !important;
+          align-items: stretch !important;
+        }
+
+        .preview-scale-root > main > .absolute.left-3.top-64.bottom-60 {
+          top: 5.8rem !important;
+          bottom: 1.4rem !important;
+        }
+
+        .preview-scale-root h1.text-\\[72px\\] {
+          font-size: 3.6rem !important;
+          line-height: 0.92 !important;
+        }
+
+        .preview-scale-root p.text-white\\/90.text-\\[18px\\] {
+          max-width: 16rem !important;
+          font-size: 0.92rem !important;
+          line-height: 1.42 !important;
+        }
+
+        .preview-scale-root .glass-ios {
+          width: min(100%, 19.5rem) !important;
+          max-width: none !important;
+          padding: 1.25rem !important;
+          margin-bottom: 1rem !important;
+        }
+      `
       : "";
+  const typographyNormalizationStyle = normalizeTypography
+    ? `
+    .preview-scale-root .tabular-nums,
+    .preview-scale-root .showcase-soft-number,
+    .preview-scale-root .showcase-soft-total,
+    .preview-scale-root .glass-popup .text-sm.font-black,
+    .preview-scale-root .transaction-card p.text-\\[13px\\].font-black,
+    .preview-scale-root .inbox-item .text-\\[13px\\].font-black,
+    .preview-scale-root .category-item .text-\\[12px\\].font-black {
+      font-weight: 800 !important;
+      letter-spacing: -0.03em !important;
+      font-variant-numeric: tabular-nums lining-nums !important;
+      font-feature-settings: "tnum" 1, "lnum" 1 !important;
+    }
+    .preview-scale-root .glass-popup .text-sm.font-black,
+    .preview-scale-root .transaction-card p.text-\\[13px\\].font-black,
+    .preview-scale-root .inbox-item .text-\\[13px\\].font-black,
+    .preview-scale-root .category-item .text-\\[12px\\].font-black {
+      letter-spacing: -0.025em !important;
+    }
+    .preview-scale-root [class*="tracking-widest"] {
+      letter-spacing: 0.07em !important;
+    }
+    .preview-scale-root [class*="tracking-wider"] {
+      letter-spacing: 0.035em !important;
+    }
+    .preview-scale-root [class*="tracking-wide"] {
+      letter-spacing: 0.02em !important;
+    }
+    `
+    : "";
+  const topNavConsistencyStyle = `
+    .preview-scale-root .immersive-dark-top > header > div.glass-island-dark:not(.w-10):not(.h-10) {
+      min-width: 0 !important;
+      flex: 0 0 auto !important;
+      width: fit-content !important;
+      max-width: none !important;
+      padding: 0.42rem 0.96rem !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+      border-radius: 9999px !important;
+    }
+    .preview-scale-root .immersive-dark-top > header > div.glass-island-dark:not(.w-10):not(.h-10) h1 {
+      margin: 0 !important;
+      font-size: 0.66rem !important;
+      line-height: 1 !important;
+      letter-spacing: 0.22em !important;
+      text-transform: uppercase !important;
+      white-space: nowrap !important;
+    }
+  `;
 
   return `
+    @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+
     @font-face {
       font-family: "Material Symbols Outlined";
       font-style: normal;
@@ -294,6 +391,7 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
       background: ${previewRootBackground} !important;
     }
     .preview-scale-root {
+      --mockup-font-sans: "Manrope", "Segoe UI Variable Display", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
       position: absolute !important;
       left: 0 !important;
       top: 0 !important;
@@ -308,10 +406,21 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
       transform-origin: top left !important;
       will-change: transform !important;
       backface-visibility: hidden !important;
+      font-family: var(--mockup-font-sans) !important;
+      font-synthesis: none !important;
+      font-kerning: normal !important;
+      -webkit-font-smoothing: antialiased !important;
+      text-rendering: optimizeLegibility !important;
     }
     * {
       box-sizing: border-box;
     }
+    .preview-scale-root,
+    .preview-scale-root *:not(.material-symbols-outlined):not(.material-symbol-icon) {
+      font-family: var(--mockup-font-sans) !important;
+    }
+    ${typographyNormalizationStyle}
+    ${topNavConsistencyStyle}
     .material-symbols-outlined {
       font-family: "Material Symbols Outlined" !important;
       font-weight: normal !important;
@@ -337,16 +446,81 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
     ${viewportStyle}
     ${fixedNavStyle}
     ${previewVariantStyle}
+    ${storySignatureStyle}
     ${cropStyle}
   `;
 }
 
-function buildScalingScript() {
+function buildScalingScriptForCrop(slug: MockupPreviewSlug, crop?: PreviewCrop) {
+  const mode = crop === "storiesSignature" ? "cover-top" : "fit";
+  const normalizeLetterSpacing = slug !== "overview-screen";
+
   return `
     <script>
       (() => {
         const canvasWidth = ${PREVIEW_CANVAS_WIDTH};
         const canvasHeight = ${PREVIEW_CANVAS_HEIGHT};
+        const mode = "${mode}";
+        const shouldNormalizeLetterSpacing = ${normalizeLetterSpacing};
+        const normalizeLetterSpacing = () => {
+          const root = document.querySelector(".preview-scale-root");
+
+          if (!root) {
+            return;
+          }
+
+          const namedWideSelectors = [
+            '[class*="tracking-widest"]',
+            '[class*="tracking-wider"]',
+            '[class*="tracking-wide"]'
+          ];
+          const arbitraryTrackingSelector = '[class*="tracking-["]';
+
+          root.querySelectorAll(namedWideSelectors.join(",")).forEach((node) => {
+            if (!(node instanceof HTMLElement)) {
+              return;
+            }
+
+            if (node.className.includes("tracking-widest")) {
+              node.style.setProperty("letter-spacing", "0.07em", "important");
+              return;
+            }
+
+            if (node.className.includes("tracking-wider")) {
+              node.style.setProperty("letter-spacing", "0.035em", "important");
+              return;
+            }
+
+            if (node.className.includes("tracking-wide")) {
+              node.style.setProperty("letter-spacing", "0.02em", "important");
+            }
+          });
+
+          root.querySelectorAll(arbitraryTrackingSelector).forEach((node) => {
+            if (node instanceof HTMLElement) {
+              const trackingClass = node.className
+                .split(" ")
+                .find((token) => token.startsWith("tracking-[") && token.endsWith("]"));
+
+              if (!trackingClass) {
+                return;
+              }
+
+              const numericPortion = trackingClass.slice("tracking-[".length, -"]".length);
+
+              if (!numericPortion.endsWith("em")) {
+                return;
+              }
+
+              const value = Number.parseFloat(numericPortion.slice(0, -"em".length));
+
+              if (Number.isFinite(value) && value > 0.08) {
+                const softened = Math.max(0.02, Math.round(value * 0.7 * 1000) / 1000);
+                node.style.setProperty("letter-spacing", softened + "em", "important");
+              }
+            }
+          });
+        };
 
         const ensureRoot = () => {
           const existing = document.querySelector(".preview-scale-root");
@@ -369,17 +543,26 @@ function buildScalingScript() {
         const applyScale = () => {
           const widthScale = window.innerWidth / canvasWidth;
           const heightScale = window.innerHeight / canvasHeight;
-          const nextScale = Math.min(widthScale, heightScale);
-          const overscanScale = nextScale + 0.003;
+          const nextScale = mode === "cover-top" ? Math.max(widthScale, heightScale) : Math.min(widthScale, heightScale);
+          const overscanScale = nextScale;
           const root = ensureRoot();
-          const offsetX = Math.max((window.innerWidth - canvasWidth * overscanScale) / 2, 0);
-          const offsetY = Math.max((window.innerHeight - canvasHeight * overscanScale) / 2, 0);
+          const offsetX =
+            mode === "cover-top"
+              ? (window.innerWidth - canvasWidth * overscanScale) / 2
+              : Math.max((window.innerWidth - canvasWidth * overscanScale) / 2, 0);
+          const offsetY =
+            mode === "cover-top"
+              ? Math.min((window.innerHeight - canvasHeight * overscanScale) * 0.22, 0)
+              : Math.max((window.innerHeight - canvasHeight * overscanScale) / 2, 0);
 
           document.documentElement.dataset.previewScale = "managed";
           document.body.style.width = "100%";
           document.body.style.height = "100%";
           root.style.zoom = "";
           root.style.transform = "translate(" + offsetX + "px, " + offsetY + "px) scale(" + overscanScale + ")";
+          if (shouldNormalizeLetterSpacing) {
+            normalizeLetterSpacing();
+          }
         };
 
         if (document.readyState === "loading") {
@@ -398,8 +581,10 @@ async function buildPreviewHtmlInternal(slug: MockupPreviewSlug, crop?: PreviewC
   const source = readFileSync(join(MOCKUP_DIR, mockupPreviews[slug].file), "utf8");
   const tailwindCss = await compileTailwindCss(source);
   const sharedStyle = buildSharedStyle(slug, crop);
-  const previewSource = replaceMaterialSymbolLigatures(stabilizeViewport(stripRuntimeDependencies(source)));
-  const scalingScript = buildScalingScript();
+  const previewSource = replaceMaterialSymbolLigatures(
+    stabilizeViewport(stripRuntimeDependencies(source)),
+  );
+  const scalingScript = buildScalingScriptForCrop(slug, crop);
 
   return previewSource
     .replace("</head>", `<style>${tailwindCss}\n${sharedStyle}</style></head>`)
@@ -408,6 +593,10 @@ async function buildPreviewHtmlInternal(slug: MockupPreviewSlug, crop?: PreviewC
 
 export function getMockupPreviewHtml(slug: MockupPreviewSlug, crop?: PreviewCrop) {
   if (isDevelopment) {
+    return buildPreviewHtmlInternal(slug, crop);
+  }
+
+  if (slug === "overview-screen") {
     return buildPreviewHtmlInternal(slug, crop);
   }
 

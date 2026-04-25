@@ -16,6 +16,8 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+const PREVIEW_BUST = "20260424-1";
+
 function TrustIcon({ icon }: { icon: TrustSlide["icon"] }) {
   if (icon === "privacy") {
     return (
@@ -102,9 +104,6 @@ export function TrustFeatureCarousel({ slides }: { slides: readonly TrustSlide[]
     return null;
   }
 
-  const activeSlide = (slides[activeIndex] ?? slides[0])!;
-  const previewSrc = `/preview/${activeSlide.previewSlug}`;
-
   return (
     <div className="home-trust-carousel" aria-label="Trust highlights">
       <div className="home-trust-carousel-tabs" aria-label="Trust features">
@@ -126,38 +125,38 @@ export function TrustFeatureCarousel({ slides }: { slides: readonly TrustSlide[]
       </div>
 
       <div className="home-trust-carousel-stage">
-        <div key={activeSlide.id} className="home-trust-slide home-trust-slide-active">
-          <div className="home-trust-slide-copy">
-            <div className="home-trust-slide-eyebrow-row">
-              <span className="home-trust-slide-icon">
-                <TrustIcon icon={activeSlide.icon} />
-              </span>
-              <span className="home-trust-slide-kicker">{activeSlide.eyebrow}</span>
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id}
+            aria-hidden={index !== activeIndex}
+            className={joinClasses("home-trust-slide", index === activeIndex && "home-trust-slide-active")}
+          >
+            <div className="home-trust-slide-copy">
+              <h3>{slide.title}</h3>
+              <p>{slide.body}</p>
             </div>
-            <h3>{activeSlide.title}</h3>
-            <p>{activeSlide.body}</p>
-          </div>
 
-          <div className="home-trust-slide-device-wrap" aria-hidden="true">
-            <div className="home-walkthrough-device-card home-trust-slide-device-card">
-              <div className="home-walkthrough-device-viewport home-trust-slide-device-viewport">
-                <div className="home-walkthrough-device-shell">
-                  <div className="home-walkthrough-preview-mask">
-                    <iframe
-                      className="home-walkthrough-preview-frame home-walkthrough-preview-frame-active home-trust-preview-frame"
-                      loading="eager"
-                      sandbox=""
-                      scrolling="no"
-                      src={previewSrc}
-                      tabIndex={-1}
-                      title={`Gama ${activeSlide.previewSlug} trust preview`}
-                    />
+            <div className="home-trust-slide-device-wrap" aria-hidden="true">
+              <div className="home-walkthrough-device-card home-trust-slide-device-card">
+                <div className="home-walkthrough-device-viewport home-trust-slide-device-viewport">
+                  <div className="home-walkthrough-device-shell">
+                    <div className="home-walkthrough-preview-mask">
+                      <iframe
+                        className="home-walkthrough-preview-frame home-walkthrough-preview-frame-active home-trust-preview-frame"
+                        loading="eager"
+                        sandbox=""
+                        scrolling="no"
+                        src={`/preview/${slide.previewSlug}?v=${PREVIEW_BUST}`}
+                        tabIndex={-1}
+                        title={`Gama ${slide.previewSlug} trust preview`}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

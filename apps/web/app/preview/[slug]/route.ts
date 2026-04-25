@@ -2,6 +2,7 @@ import { mockupPreviews, type MockupPreviewSlug } from "../../../src/content/moc
 import { getMockupPreviewHtml, type PreviewCrop } from "../../../src/lib/mockup-preview-html";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
@@ -25,6 +26,8 @@ export async function GET(
     headers: {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-store, max-age=0",
+      Pragma: "no-cache",
+      Expires: "0",
       "X-Robots-Tag": "noindex, nofollow, noarchive"
     }
   });

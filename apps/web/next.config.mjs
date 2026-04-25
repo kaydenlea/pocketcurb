@@ -16,7 +16,8 @@ const nextConfig = {
     const embeddedPreviewHeaders = buildSecurityHeaders({
       nodeEnv: process.env.NODE_ENV,
       siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
-      allowEmbeddedPreview: true
+      allowEmbeddedPreview: true,
+      allowRemoteAssets: true
     });
 
     return [

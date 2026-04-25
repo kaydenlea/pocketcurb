@@ -49,4 +49,13 @@ describe("site-metadata", () => {
       icon: [{ url: "/icon.png", type: "image/png" }]
     });
   });
+
+  it("uses a root title template that leads with the Gama brand", () => {
+    const metadata = createRootMetadata(productionEnvironment);
+
+    expect(metadata.title).toMatchObject({
+      default: "Gama | Decision-first money clarity.",
+      template: "Gama | %s"
+    });
+  });
 });

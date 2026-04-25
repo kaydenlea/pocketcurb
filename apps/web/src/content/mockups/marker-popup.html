@@ -91,11 +91,14 @@
             margin: 0 auto;
             position: relative;
             min-height: 100vh;
+            padding-inline: 0.48rem;
         }
         .immersive-dark-top {
             background: #F1F5F9;
             position: relative;
             overflow: hidden;
+            margin-inline: 0.62rem;
+            border-radius: 1.1rem;
         }
         .map-gradient-overlay {
             background: linear-gradient(180deg, rgba(241, 245, 249, 0) 0%, rgba(241, 245, 249, 0.2) 60%, rgba(241, 245, 249, 0.9) 100%);
@@ -202,7 +205,7 @@
 <div class="absolute inset-0 map-gradient-overlay"></div>
 </div>
 <!-- Header UI -->
-<div class="relative z-20 px-4">
+<div class="relative z-20 px-3">
 <header class="flex justify-between items-center py-4">
 <div class="glass-island-premium w-11 h-11 flex items-center justify-center rounded-full hover:scale-95 transition-transform cursor-pointer shadow-lg overflow-hidden">
 <span class="material-symbols-outlined text-primary/80 text-xl">person</span>
@@ -227,7 +230,7 @@
 <!-- Highlighted Centered Pin -->
 <div class="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10">
 <!-- Glassy Popup -->
-<div class="glass-popup p-4 w-60 pointer-events-auto transform animate-in fade-in slide-in-from-bottom-4 duration-500 relative mb-1.5 -translate-y-1">
+<div class="glass-popup p-4 w-[13.8rem] pointer-events-auto relative mb-3">
 <div class="flex items-start justify-between mb-3">
 <div>
 <h3 class="text-sm font-extrabold text-primary tracking-tight">Sushi Zen Ginza</h3>
@@ -255,7 +258,7 @@
 <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center ring-1 ring-emerald-500/40">
 <div class="emoji-pin bg-emerald-500 pin-glow flex items-center justify-center text-lg z-20">🍱</div>
 </div>
-<span class="map-date-label text-white border-none shadow-emerald-500/20 mt-3 bg-slate-600 px-2 py-0.5">SELECTED</span>
+<span class="map-date-label text-white border-none shadow-emerald-500/20 mt-2.5 bg-slate-600 px-2 py-0.5">SELECTED</span>
 </div>
 </div>
 </div>
@@ -270,7 +273,7 @@
 </div>
 </section>
 <!-- Unified Bottom Sheet Section -->
-<main class="relative z-20 min-h-[55vh] -mt-12 shadow-[0_-24px_48px_rgba(0,0,0,0.08)] pt-8 border-t border-white/60 rounded-t-3xl px-6 pb-32 bg-[#f1f5f9]">
+<main class="relative z-20 min-h-[55vh] -mt-12 shadow-[0_-24px_48px_rgba(0,0,0,0.08)] pt-8 border-t border-white/60 rounded-t-3xl px-3 pb-32 bg-[#f1f5f9]">
 <!-- Grab Bar Handle -->
 <div class="absolute top-0 left-0 right-0 flex justify-center pt-3 pb-4">
 <div class="w-10 h-1.5 rounded-full bg-primary/10"></div>
@@ -393,7 +396,7 @@
 </div>
 </main>
 <!-- Navigation Islands -->
-<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-full z-50 flex justify-between px-6 pointer-events-none">
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-full z-50 flex justify-between px-3 pointer-events-none">
 <div class="p-1.5 rounded-full border border-slate-200/40 shadow-[0_12px_40px_rgba(0,0,0,0.12)] flex gap-1 pointer-events-auto glass-island-premium">
 <div class="w-11 h-11 rounded-full flex items-center justify-center text-primary/40 hover:text-primary transition-all cursor-pointer">
 <span class="material-symbols-outlined text-xl">grid_view</span>
