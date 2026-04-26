@@ -188,8 +188,8 @@ export const siteCopy = {
       ] as const satisfies readonly MarqueeInstitution[],
     },
     signatureFeatures: {
-      eyebrow: "Distinctive product moments",
-      title: "Distinctive product moments shown in the product itself.",
+      eyebrow: "Budget your life moments",
+      title: "Distinctive moments shown in the app itself.",
       body: "Four focused surfaces show where Gama becomes more useful than another budgeting dashboard.",
       cards: [
         {

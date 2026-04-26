@@ -8,15 +8,83 @@ import { mockupPreviews, type MockupPreviewSlug } from "../content/mockup-previe
 type StoryScene = (typeof siteCopy.shared.storyScenes)[number];
 type MockupPreviewCrop = "events" | "eventDetails" | "storiesSignature";
 const PREVIEW_BUST = "20260425-11";
+const PREVIEW_ROOT_MARGIN = "150% 0px";
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+export function EmbeddedPreviewFrame({
+  className,
+  previewSlug,
+  title,
+  crop,
+  eager = false,
+}: {
+  className: string;
+  previewSlug: MockupPreviewSlug;
+  title: string;
+  crop?: MockupPreviewCrop;
+  eager?: boolean;
+}) {
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const [shouldRender, setShouldRender] = useState(eager);
+
+  useEffect(() => {
+    if (shouldRender || eager) {
+      return;
+    }
+
+    const host = hostRef.current;
+
+    if (!host) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+
+        if (entry?.isIntersecting) {
+          setShouldRender(true);
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin: PREVIEW_ROOT_MARGIN,
+      }
+    );
+
+    observer.observe(host);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [eager, shouldRender]);
+
+  const src = `/preview/${previewSlug}${crop ? `?crop=${crop}&v=${PREVIEW_BUST}` : `?v=${PREVIEW_BUST}`}`;
+
+  return (
+    <div ref={hostRef} className="embedded-preview-host">
+      {shouldRender ? (
+        <iframe
+          aria-label={title}
+          className={className}
+          loading={eager ? "eager" : "lazy"}
+          sandbox=""
+          scrolling="no"
+          src={src}
+          title={title}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 function DeviceShell({
   className,
   crop,
-  preview = "overview-screen",
+  preview = "overview-screen"
 }: {
   className?: string;
   crop?: MockupPreviewCrop;
@@ -29,14 +97,11 @@ function DeviceShell({
           className="device-screen-wrap"
           style={{ background: mockupPreviews[preview].background }}
         >
-          <iframe
-            aria-label={`Gama ${preview} preview`}
+          <EmbeddedPreviewFrame
             className="device-iframe"
-            loading="eager"
-            sandbox=""
-            scrolling="no"
-            src={`/preview/${preview}${crop ? `?crop=${crop}&v=${PREVIEW_BUST}` : `?v=${PREVIEW_BUST}`}`}
+            previewSlug={preview}
             title={`Gama ${preview} preview`}
+            {...(crop ? { crop } : {})}
           />
         </div>
       </div>
@@ -70,14 +135,11 @@ export function MockupPreviewSurface({
       className={joinClasses("mockup-surface", className)}
       style={{ background: mockupPreviews[preview].background }}
     >
-      <iframe
-        aria-label={`Gama ${preview} surface preview`}
+      <EmbeddedPreviewFrame
         className="mockup-surface-frame"
-        loading="eager"
-        sandbox=""
-        scrolling="no"
-        src={`/preview/${preview}${crop ? `?crop=${crop}&v=${PREVIEW_BUST}` : `?v=${PREVIEW_BUST}`}`}
+        previewSlug={preview}
         title={`Gama ${preview} surface preview`}
+        {...(crop ? { crop } : {})}
       />
     </div>
   );
@@ -194,8 +256,9 @@ function StorySceneFrame({ scene }: { scene: StoryScene }) {
 
 export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isNarrowStacked, setIsNarrowStacked] = useState(false);
+  const boundsRef = useRef({ start: 0, distance: 1 });
+  const isNearViewportRef = useRef(true);
+  const chipRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
     const node = ref.current;
@@ -205,18 +268,124 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
     }
 
     let frame = 0;
+    let resizeObserver: ResizeObserver | null = null;
 
-    const update = () => {
+    const measure = () => {
       const rect = node.getBoundingClientRect();
       const viewportHeight = window.innerHeight || 1;
       const absoluteTop = window.scrollY + rect.top;
       const start = Math.max(absoluteTop - viewportHeight * 0.28, 0);
       const end = absoluteTop + rect.height * 0.34;
-      const distance = Math.max(end - start, 1);
-      const progress = Math.min(Math.max(((window.scrollY - start) / distance) * 1.32, 0), 1);
 
-      setIsNarrowStacked(window.innerWidth <= 1119);
-      setScrollProgress(progress);
+      boundsRef.current = {
+        start,
+        distance: Math.max(end - start, 1),
+      };
+    };
+
+    const update = () => {
+      if (!isNearViewportRef.current) {
+        return;
+      }
+
+      const { start, distance } = boundsRef.current;
+      const progress = Math.min(Math.max(((window.scrollY - start) / distance) * 1.32, 0), 1);
+      const easedProgress = progress * progress * (3 - 2 * progress);
+      const isNarrowStacked = window.innerWidth <= 1119;
+      const motionByChip: Record<
+        string,
+        {
+          endAngle: number;
+          fadeStart: number;
+          fromX: number;
+          fromY: number;
+          startAngle: number;
+          startScale: number;
+        }
+      > = {
+        "premium-context-chip-safe": {
+          endAngle: -12,
+          fadeStart: 0,
+          fromX: 3.8,
+          fromY: 2.8,
+          startAngle: 24,
+          startScale: 0.76,
+        },
+        "premium-context-chip-rent": {
+          endAngle: 13,
+          fadeStart: 0,
+          fromX: -3.8,
+          fromY: 2.5,
+          startAngle: -24,
+          startScale: 0.77,
+        },
+        "premium-context-chip-trip": {
+          endAngle: 8,
+          fadeStart: 0.02,
+          fromX: -3.1,
+          fromY: 1.7,
+          startAngle: -17,
+          startScale: 0.8,
+        },
+        "premium-context-chip-date": {
+          endAngle: -9,
+          fadeStart: 0.015,
+          fromX: 3.2,
+          fromY: -2.4,
+          startAngle: 16,
+          startScale: 0.79,
+        },
+        "premium-context-chip-bills": {
+          endAngle: -6,
+          fadeStart: 0.03,
+          fromX: 2.9,
+          fromY: -2,
+          startAngle: 14,
+          startScale: 0.82,
+        },
+        "premium-context-chip-sync": {
+          endAngle: 10,
+          fadeStart: 0.025,
+          fromX: -3,
+          fromY: -2.3,
+          startAngle: -18,
+          startScale: 0.82,
+        },
+      };
+
+      for (const chip of chipRefs.current) {
+        if (!chip) {
+          continue;
+        }
+
+        const chipClassName = chip.dataset.chip;
+
+        if (!chipClassName) {
+          continue;
+        }
+
+        const motion = motionByChip[chipClassName] ?? {
+          endAngle: 0,
+          fadeStart: 0,
+          fromX: 0,
+          fromY: 0,
+          startAngle: 0,
+          startScale: 1,
+        };
+        const revealFloor = isNarrowStacked ? 0.52 : 0.34;
+        const reveal =
+          easedProgress <= motion.fadeStart
+            ? revealFloor
+            : Math.min(
+                1,
+                revealFloor +
+                  ((easedProgress - motion.fadeStart) / (1 - motion.fadeStart)) * (1 - revealFloor),
+              );
+        const angle = motion.endAngle + (motion.startAngle - motion.endAngle) * (1 - reveal);
+
+        chip.style.opacity = `${reveal}`;
+        chip.style.transform = `translate3d(${(1 - reveal) * motion.fromX}rem, ${(1 - reveal) * motion.fromY}rem, 0) rotate(${angle}deg) scale(${motion.startScale + (1 - motion.startScale) * reveal})`;
+      }
     };
 
     const requestUpdate = () => {
@@ -224,18 +393,47 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
       frame = requestAnimationFrame(update);
     };
 
+    const handleResize = () => {
+      measure();
+      requestUpdate();
+    };
+
+    const viewportObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+
+        isNearViewportRef.current = Boolean(entry?.isIntersecting);
+
+        if (entry?.isIntersecting) {
+          measure();
+          requestUpdate();
+        }
+      },
+      {
+        rootMargin: "35% 0px",
+      }
+    );
+
+    resizeObserver = new ResizeObserver(() => {
+      measure();
+      requestUpdate();
+    });
+
+    measure();
     requestUpdate();
+    viewportObserver.observe(node);
+    resizeObserver.observe(node);
     window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       cancelAnimationFrame(frame);
+      viewportObserver.disconnect();
+      resizeObserver?.disconnect();
       window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
-
-  const easedProgress = scrollProgress * scrollProgress * (3 - 2 * scrollProgress);
 
   return (
     <div
@@ -248,8 +446,9 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
         chipClassName="premium-context-chip-safe"
         detail="SAFE"
         icon="🛡"
-        isNarrowStacked={isNarrowStacked}
-        progress={easedProgress}
+        registerRef={(element) => {
+          chipRefs.current[0] = element;
+        }}
         title="$86 today"
       />
       <HeroContextChip
@@ -257,8 +456,9 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
         chipClassName="premium-context-chip-rent"
         detail="RESERVED"
         icon="🏠"
-        isNarrowStacked={isNarrowStacked}
-        progress={easedProgress}
+        registerRef={(element) => {
+          chipRefs.current[1] = element;
+        }}
         title="Rent Fri"
       />
       <HeroContextChip
@@ -266,8 +466,9 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
         chipClassName="premium-context-chip-date"
         detail="COVERED"
         icon="🍜"
-        isNarrowStacked={isNarrowStacked}
-        progress={easedProgress}
+        registerRef={(element) => {
+          chipRefs.current[2] = element;
+        }}
         title="Date night"
       />
       <HeroContextChip
@@ -275,8 +476,9 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
         chipClassName="premium-context-chip-sync"
         detail="SYNCED"
         icon="🔗"
-        isNarrowStacked={isNarrowStacked}
-        progress={easedProgress}
+        registerRef={(element) => {
+          chipRefs.current[3] = element;
+        }}
         title="3 accounts"
       />
       <HeroContextChip
@@ -284,8 +486,9 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
         chipClassName="premium-context-chip-trip"
         detail="Forward view"
         icon="\u2708\uFE0F"
-        isNarrowStacked={isNarrowStacked}
-        progress={easedProgress}
+        registerRef={(element) => {
+          chipRefs.current[4] = element;
+        }}
         title="Trip week"
       />
       <HeroContextChip
@@ -293,8 +496,9 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
         chipClassName="premium-context-chip-bills"
         detail="Bills ready"
         icon="\uD83D\uDCC5"
-        isNarrowStacked={isNarrowStacked}
-        progress={easedProgress}
+        registerRef={(element) => {
+          chipRefs.current[5] = element;
+        }}
         title="Loaded"
       />
 
@@ -307,17 +511,15 @@ function HeroContextChip({
   accentClassName,
   chipClassName,
   detail,
-  isNarrowStacked,
-  progress,
   icon,
+  registerRef,
   title,
 }: {
   accentClassName: string;
   chipClassName: string;
   detail: string;
-  isNarrowStacked: boolean;
-  progress: number;
   icon: string;
+  registerRef: (element: HTMLDivElement | null) => void;
   title: string;
 }) {
   const fallbackIconByChip: Record<string, string> = {
@@ -329,92 +531,17 @@ function HeroContextChip({
     "premium-context-chip-bills": "\uD83D\uDCC5",
   };
   const resolvedIcon = fallbackIconByChip[chipClassName] ?? icon;
-  const motionByChip: Record<
-    string,
-    {
-      endAngle: number;
-      fadeStart: number;
-      fromX: number;
-      fromY: number;
-      startAngle: number;
-      startScale: number;
-    }
-  > = {
-    "premium-context-chip-safe": {
-      endAngle: -14,
-      fadeStart: 0,
-      fromX: 4.4,
-      fromY: 3.3,
-      startAngle: 30,
-      startScale: 0.72,
-    },
-    "premium-context-chip-rent": {
-      endAngle: 15,
-      fadeStart: 0,
-      fromX: -4.4,
-      fromY: 3,
-      startAngle: -30,
-      startScale: 0.74,
-    },
-    "premium-context-chip-trip": {
-      endAngle: 9,
-      fadeStart: 0.02,
-      fromX: -3.6,
-      fromY: 2.1,
-      startAngle: -22,
-      startScale: 0.76,
-    },
-    "premium-context-chip-date": {
-      endAngle: -11,
-      fadeStart: 0.015,
-      fromX: 3.9,
-      fromY: -3.1,
-      startAngle: 22,
-      startScale: 0.76,
-    },
-    "premium-context-chip-bills": {
-      endAngle: -7,
-      fadeStart: 0.03,
-      fromX: 3.5,
-      fromY: -2.6,
-      startAngle: 18,
-      startScale: 0.78,
-    },
-    "premium-context-chip-sync": {
-      endAngle: 12,
-      fadeStart: 0.025,
-      fromX: -3.7,
-      fromY: -3,
-      startAngle: -24,
-      startScale: 0.78,
-    },
-  };
-  const motion = motionByChip[chipClassName] ?? {
-    endAngle: 0,
-    fadeStart: 0,
-    fromX: 0,
-    fromY: 0,
-    startAngle: 0,
-    startScale: 1,
-  };
-  const revealFloor = isNarrowStacked ? 0.52 : 0.34;
-  const reveal =
-    progress <= motion.fadeStart
-      ? revealFloor
-      : Math.min(
-          1,
-          revealFloor +
-            ((progress - motion.fadeStart) / (1 - motion.fadeStart)) * (1 - revealFloor),
-        );
-  const angle = motion.endAngle + (motion.startAngle - motion.endAngle) * (1 - reveal);
   const style = {
-    opacity: reveal,
-    transform: `translate3d(${(1 - reveal) * motion.fromX}rem, ${(1 - reveal) * motion.fromY}rem, 0) rotate(${angle}deg) scale(${motion.startScale + (1 - motion.startScale) * reveal})`,
-    filter: `blur(${(1 - reveal) * (isNarrowStacked ? 1.6 : 2.5)}px)`,
+    opacity: 0.34,
   } as CSSProperties;
 
   return (
-    <div className={joinClasses("premium-context-chip", chipClassName)} style={style}>
+    <div
+      ref={registerRef}
+      className={joinClasses("premium-context-chip", chipClassName)}
+      data-chip={chipClassName}
+      style={style}
+    >
       <span
         className={joinClasses("premium-context-chip-icon", accentClassName)}
         aria-hidden="true"

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { MockupPreviewSlug } from "../content/mockup-previews";
+import { EmbeddedPreviewFrame } from "./ProductVisuals";
 
 type TrustSlide = {
   id: string;
@@ -17,6 +18,24 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
 }
 
 const PREVIEW_BUST = "20260424-1";
+
+function warmPreviewDocuments(slugs: readonly MockupPreviewSlug[]) {
+  const uniqueUrls = Array.from(new Set(slugs.map((slug) => `/preview/${slug}?v=${PREVIEW_BUST}`)));
+
+  const warm = () => {
+    for (const url of uniqueUrls) {
+      void fetch(url, { credentials: "same-origin" }).catch(() => undefined);
+    }
+  };
+
+  if ("requestIdleCallback" in window) {
+    const idleId = window.requestIdleCallback(warm, { timeout: 2000 });
+    return () => window.cancelIdleCallback(idleId);
+  }
+
+  const timeoutId = setTimeout(warm, 300);
+  return () => window.clearTimeout(timeoutId);
+}
 
 function TrustIcon({ icon }: { icon: TrustSlide["icon"] }) {
   if (icon === "privacy") {
@@ -86,6 +105,8 @@ function TrustIcon({ icon }: { icon: TrustSlide["icon"] }) {
 export function TrustFeatureCarousel({ slides }: { slides: readonly TrustSlide[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
+  useEffect(() => warmPreviewDocuments(slides.map((slide) => slide.previewSlug)), [slides]);
+
   useEffect(() => {
     if (slides.length <= 1) {
       return;
@@ -125,38 +146,38 @@ export function TrustFeatureCarousel({ slides }: { slides: readonly TrustSlide[]
       </div>
 
       <div className="home-trust-carousel-stage">
-        {slides.map((slide, index) => (
-          <div
-            key={slide.id}
-            aria-hidden={index !== activeIndex}
-            className={joinClasses("home-trust-slide", index === activeIndex && "home-trust-slide-active")}
-          >
-            <div className="home-trust-slide-copy">
-              <h3>{slide.title}</h3>
-              <p>{slide.body}</p>
-            </div>
+        {(() => {
+          const activeSlide = slides[activeIndex] ?? slides[0];
 
-            <div className="home-trust-slide-device-wrap" aria-hidden="true">
-              <div className="home-walkthrough-device-card home-trust-slide-device-card">
-                <div className="home-walkthrough-device-viewport home-trust-slide-device-viewport">
-                  <div className="home-walkthrough-device-shell">
-                    <div className="home-walkthrough-preview-mask">
-                      <iframe
-                        className="home-walkthrough-preview-frame home-walkthrough-preview-frame-active home-trust-preview-frame"
-                        loading="eager"
-                        sandbox=""
-                        scrolling="no"
-                        src={`/preview/${slide.previewSlug}?v=${PREVIEW_BUST}`}
-                        tabIndex={-1}
-                        title={`Gama ${slide.previewSlug} trust preview`}
-                      />
+          if (!activeSlide) {
+            return null;
+          }
+
+          return (
+            <div key={activeSlide.id} className="home-trust-slide home-trust-slide-active">
+              <div className="home-trust-slide-copy">
+                <h3>{activeSlide.title}</h3>
+                <p>{activeSlide.body}</p>
+              </div>
+
+              <div className="home-trust-slide-device-wrap" aria-hidden="true">
+                <div className="home-walkthrough-device-card home-trust-slide-device-card">
+                  <div className="home-walkthrough-device-viewport home-trust-slide-device-viewport">
+                    <div className="home-walkthrough-device-shell">
+                      <div className="home-walkthrough-preview-mask">
+                        <EmbeddedPreviewFrame
+                          className="home-walkthrough-preview-frame home-walkthrough-preview-frame-active home-trust-preview-frame"
+                          previewSlug={activeSlide.previewSlug}
+                          title={`Gama ${activeSlide.previewSlug} trust preview`}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })()}
       </div>
     </div>
   );

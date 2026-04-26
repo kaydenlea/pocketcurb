@@ -14,6 +14,46 @@ export function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const shellRef = useRef<HTMLDivElement | null>(null);
+  const highlightTimerRef = useRef<number | null>(null);
+
+  const handleJoinEarlyAccessClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = document.getElementById("hero-waitlist-cta");
+    const emailShell = target?.querySelector<HTMLElement>(".hero-email-shell");
+
+    if (!target) {
+      return;
+    }
+
+    event.preventDefault();
+    target.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "nearest",
+    });
+    window.history.replaceState(null, "", "#hero-waitlist-cta");
+
+    if (emailShell) {
+      if (highlightTimerRef.current !== null) {
+        window.clearTimeout(highlightTimerRef.current);
+      }
+
+      const triggerHighlight = () => {
+        emailShell.classList.remove("hero-email-shell-flash");
+        void emailShell.offsetWidth;
+        emailShell.classList.add("hero-email-shell-flash");
+      };
+
+      triggerHighlight();
+
+      highlightTimerRef.current = window.setTimeout(() => {
+        triggerHighlight();
+      }, 280);
+
+      window.setTimeout(() => {
+        emailShell.classList.remove("hero-email-shell-flash");
+      }, 1800);
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => {
@@ -46,6 +86,9 @@ export function SiteHeader() {
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
+      if (highlightTimerRef.current !== null) {
+        window.clearTimeout(highlightTimerRef.current);
+      }
       window.removeEventListener("scroll", onScroll);
     };
   }, []);
@@ -75,7 +118,11 @@ export function SiteHeader() {
               <div className="floating-brand-name">Gama</div>
             </div>
           </Link>
-          <Link className="floating-nav-cta floating-nav-cta-inline" href="/#hero-waitlist-cta">
+          <Link
+            className="floating-nav-cta floating-nav-cta-inline"
+            href="/#hero-waitlist-cta"
+            onClick={handleJoinEarlyAccessClick}
+          >
             <span className="floating-nav-cta-label-full">Join early access</span>
             <span className="floating-nav-cta-label-compact">Join</span>
             <span aria-hidden="true" className="floating-nav-cta-arrow">→</span>

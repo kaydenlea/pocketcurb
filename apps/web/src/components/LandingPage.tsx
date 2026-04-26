@@ -4,6 +4,7 @@ import { MockupPreviewPhone, ProductHeroVisual } from "./ProductVisuals";
 import { Reveal } from "./Reveal";
 import { ScrollFeatureShowcase } from "./ScrollFeatureShowcase";
 import { TrustFeatureCarousel } from "./TrustFeatureCarousel";
+import { ViewportMotionGate } from "./ViewportMotionGate";
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -340,7 +341,7 @@ async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }
         `home-signature-card-${card.id}`
       )}
     >
-      <div className="home-signature-card-device-window">
+      <ViewportMotionGate className="home-signature-card-device-window" rootMargin="28% 0px">
         {cardId === "overview-timeline" ? (
           <EventTimelineSignatureVisual />
         ) : cardId === "map-context" ? (
@@ -365,7 +366,7 @@ async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }
             preview={previewSlug}
           />
         )}
-      </div>
+      </ViewportMotionGate>
 
       <div className="home-signature-card-copy">
         <span className="home-signature-card-icon" aria-hidden="true">
@@ -396,16 +397,16 @@ export async function LandingPage() {
               <h1 className="hero-home-title">{siteCopy.home.hero.title}</h1>
               <p className="hero-home-body">{siteCopy.home.hero.body}</p>
 
-              <div className="hero-home-cta">
-                <div className="hero-email-panel" id="hero-waitlist-cta">
+              <div className="hero-home-cta" id="hero-waitlist-cta">
+                <div className="hero-email-panel">
                   <HeroWaitlistForm ctaLabel={siteCopy.home.hero.primaryCta.label} />
                 </div>
               </div>
             </div>
 
-            <div className="hero-home-visual">
+            <ViewportMotionGate className="hero-home-visual" rootMargin="35% 0px">
               <ProductHeroVisual />
-            </div>
+            </ViewportMotionGate>
           </div>
 
           <div className="hero-home-marquee-shell">

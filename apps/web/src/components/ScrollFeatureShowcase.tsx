@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { mockupPreviews, type MockupPreviewSlug } from "../content/mockup-previews";
+import { EmbeddedPreviewFrame } from "./ProductVisuals";
 
 type ShowcaseStep = {
   id: string;
@@ -20,6 +21,24 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+function warmPreviewDocuments(slugs: readonly MockupPreviewSlug[]) {
+  const uniqueUrls = Array.from(new Set(slugs.map((slug) => `/preview/${slug}?v=${PREVIEW_BUST}`)));
+
+  const warm = () => {
+    for (const url of uniqueUrls) {
+      void fetch(url, { credentials: "same-origin" }).catch(() => undefined);
+    }
+  };
+
+  if ("requestIdleCallback" in window) {
+    const idleId = window.requestIdleCallback(warm, { timeout: 1500 });
+    return () => window.cancelIdleCallback(idleId);
+  }
+
+  const timeoutId = setTimeout(warm, 250);
+  return () => window.clearTimeout(timeoutId);
+}
+
 function WalkthroughPreview({
   isActive,
   previewSlug
@@ -28,13 +47,9 @@ function WalkthroughPreview({
   previewSlug: MockupPreviewSlug;
 }) {
   return (
-    <iframe
+    <EmbeddedPreviewFrame
       className={joinClasses("home-walkthrough-preview-frame", isActive && "home-walkthrough-preview-frame-active")}
-      loading="eager"
-      sandbox=""
-      scrolling="no"
-      src={`/preview/${previewSlug}?v=${PREVIEW_BUST}`}
-      tabIndex={-1}
+      previewSlug={previewSlug}
       title={`Gama ${previewSlug} walkthrough preview`}
     />
   );
@@ -45,13 +60,10 @@ function MobileWalkthroughPreviewPhone({ previewSlug }: { previewSlug: MockupPre
     <div className="device-shell device-shell-framed home-walkthrough-device-shell-mobile" aria-hidden="true">
       <div className="device-frame">
         <div className="device-screen-wrap" style={{ background: mockupPreviews[previewSlug].background }}>
-          <iframe
+          <EmbeddedPreviewFrame
             className="device-iframe"
-            loading="eager"
-            sandbox=""
-            scrolling="no"
-            src={`/preview/${previewSlug}?v=${PREVIEW_BUST}`}
-            tabIndex={-1}
+            eager
+            previewSlug={previewSlug}
             title={`Gama ${previewSlug} mobile walkthrough preview`}
           />
         </div>
@@ -67,10 +79,45 @@ export function ScrollFeatureShowcase({
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [hasPrimedDesktopPreviews, setHasPrimedDesktopPreviews] = useState(false);
   const regionRef = useRef<HTMLDivElement | null>(null);
   const activeIndexRef = useRef(0);
+  const scrollProgressRef = useRef(0);
+  const boundsRef = useRef({ top: 0, scrollableDistance: 1 });
+  const isNearViewportRef = useRef(false);
 
   activeIndexRef.current = activeIndex;
+  scrollProgressRef.current = scrollProgress;
+
+  useEffect(() => warmPreviewDocuments(steps.map((step) => step.previewSlug)), [steps]);
+
+  useEffect(() => {
+    const region = regionRef.current;
+
+    if (!region) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+
+        if (entry?.isIntersecting) {
+          setHasPrimedDesktopPreviews(true);
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin: "20% 0px"
+      }
+    );
+
+    observer.observe(region);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (steps.length === 0) {
@@ -79,21 +126,36 @@ export function ScrollFeatureShowcase({
 
     const desktopQuery = window.matchMedia(DESKTOP_BREAKPOINT_QUERY);
     let frame = 0;
+    let resizeObserver: ResizeObserver | null = null;
 
-    const updateDesktopStep = () => {
+    const measure = () => {
       const region = regionRef.current;
 
-      if (!region || !desktopQuery.matches) {
+      if (!region) {
         return;
       }
 
       const rect = region.getBoundingClientRect();
-      const scrollableDistance = Math.max(region.offsetHeight - window.innerHeight, 1);
-      const consumed = Math.min(Math.max(-rect.top, 0), scrollableDistance);
+
+      boundsRef.current = {
+        top: window.scrollY + rect.top,
+        scrollableDistance: Math.max(region.offsetHeight - window.innerHeight, 1),
+      };
+    };
+
+    const updateDesktopStep = () => {
+      if (!desktopQuery.matches || !isNearViewportRef.current) {
+        return;
+      }
+
+      const { top, scrollableDistance } = boundsRef.current;
+      const consumed = Math.min(Math.max(window.scrollY - top, 0), scrollableDistance);
       const progress = consumed / scrollableDistance;
       const nextIndex = Math.min(steps.length - 1, Math.round(progress * Math.max(steps.length - 1, 1)));
 
-      setScrollProgress(progress);
+      if (Math.abs(progress - scrollProgressRef.current) > 0.01) {
+        setScrollProgress(progress);
+      }
 
       if (nextIndex !== activeIndexRef.current) {
         setActiveIndex(nextIndex);
@@ -103,6 +165,11 @@ export function ScrollFeatureShowcase({
     const requestUpdate = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(updateDesktopStep);
+    };
+
+    const handleResize = () => {
+      measure();
+      requestUpdate();
     };
 
     const handleBreakpointChange = () => {
@@ -117,15 +184,45 @@ export function ScrollFeatureShowcase({
       requestUpdate();
     };
 
+    const viewportObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+
+        isNearViewportRef.current = Boolean(entry?.isIntersecting);
+
+        if (entry?.isIntersecting) {
+          measure();
+          requestUpdate();
+        }
+      },
+      {
+        rootMargin: "40% 0px",
+      }
+    );
+
+    const region = regionRef.current;
+
+    if (region) {
+      viewportObserver.observe(region);
+      resizeObserver = new ResizeObserver(() => {
+        measure();
+        requestUpdate();
+      });
+      resizeObserver.observe(region);
+    }
+
+    measure();
     requestUpdate();
     window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
+    window.addEventListener("resize", handleResize);
     desktopQuery.addEventListener("change", handleBreakpointChange);
 
     return () => {
       cancelAnimationFrame(frame);
+      viewportObserver.disconnect();
+      resizeObserver?.disconnect();
       window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
+      window.removeEventListener("resize", handleResize);
       desktopQuery.removeEventListener("change", handleBreakpointChange);
     };
   }, [steps.length]);
@@ -181,9 +278,21 @@ export function ScrollFeatureShowcase({
                 <div className="home-walkthrough-device-card">
                   <div className="home-walkthrough-device-viewport">
                     <div className="home-walkthrough-device-shell" aria-hidden="true">
-                      {steps.map((step, index) => (
-                        <WalkthroughPreview key={step.id} isActive={index === activeIndex} previewSlug={step.previewSlug} />
-                      ))}
+                      {hasPrimedDesktopPreviews
+                        ? steps.map((step, index) => (
+                            <WalkthroughPreview
+                              key={step.id}
+                              isActive={index === activeIndex}
+                              previewSlug={step.previewSlug}
+                            />
+                          ))
+                        : (
+                            <WalkthroughPreview
+                              key={activeStep.id}
+                              isActive
+                              previewSlug={activeStep.previewSlug}
+                            />
+                          )}
                     </div>
                   </div>
                 </div>

@@ -3,6 +3,42 @@ import { SiteContainer } from "@gama/ui-web";
 import gamaLogo from "../../app/icon.png";
 import { siteCopy } from "../content/site-copy";
 
+function InstagramIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function TikTokIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path
+        d="M14.3 4V14.4A4.3 4.3 0 1 1 10 10.1"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+      <path d="M14.3 4C14.8 5.9 16.3 7.4 18.4 7.9" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M5 4.5L19 19.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      <path d="M8.6 4.5H19L15.4 8.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <path d="M5 19.5H15.4L19 15.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
 export function SiteFooter() {
   return (
     <footer className="site-footer-shell py-8 md:py-10">
@@ -19,15 +55,28 @@ export function SiteFooter() {
               />
               <div className="site-footer-brand-copy">
                 <p className="site-footer-brand-name">Gama</p>
-                <p className="site-footer-brand-note">{siteCopy.footer.note}</p>
+                <p className="site-footer-brand-note">
+                  A daily budgeting tool built around real-life moments, with forward-looking cash flow clarity.
+                </p>
               </div>
             </div>
-            <p className="site-footer-caption">
-              Built for short-term clarity, explicit trust, and less admin work around everyday money.
-            </p>
           </div>
 
           <div className="site-footer-meta">
+            <div className="site-footer-meta-group">
+              <span className="site-footer-label">Social</span>
+              <div className="site-footer-social-placeholder" aria-label="Social links coming soon">
+                <span className="site-footer-social-icon" aria-label="Instagram coming soon" role="img">
+                  <InstagramIcon />
+                </span>
+                <span className="site-footer-social-icon" aria-label="TikTok coming soon" role="img">
+                  <TikTokIcon />
+                </span>
+                <span className="site-footer-social-icon" aria-label="X coming soon" role="img">
+                  <XIcon />
+                </span>
+              </div>
+            </div>
             <div className="site-footer-meta-group">
               <span className="site-footer-label">Contact</span>
               <a className="site-footer-link" href={siteCopy.footer.contactHref}>
@@ -38,7 +87,7 @@ export function SiteFooter() {
         </div>
 
         <div className="site-footer-bottom">
-          <p className="site-footer-meta-note">Decision-first clarity for the next money move.</p>
+          <p>© Gama</p>
         </div>
       </SiteContainer>
     </footer>
