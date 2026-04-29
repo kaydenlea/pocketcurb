@@ -395,11 +395,13 @@ export async function LandingPage() {
               <h1 className="hero-home-title">{siteCopy.home.hero.title}</h1>
               <p className="hero-home-body">{siteCopy.home.hero.body}</p>
 
-              <div className="hero-home-cta" id="hero-waitlist-cta">
-                <div className="hero-email-panel">
-                  <HeroWaitlistForm ctaLabel={siteCopy.home.hero.primaryCta.label} />
+              <ViewportMotionGate className="hero-home-cta" rootMargin="40% 0px">
+                <div id="hero-waitlist-cta">
+                  <div className="hero-email-panel">
+                    <HeroWaitlistForm ctaLabel={siteCopy.home.hero.primaryCta.label} />
+                  </div>
                 </div>
-              </div>
+              </ViewportMotionGate>
             </div>
 
             <ViewportMotionGate className="hero-home-visual" rootMargin="35% 0px">
@@ -407,7 +409,7 @@ export async function LandingPage() {
             </ViewportMotionGate>
           </div>
 
-          <div className="hero-home-marquee-shell">
+          <ViewportMotionGate className="hero-home-marquee-shell" rootMargin="20% 0px">
             <div className="site-shell hero-home-marquee-inner">
               <p className="hero-home-marquee-label">{siteCopy.home.connectMarquee.label}</p>
               <div className="hero-home-marquee" aria-label="Supported account connections">
@@ -433,7 +435,7 @@ export async function LandingPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </ViewportMotionGate>
       </section>
 
       <section className="home-signature-band" aria-labelledby="home-signature-title" data-nav-theme="dark">

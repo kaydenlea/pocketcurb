@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import vm from "node:vm";
@@ -9,6 +9,24 @@ const MOCKUP_DIR = join(process.cwd(), "src", "content", "mockups");
 const TAILWIND_ENTRY = resolve(process.cwd(), "node_modules", "tailwindcss", "index.css");
 const MATERIAL_SYMBOLS_FONT = join(MOCKUP_DIR, "material-symbols-outlined.woff2");
 const MATERIAL_SYMBOLS_BASE64 = readFileSync(MATERIAL_SYMBOLS_FONT).toString("base64");
+
+function buildManropeFontFaces(): string {
+  try {
+    const mediaDir = join(process.cwd(), ".next", "static", "media");
+    const files = readdirSync(mediaDir).filter((f) => f.endsWith(".woff2"));
+    if (files.length === 0) return "";
+    return files
+      .map(
+        (f) =>
+          `@font-face { font-family: "Manrope"; font-style: normal; font-weight: 200 800; font-display: block; src: url("/_next/static/media/${f}") format("woff2"); }`
+      )
+      .join("\n");
+  } catch {
+    return `@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");`;
+  }
+}
+
+const MANROPE_FONT_CSS = buildManropeFontFaces();
 const PREVIEW_CANVAS_WIDTH = 393;
 const PREVIEW_CANVAS_HEIGHT = 852;
 const STABLE_VIEWPORT = "width=393, initial-scale=1, maximum-scale=1, viewport-fit=cover";
@@ -356,7 +374,7 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
   `;
 
   return `
-    @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+    ${MANROPE_FONT_CSS}
 
     @font-face {
       font-family: "Material Symbols Outlined";

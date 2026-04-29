@@ -1,7 +1,7 @@
 "use client";
 
 import { MetricChip } from "@gama/ui-web";
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { siteCopy } from "../content/site-copy";
 import { mockupPreviews, type MockupPreviewSlug } from "../content/mockup-previews";
 
@@ -19,12 +19,14 @@ export function EmbeddedPreviewFrame({
   title,
   crop,
   eager = false,
+  onLoad,
 }: {
   className: string;
   previewSlug: MockupPreviewSlug;
   title: string;
   crop?: MockupPreviewCrop;
   eager?: boolean;
+  onLoad?: () => void;
 }) {
   const src = `/preview/${previewSlug}${crop ? `?crop=${crop}&v=${PREVIEW_BUST}` : `?v=${PREVIEW_BUST}`}`;
 
@@ -38,6 +40,7 @@ export function EmbeddedPreviewFrame({
         scrolling="no"
         src={src}
         title={title}
+        {...(onLoad ? { onLoad } : {})}
       />
     </div>
   );
@@ -47,11 +50,13 @@ function DeviceShell({
   className,
   crop,
   eager = false,
+  onLoad,
   preview = "overview-screen"
 }: {
   className?: string;
   crop?: MockupPreviewCrop;
   eager?: boolean;
+  onLoad?: () => void;
   preview?: MockupPreviewSlug;
 }) {
   return (
@@ -66,6 +71,7 @@ function DeviceShell({
             eager={eager}
             previewSlug={preview}
             title={`Gama ${preview} preview`}
+            {...(onLoad ? { onLoad } : {})}
             {...(crop ? { crop } : {})}
           />
         </div>
@@ -219,11 +225,26 @@ function StorySceneFrame({ scene }: { scene: StoryScene }) {
   );
 }
 
+const CHIP_MOTION: Record<string, { endAngle: number; fadeStart: number; fromX: number; fromY: number; startAngle: number; startScale: number }> = {
+  "premium-context-chip-safe":  { endAngle: -12, fadeStart: 0,     fromX:  3.8, fromY:  2.8, startAngle:  24, startScale: 0.76 },
+  "premium-context-chip-rent":  { endAngle:  13, fadeStart: 0,     fromX: -3.8, fromY:  2.5, startAngle: -24, startScale: 0.77 },
+  "premium-context-chip-trip":  { endAngle:   8, fadeStart: 0.02,  fromX: -3.1, fromY:  1.7, startAngle: -17, startScale: 0.80 },
+  "premium-context-chip-date":  { endAngle:  -9, fadeStart: 0.015, fromX:  3.2, fromY: -2.4, startAngle:  16, startScale: 0.79 },
+  "premium-context-chip-bills": { endAngle:  -6, fadeStart: 0.03,  fromX:  2.9, fromY: -2.0, startAngle:  14, startScale: 0.82 },
+  "premium-context-chip-sync":  { endAngle:  10, fadeStart: 0.025, fromX: -3.0, fromY: -2.3, startAngle: -18, startScale: 0.82 },
+};
+
 export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const boundsRef = useRef({ start: 0, distance: 1 });
   const isNearViewportRef = useRef(true);
   const chipRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setReady(true), 2000);
+    return () => window.clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     const node = ref.current;
@@ -257,66 +278,6 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
       const progress = Math.min(Math.max(((window.scrollY - start) / distance) * 1.32, 0), 1);
       const easedProgress = progress * progress * (3 - 2 * progress);
       const isNarrowStacked = window.innerWidth <= 1119;
-      const motionByChip: Record<
-        string,
-        {
-          endAngle: number;
-          fadeStart: number;
-          fromX: number;
-          fromY: number;
-          startAngle: number;
-          startScale: number;
-        }
-      > = {
-        "premium-context-chip-safe": {
-          endAngle: -12,
-          fadeStart: 0,
-          fromX: 3.8,
-          fromY: 2.8,
-          startAngle: 24,
-          startScale: 0.76,
-        },
-        "premium-context-chip-rent": {
-          endAngle: 13,
-          fadeStart: 0,
-          fromX: -3.8,
-          fromY: 2.5,
-          startAngle: -24,
-          startScale: 0.77,
-        },
-        "premium-context-chip-trip": {
-          endAngle: 8,
-          fadeStart: 0.02,
-          fromX: -3.1,
-          fromY: 1.7,
-          startAngle: -17,
-          startScale: 0.8,
-        },
-        "premium-context-chip-date": {
-          endAngle: -9,
-          fadeStart: 0.015,
-          fromX: 3.2,
-          fromY: -2.4,
-          startAngle: 16,
-          startScale: 0.79,
-        },
-        "premium-context-chip-bills": {
-          endAngle: -6,
-          fadeStart: 0.03,
-          fromX: 2.9,
-          fromY: -2,
-          startAngle: 14,
-          startScale: 0.82,
-        },
-        "premium-context-chip-sync": {
-          endAngle: 10,
-          fadeStart: 0.025,
-          fromX: -3,
-          fromY: -2.3,
-          startAngle: -18,
-          startScale: 0.82,
-        },
-      };
 
       for (const chip of chipRefs.current) {
         if (!chip) {
@@ -329,7 +290,7 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
           continue;
         }
 
-        const motion = motionByChip[chipClassName] ?? {
+        const motion = CHIP_MOTION[chipClassName] ?? {
           endAngle: 0,
           fadeStart: 0,
           fromX: 0,
@@ -404,6 +365,7 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
     <div
       ref={ref}
       className={joinClasses("premium-hero-visual", compact && "premium-hero-visual-compact")}
+      style={{ opacity: ready ? 1 : 0, transition: ready ? "opacity 500ms ease" : "none" }}
     >
       <div className="premium-hero-halo" aria-hidden="true" />
       <HeroContextChip
@@ -467,7 +429,7 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
         title="Loaded"
       />
 
-      <DeviceShell className="premium-hero-device" eager preview="overview-screen" />
+      <DeviceShell className="premium-hero-device" eager onLoad={() => setReady(true)} preview="overview-screen" />
     </div>
   );
 }

@@ -19,6 +19,18 @@ const siteFont = Manrope({
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en-US" className={siteFont.variable}>
+      <head>
+        <style dangerouslySetInnerHTML={{ __html: `
+          @font-face {
+            font-family: "Manrope Fallback";
+            src: local("Arial");
+            ascent-override: 103.31%;
+            descent-override: 29.07%;
+            line-gap-override: 0%;
+            size-adjust: 103.19%;
+          }
+        `}} />
+      </head>
       <body className={`${siteFont.className} min-h-screen antialiased`}>
         <StructuredData data={buildSiteSchemas()} id="site-schema" />
         <a className="skip-link" href="#main-content">
