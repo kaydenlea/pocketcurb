@@ -1,5 +1,9 @@
 import { mockupPreviews, type MockupPreviewSlug } from "../../../src/content/mockup-previews";
-import { getMockupPreviewHtml, type PreviewCrop } from "../../../src/lib/mockup-preview-html";
+import {
+  getMockupPreviewHtml,
+  type PreviewCrop,
+  type PreviewMotionMode
+} from "../../../src/lib/mockup-preview-html";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,8 +13,14 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const cropParam = new URL(request.url).searchParams.get("crop");
-  const crop = cropParam === "events" || cropParam === "eventDetails" ? cropParam : undefined;
+  const searchParams = new URL(request.url).searchParams;
+  const cropParam = searchParams.get("crop");
+  const motionParam = searchParams.get("motion");
+  const crop =
+    cropParam === "events" || cropParam === "eventDetails" || cropParam === "storiesSignature"
+      ? cropParam
+      : undefined;
+  const motion: PreviewMotionMode = motionParam === "static" ? "static" : "active";
 
   if (!(slug in mockupPreviews)) {
     return new Response("Not found", {
@@ -22,12 +32,19 @@ export async function GET(
     });
   }
 
-  return new Response(await getMockupPreviewHtml(slug as MockupPreviewSlug, crop as PreviewCrop | undefined), {
+  return new Response(await getMockupPreviewHtml(slug as MockupPreviewSlug, crop as PreviewCrop | undefined, motion), {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-store, max-age=0",
-      Pragma: "no-cache",
-      Expires: "0",
+      "Cache-Control":
+        process.env.NODE_ENV === "production"
+          ? "public, max-age=31536000, immutable"
+          : "no-store, max-age=0",
+      ...(process.env.NODE_ENV === "production"
+        ? {}
+        : {
+            Pragma: "no-cache",
+            Expires: "0"
+          }),
       "X-Robots-Tag": "noindex, nofollow, noarchive"
     }
   });

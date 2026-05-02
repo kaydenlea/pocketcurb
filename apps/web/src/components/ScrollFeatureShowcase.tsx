@@ -43,7 +43,6 @@ function MobileWalkthroughPreviewPhone({ previewSlug }: { previewSlug: MockupPre
         <div className="device-screen-wrap" style={{ background: mockupPreviews[previewSlug].background }}>
           <EmbeddedPreviewFrame
             className="device-iframe"
-            eager
             previewSlug={previewSlug}
             title={`Gama ${previewSlug} mobile walkthrough preview`}
           />
@@ -61,7 +60,6 @@ export function ScrollFeatureShowcase({
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [hasPrimedDesktopPreviews] = useState(true);
   const regionRef = useRef<HTMLDivElement | null>(null);
   const activeIndexRef = useRef(0);
   const scrollProgressRef = useRef(0);
@@ -242,21 +240,10 @@ export function ScrollFeatureShowcase({
                   <div className="home-walkthrough-device-card">
                     <div className="home-walkthrough-device-viewport">
                       <div className="home-walkthrough-device-shell" aria-hidden="true">
-                        {hasPrimedDesktopPreviews
-                          ? steps.map((step, index) => (
-                              <WalkthroughPreview
-                                key={step.id}
-                                isActive={index === activeIndex}
-                                previewSlug={step.previewSlug}
-                              />
-                            ))
-                          : (
-                              <WalkthroughPreview
-                                key={activeStep.id}
-                                isActive
-                                previewSlug={activeStep.previewSlug}
-                              />
-                            )}
+                        <WalkthroughPreview
+                          isActive
+                          previewSlug={activeStep.previewSlug}
+                        />
                       </div>
                     </div>
                   </div>

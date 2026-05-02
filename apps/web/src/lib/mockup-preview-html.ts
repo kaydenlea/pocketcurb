@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import vm from "node:vm";
@@ -12,28 +12,58 @@ const MATERIAL_SYMBOLS_BASE64 = readFileSync(MATERIAL_SYMBOLS_FONT).toString("ba
 
 function buildManropeFontFaces(): string {
   try {
-    const mediaDir = join(process.cwd(), ".next", "static", "media");
-    const files = readdirSync(mediaDir).filter((f) => f.endsWith(".woff2"));
+    const manifestCandidates = [
+      join(process.cwd(), ".next", "server", "next-font-manifest.json"),
+      join(process.cwd(), ".next", "dev", "server", "next-font-manifest.json"),
+    ];
+    const manifestPath = manifestCandidates.find((path) => {
+      try {
+        readFileSync(path, "utf8");
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
+    if (!manifestPath) {
+      return "";
+    }
+
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
+      app?: Record<string, string[]>;
+    };
+    const files = Array.from(
+      new Set(
+        Object.values(manifest.app ?? {})
+          .flat()
+          .filter((file) => file.endsWith(".woff2")),
+      ),
+    );
+
     if (files.length === 0) return "";
+
     return files
       .map(
-        (f) =>
-          `@font-face { font-family: "Manrope"; font-style: normal; font-weight: 200 800; font-display: block; src: url("/_next/static/media/${f}") format("woff2"); }`
+        (file) =>
+          `@font-face { font-family: "Gama Mockup Manrope"; font-style: normal; font-weight: 200 800; font-display: block; src: url("/_next/${file}") format("woff2"); }`
       )
       .join("\n");
   } catch {
-    return `@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");`;
+    return "";
   }
 }
 
-const MANROPE_FONT_CSS = buildManropeFontFaces();
+const MANROPE_FONT_CSS =
+  buildManropeFontFaces() ||
+  `@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");`;
 const PREVIEW_CANVAS_WIDTH = 393;
 const PREVIEW_CANVAS_HEIGHT = 852;
 const STABLE_VIEWPORT = "width=393, initial-scale=1, maximum-scale=1, viewport-fit=cover";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-const previewHtmlCache = new Map<MockupPreviewSlug, Promise<string>>();
+const previewHtmlCache = new Map<string, Promise<string>>();
 export type PreviewCrop = "events" | "eventDetails" | "storiesSignature";
+export type PreviewMotionMode = "active" | "static";
 
 type TailwindConfig = Record<string, unknown>;
 
@@ -103,6 +133,7 @@ function normalizeTailwindConfig(config: TailwindConfig): TailwindConfig {
   const extend = (theme.extend ?? {}) as Record<string, unknown>;
   const fontFamily = (extend.fontFamily ?? {}) as Record<string, unknown>;
   const stableSans = [
+    '"Gama Mockup Manrope"',
     "Manrope",
     '"Segoe UI Variable Display"',
     '"SF Pro Display"',
@@ -225,9 +256,12 @@ async function compileTailwindCss(source: string) {
   return compiler.build(candidates);
 }
 
-function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
+function buildSharedStyle(
+  slug: MockupPreviewSlug,
+  crop?: PreviewCrop,
+  motion: PreviewMotionMode = "active",
+) {
   const preview = mockupPreviews[slug];
-  const normalizeTypography = slug !== "overview-screen";
   const previewRootBackground = preview.mode === "page" ? "transparent" : preview.background;
   const cropOffsetY = crop === "events" ? -815 : crop === "eventDetails" ? -180 : 0;
   const cropStyle =
@@ -322,8 +356,28 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
         }
       `
       : "";
-  const typographyNormalizationStyle = normalizeTypography
-    ? `
+  const typographyNormalizationStyle = `
+    .preview-scale-root {
+      font-weight: 500 !important;
+      font-optical-sizing: auto !important;
+      font-synthesis-weight: none !important;
+    }
+    .preview-scale-root .font-normal {
+      font-weight: 400 !important;
+    }
+    .preview-scale-root .font-medium {
+      font-weight: 500 !important;
+    }
+    .preview-scale-root .font-semibold {
+      font-weight: 600 !important;
+    }
+    .preview-scale-root .font-bold {
+      font-weight: 700 !important;
+    }
+    .preview-scale-root .font-extrabold,
+    .preview-scale-root .font-black {
+      font-weight: 800 !important;
+    }
     .preview-scale-root .tabular-nums,
     .preview-scale-root .showcase-soft-number,
     .preview-scale-root .showcase-soft-total,
@@ -351,8 +405,7 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
     .preview-scale-root [class*="tracking-wide"] {
       letter-spacing: 0.02em !important;
     }
-    `
-    : "";
+    `;
   const topNavConsistencyStyle = `
     .preview-scale-root .immersive-dark-top > header > div.glass-island-dark:not(.w-10):not(.h-10) {
       min-width: 0 !important;
@@ -372,6 +425,19 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
       white-space: nowrap !important;
     }
   `;
+  const staticMotionStyle =
+    motion === "static"
+      ? `
+    html[data-preview-motion="static"] *,
+    html[data-preview-motion="static"] *::before,
+    html[data-preview-motion="static"] *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+      will-change: auto !important;
+    }
+  `
+      : "";
 
   return `
     ${MANROPE_FONT_CSS}
@@ -409,7 +475,7 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
       background: ${previewRootBackground} !important;
     }
     .preview-scale-root {
-      --mockup-font-sans: "Manrope", "Segoe UI Variable Display", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      --mockup-font-sans: "Gama Mockup Manrope", "Manrope", "Segoe UI Variable Display", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
       position: absolute !important;
       left: 0 !important;
       top: 0 !important;
@@ -422,8 +488,6 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
       overflow: hidden !important;
       background: ${preview.background} !important;
       transform-origin: top left !important;
-      will-change: transform !important;
-      backface-visibility: hidden !important;
       font-family: var(--mockup-font-sans) !important;
       font-synthesis: none !important;
       font-kerning: normal !important;
@@ -466,12 +530,16 @@ function buildSharedStyle(slug: MockupPreviewSlug, crop?: PreviewCrop) {
     ${previewVariantStyle}
     ${storySignatureStyle}
     ${cropStyle}
+    ${staticMotionStyle}
   `;
 }
 
-function buildScalingScriptForCrop(slug: MockupPreviewSlug, crop?: PreviewCrop) {
+function buildScalingScriptForCrop(
+  slug: MockupPreviewSlug,
+  crop?: PreviewCrop,
+  motion: PreviewMotionMode = "active",
+) {
   const mode = crop === "storiesSignature" ? "cover-top" : "fit";
-  const normalizeLetterSpacing = slug !== "overview-screen";
 
   return `
     <script>
@@ -479,7 +547,7 @@ function buildScalingScriptForCrop(slug: MockupPreviewSlug, crop?: PreviewCrop) 
         const canvasWidth = ${PREVIEW_CANVAS_WIDTH};
         const canvasHeight = ${PREVIEW_CANVAS_HEIGHT};
         const mode = "${mode}";
-        const shouldNormalizeLetterSpacing = ${normalizeLetterSpacing};
+        const motion = "${motion}";
         const normalizeLetterSpacing = () => {
           const root = document.querySelector(".preview-scale-root");
 
@@ -574,13 +642,12 @@ function buildScalingScriptForCrop(slug: MockupPreviewSlug, crop?: PreviewCrop) 
               : Math.max((window.innerHeight - canvasHeight * overscanScale) / 2, 0);
 
           document.documentElement.dataset.previewScale = "managed";
+          document.documentElement.dataset.previewMotion = motion;
           document.body.style.width = "100%";
           document.body.style.height = "100%";
           root.style.zoom = "";
           root.style.transform = "translate(" + offsetX + "px, " + offsetY + "px) scale(" + overscanScale + ")";
-          if (shouldNormalizeLetterSpacing) {
-            normalizeLetterSpacing();
-          }
+          normalizeLetterSpacing();
         };
 
         if (document.readyState === "loading") {
@@ -595,44 +662,53 @@ function buildScalingScriptForCrop(slug: MockupPreviewSlug, crop?: PreviewCrop) 
   `;
 }
 
-async function buildPreviewHtmlInternal(slug: MockupPreviewSlug, crop?: PreviewCrop) {
+async function buildPreviewHtmlInternal(
+  slug: MockupPreviewSlug,
+  crop?: PreviewCrop,
+  motion: PreviewMotionMode = "active",
+) {
   const source = readFileSync(join(MOCKUP_DIR, mockupPreviews[slug].file), "utf8");
   const tailwindCss = await compileTailwindCss(source);
-  const sharedStyle = buildSharedStyle(slug, crop);
+  const sharedStyle = buildSharedStyle(slug, crop, motion);
   const previewSource = replaceMaterialSymbolLigatures(
     stabilizeViewport(stripRuntimeDependencies(source)),
   );
-  const scalingScript = buildScalingScriptForCrop(slug, crop);
+  const scalingScript = buildScalingScriptForCrop(slug, crop, motion);
 
   return previewSource
     .replace("</head>", `<style>${tailwindCss}\n${sharedStyle}</style></head>`)
     .replace("</body>", `${scalingScript}</body>`);
 }
 
-export function getMockupPreviewHtml(slug: MockupPreviewSlug, crop?: PreviewCrop) {
+export function getMockupPreviewHtml(
+  slug: MockupPreviewSlug,
+  crop?: PreviewCrop,
+  motion: PreviewMotionMode = "active",
+) {
   if (isDevelopment) {
-    return buildPreviewHtmlInternal(slug, crop);
+    return buildPreviewHtmlInternal(slug, crop, motion);
   }
 
   if (slug === "overview-screen") {
-    return buildPreviewHtmlInternal(slug, crop);
+    return buildPreviewHtmlInternal(slug, crop, motion);
   }
 
   if (crop) {
-    return buildPreviewHtmlInternal(slug, crop);
+    return buildPreviewHtmlInternal(slug, crop, motion);
   }
 
-  const cached = previewHtmlCache.get(slug);
+  const cacheKey = `${slug}:${motion}`;
+  const cached = previewHtmlCache.get(cacheKey);
 
   if (cached) {
     return cached;
   }
 
-  const previewPromise = buildPreviewHtmlInternal(slug).catch((error) => {
-    previewHtmlCache.delete(slug);
+  const previewPromise = buildPreviewHtmlInternal(slug, undefined, motion).catch((error) => {
+    previewHtmlCache.delete(cacheKey);
     throw error;
   });
-  previewHtmlCache.set(slug, previewPromise);
+  previewHtmlCache.set(cacheKey, previewPromise);
 
   return previewPromise;
 }

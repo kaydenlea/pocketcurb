@@ -16,7 +16,7 @@ export function ViewportMotionGate({
   rootMargin?: string;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const [isInView, setIsInView] = useState(true);
+  const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
     const node = ref.current;

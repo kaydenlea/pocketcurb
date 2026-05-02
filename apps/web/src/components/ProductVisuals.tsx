@@ -1,16 +1,88 @@
 "use client";
 
 import { MetricChip } from "@gama/ui-web";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { siteCopy } from "../content/site-copy";
 import { mockupPreviews, type MockupPreviewSlug } from "../content/mockup-previews";
 
 type StoryScene = (typeof siteCopy.shared.storyScenes)[number];
 type MockupPreviewCrop = "events" | "eventDetails" | "storiesSignature";
+type PreviewMotionMode = "active" | "static";
 const PREVIEW_BUST = "20260425-11";
+const PREVIEW_FADE_MS = 360;
+
+type PreviewFrameStatus = "active" | "incoming" | "outgoing";
+
+type PreviewFrameState = {
+  id: number;
+  ready: boolean;
+  src: string;
+  status: PreviewFrameStatus;
+};
 
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
+}
+
+function PreviewFrameLayer({
+  className,
+  eager,
+  frame,
+  onHostLoad,
+  onReady,
+  title,
+}: {
+  className: string;
+  eager: boolean;
+  frame: PreviewFrameState;
+  onHostLoad?: () => void;
+  onReady: (id: number) => void;
+  title: string;
+}) {
+  const hasMarkedReadyRef = useRef(false);
+  const loadFallbackIdRef = useRef<number | undefined>(undefined);
+
+  const markReady = useCallback(() => {
+    if (hasMarkedReadyRef.current) {
+      return;
+    }
+
+    hasMarkedReadyRef.current = true;
+    onReady(frame.id);
+    onHostLoad?.();
+  }, [frame.id, onHostLoad, onReady]);
+
+  useEffect(() => {
+    hasMarkedReadyRef.current = false;
+
+    return () => {
+      if (loadFallbackIdRef.current !== undefined) {
+        window.clearTimeout(loadFallbackIdRef.current);
+      }
+    };
+  }, [frame.src, markReady]);
+
+  return (
+    <iframe
+      aria-label={title}
+      className={joinClasses(
+        className,
+        "embedded-preview-frame-layer",
+        frame.ready && frame.status !== "incoming" && "embedded-preview-frame-layer-visible",
+        frame.status === "outgoing" && "embedded-preview-frame-layer-outgoing",
+      )}
+      data-preview-frame-status={frame.status}
+      loading={eager ? "eager" : "lazy"}
+      onLoad={() => {
+        loadFallbackIdRef.current = window.setTimeout(markReady, 80);
+      }}
+      sandbox=""
+      scrolling="no"
+      src={frame.src}
+      tabIndex={-1}
+      title={title}
+    />
+  );
 }
 
 export function EmbeddedPreviewFrame({
@@ -19,29 +91,186 @@ export function EmbeddedPreviewFrame({
   title,
   crop,
   eager = false,
+  motion = "active",
   onLoad,
+  rootMargin = "65% 0px",
+  suspendWhenOffscreen = true,
 }: {
   className: string;
   previewSlug: MockupPreviewSlug;
   title: string;
   crop?: MockupPreviewCrop;
   eager?: boolean;
+  motion?: PreviewMotionMode;
   onLoad?: () => void;
+  rootMargin?: string;
+  suspendWhenOffscreen?: boolean;
 }) {
-  const src = `/preview/${previewSlug}${crop ? `?crop=${crop}&v=${PREVIEW_BUST}` : `?v=${PREVIEW_BUST}`}`;
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const nextFrameIdRef = useRef(1);
+  const [isNearViewport, setIsNearViewport] = useState(eager || !suspendWhenOffscreen);
+  const src = useMemo(() => {
+    const params = new URLSearchParams();
+
+    if (crop) {
+      params.set("crop", crop);
+    }
+
+    if (motion !== "active") {
+      params.set("motion", motion);
+    }
+
+    params.set("v", PREVIEW_BUST);
+    return `/preview/${previewSlug}?${params.toString()}`;
+  }, [crop, motion, previewSlug]);
+  const [frames, setFrames] = useState<PreviewFrameState[]>([
+    {
+      id: 0,
+      ready: false,
+      src,
+      status: "active",
+    },
+  ]);
+  const hasReadyFrame = frames.some((frame) => frame.ready && frame.status === "active");
+
+  useEffect(() => {
+    if (!suspendWhenOffscreen || eager) {
+      setIsNearViewport(true);
+      return;
+    }
+
+    const node = hostRef.current;
+
+    if (!node) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setIsNearViewport(Boolean(entry?.isIntersecting));
+      },
+      { rootMargin }
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [eager, rootMargin, suspendWhenOffscreen]);
+
+  useEffect(() => {
+    setFrames((currentFrames) => {
+      const activeFrame = currentFrames.find((frame) => frame.status === "active");
+
+      if (
+        activeFrame?.src === src ||
+        currentFrames.some((frame) => frame.src === src && frame.status === "incoming")
+      ) {
+        return currentFrames;
+      }
+
+      return [
+        ...currentFrames.filter((frame) => frame.status === "active"),
+        {
+          id: nextFrameIdRef.current++,
+          ready: false,
+          src,
+          status: "incoming",
+        },
+      ];
+    });
+  }, [src]);
+
+  useEffect(() => {
+    if (isNearViewport) {
+      return;
+    }
+
+    setFrames([
+      {
+        id: nextFrameIdRef.current++,
+        ready: false,
+        src,
+        status: "active",
+      },
+    ]);
+  }, [isNearViewport, src]);
+
+  useEffect(() => {
+    if (!frames.some((frame) => frame.status === "outgoing")) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setFrames((currentFrames) =>
+        currentFrames.filter((frame) => frame.status !== "outgoing"),
+      );
+    }, PREVIEW_FADE_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [frames]);
+
+  const handleFrameReady = useCallback((id: number) => {
+    setFrames((currentFrames) => {
+      const readyFrame = currentFrames.find((frame) => frame.id === id);
+
+      if (!readyFrame) {
+        return currentFrames;
+      }
+
+      if (readyFrame.status === "incoming") {
+        return currentFrames.map((frame) => {
+          if (frame.id === id) {
+            return { ...frame, ready: true, status: "active" };
+          }
+
+          if (frame.status === "active") {
+            return { ...frame, status: "outgoing" };
+          }
+
+          return frame;
+        });
+      }
+
+      return currentFrames.map((frame) =>
+        frame.id === id ? { ...frame, ready: true } : frame,
+      );
+    });
+  }, []);
 
   return (
-    <div aria-hidden="true" className="embedded-preview-host">
-      <iframe
-        aria-label={title}
-        className={className}
-        loading={eager ? "eager" : "lazy"}
-        sandbox=""
-        scrolling="no"
-        src={src}
-        title={title}
-        {...(onLoad ? { onLoad } : {})}
-      />
+    <div
+      ref={hostRef}
+      aria-hidden="true"
+      className="embedded-preview-host"
+      data-preview-mounted={isNearViewport ? "true" : "false"}
+      data-preview-ready={hasReadyFrame ? "true" : "false"}
+    >
+      {isNearViewport ? (
+        frames.map((frame) => (
+          <PreviewFrameLayer
+            key={frame.id}
+            className={className}
+            eager={eager}
+            frame={frame}
+            onReady={handleFrameReady}
+            title={title}
+            {...(onLoad ? { onHostLoad: onLoad } : {})}
+          />
+        ))
+      ) : (
+        <div
+          aria-label={title}
+          className={className}
+          data-preview-placeholder="true"
+          role="img"
+          style={{ background: mockupPreviews[previewSlug].background }}
+        />
+      )}
     </div>
   );
 }
