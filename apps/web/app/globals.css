@@ -21,6 +21,8 @@
   --color-accent-glass: #3247ad;
   --device-phone-width: min(58%, 400px);
   --device-stage-phone-width: 25rem;
+  --device-phone-height-ratio: 2.04;
+  --device-phone-source-height: 106.3%;
   --color-highlight: #dce7ff;
   --color-accent-green: #1dbb64;
   --color-accent-green-soft: #e2f8ea;
@@ -1161,45 +1163,39 @@ a {
 
 .device-frame {
   position: relative;
+  width: 100%;
   overflow: hidden;
-  aspect-ratio: 393 / 852;
-  border-radius: 3.2rem;
+  aspect-ratio: 1 / var(--device-phone-height-ratio);
+  border-radius: 2.78rem;
   box-shadow: 0 34px 60px rgba(16, 18, 28, 0.18);
   border: 2px solid rgba(15, 18, 28, 0.16);
   background: linear-gradient(180deg, #121721 0%, #1f242d 100%);
   box-shadow:
     inset 0 0 0 2px rgba(255, 255, 255, 0.24),
-    inset 0 0 0 6px rgba(8, 11, 17, 0.88),
     0 14px 32px rgba(0, 0, 0, 0.16);
 }
 
 .device-frame::before {
-  content: "";
-  position: absolute;
-  inset: 0.28rem;
-  border-radius: 2.96rem;
-  background: #000;
-  pointer-events: none;
-  z-index: 1;
+  display: none;
 }
 
 .device-screen-wrap {
   position: absolute;
-  inset: 0.48rem 0.44rem 0.72rem;
+  inset: 0.32rem 0.3rem 0.38rem;
   z-index: 2;
   overflow: hidden;
-  border-radius: 2.72rem;
+  border-radius: 2.05rem;
   background: #f2f5f7;
-  clip-path: inset(0 round 2.72rem);
+  clip-path: inset(0 round 2.05rem);
   contain: paint;
   isolation: isolate;
 }
 
 .embedded-preview-host {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(var(--device-phone-source-height) + 4px);
   overflow: hidden;
   border-radius: inherit;
   clip-path: inherit;
@@ -1229,14 +1225,14 @@ a {
 
 .device-iframe {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
   border: 0;
-  border-radius: 2.72rem;
+  border-radius: 0;
   background: #0b141a;
   overflow: hidden;
-  clip-path: inset(0 round 2.72rem);
+  clip-path: none;
 }
 
 
@@ -1940,7 +1936,7 @@ a {
   border-radius: 1.8rem;
   border: 1px solid rgba(130, 146, 214, 0.1);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.92));
-  padding: 1rem 1.05rem 0.82rem;
+  padding: 1rem clamp(1.25rem, 3vw, 1.65rem) 0.82rem;
   box-shadow:
     0 18px 42px rgba(18, 24, 44, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.72);
@@ -2578,7 +2574,7 @@ a {
 }
 
 .hero-home-title {
-  max-width: 13ch;
+  max-width: 17ch;
   font-size: clamp(2.85rem, 5vw, 4.4rem);
   line-height: 0.92;
   color: var(--color-ink);
@@ -2896,8 +2892,8 @@ a {
 }
 
 .home-signature-card-overview-timeline .home-signature-card-device-window {
-  inset: 0.72rem 0.72rem 4.45rem;
-  border-radius: 1.55rem;
+  inset: 0;
+  border-radius: inherit;
   background: transparent;
 }
 
@@ -2949,7 +2945,7 @@ a {
 
 .home-signature-card-money-stories .home-signature-card-device-window,
 .home-signature-card-receipt-recap .home-signature-card-device-window {
-  inset: 0.16rem 0 7.35rem;
+  inset: 0;
   border-radius: inherit;
   background: transparent;
 }
@@ -2979,7 +2975,7 @@ a {
 .home-signature-card-map-context .home-signature-card-device-window::after {
   z-index: 3;
   background:
-    linear-gradient(180deg, rgba(12, 12, 15, 0) 0%, rgba(12, 12, 15, 0) 70%, rgba(12, 12, 15, 0.42) 88%, rgba(12, 12, 15, 0.96) 100%);
+    linear-gradient(180deg, rgba(12, 12, 15, 0) 0%, rgba(12, 12, 15, 0) 66%, rgba(12, 12, 15, 0.5) 88%, rgba(12, 12, 15, 0.9) 100%);
 }
 
 .home-signature-card-money-stories .home-signature-card-device-window::after,
@@ -2993,6 +2989,21 @@ a {
 
 .home-signature-card-overview-timeline .home-signature-card-device-window::after {
   display: none;
+}
+
+.home-signature-card-overview-timeline::after {
+  z-index: 3;
+  background:
+    linear-gradient(180deg, rgba(12, 12, 15, 0) 0%, rgba(12, 12, 15, 0.2) 30%, rgba(12, 12, 15, 0.8) 66%, rgba(12, 12, 15, 0.99) 100%),
+    radial-gradient(circle at 24% 16%, rgba(255, 255, 255, 0.026), transparent 18%);
+}
+
+.home-signature-card-money-stories::after,
+.home-signature-card-receipt-recap::after {
+  z-index: 3;
+  background:
+    linear-gradient(180deg, rgba(12, 12, 15, 0) 0%, rgba(12, 12, 15, 0) 44%, rgba(12, 12, 15, 0.54) 76%, rgba(12, 12, 15, 0.92) 100%),
+    radial-gradient(circle at 24% 16%, rgba(255, 255, 255, 0.02), transparent 18%);
 }
 
 .home-signature-card-phone {
@@ -3020,6 +3031,7 @@ a {
   max-width: 25rem;
   padding: 0;
   z-index: 4;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.42);
 }
 
 .home-signature-event-timeline {
@@ -3037,7 +3049,7 @@ a {
 }
 
 .home-signature-card-overview-timeline .home-signature-event-timeline {
-  inset: 0 0 4.45rem;
+  inset: 0;
 }
 
 @keyframes hero-cta-ring {
@@ -3155,9 +3167,9 @@ a {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 168%;
-  height: 168%;
-  transform: translate3d(-31%, -30%, 0);
+  width: 182%;
+  height: 182%;
+  transform: translate3d(-34%, -33%, 0);
   animation: map-camera-pan 18s cubic-bezier(0.22, 1, 0.36, 1) infinite;
   will-change: transform;
   background:
@@ -4000,44 +4012,32 @@ a {
   position: relative;
   flex: 0 0 auto;
   width: var(--device-stage-phone-width);
-  height: calc(var(--device-stage-phone-width) * 852 / 393);
-  border-radius: 3.2rem;
+  height: calc(var(--device-stage-phone-width) * var(--device-phone-height-ratio));
+  border-radius: 2.78rem;
   border: 2px solid rgba(13, 17, 25, 0.18);
   background: linear-gradient(180deg, #131a24 0%, #0a1018 100%);
   box-shadow:
     inset 0 0 0 2px rgba(255, 255, 255, 0.22),
-    inset 0 0 0 6px rgba(5, 8, 13, 0.88),
     0 18px 36px rgba(16, 18, 28, 0.1);
   overflow: hidden;
   z-index: 1;
 }
 
 .home-walkthrough-device-shell::before {
-  content: "";
-  position: absolute;
-  inset: 0.28rem;
-  border-radius: 2.96rem;
-  background: #0b141a;
-  z-index: 0;
+  display: none;
 }
 
 .home-walkthrough-device-shell::after {
-  content: "";
-  position: absolute;
-  inset: 0.28rem;
-  border-radius: 2.96rem;
-  box-shadow: inset 0 0 0 0.2rem #0b141a;
-  pointer-events: none;
-  z-index: 2;
+  display: none;
 }
 
 .home-walkthrough-preview-frame {
   position: absolute;
-  inset: 0.28rem;
-  width: calc(100% - 0.56rem);
-  height: calc(100% - 0.56rem);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   border: 0;
-  border-radius: 2.96rem;
+  border-radius: 2.35rem;
   background: #f2f5f7;
   opacity: 0;
   pointer-events: none;
@@ -4047,23 +4047,35 @@ a {
 
 .home-walkthrough-preview-mask {
   position: absolute;
-  inset: 0.28rem;
+  inset: 0.32rem 0.3rem 0.38rem;
   overflow: hidden;
-  border-radius: 2.96rem;
-  clip-path: inset(0 round 2.96rem);
-  background: #0c0c0f;
+  border-radius: 2.05rem;
+  clip-path: inset(0 round 2.05rem);
+  background: transparent;
   z-index: 1;
   isolation: isolate;
   contain: paint;
 }
 
+.hero-home-visual .premium-context-chip {
+  box-shadow:
+    0 18px 34px rgba(16, 18, 28, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+
+.home-walkthrough-preview-mask .embedded-preview-host {
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(var(--device-phone-source-height) + 4px);
+}
 
 .home-walkthrough-preview-mask .home-walkthrough-preview-frame {
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 2.96rem;
-  clip-path: inset(0 round 2.96rem);
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  border-radius: 0;
+  clip-path: none;
 }
 
 .home-walkthrough-preview-frame-active {
@@ -4433,10 +4445,10 @@ a {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  min-height: calc(min(calc(100% - 0.8rem), 21.5rem, 78vw) * 852 / 393 / 1.9);
-  height: calc(min(calc(100% - 0.8rem), 21.5rem, 78vw) * 852 / 393 / 1.9);
+  min-height: calc(21.5rem * var(--device-phone-height-ratio) / 1.9);
+  height: calc(21.5rem * var(--device-phone-height-ratio) / 1.9);
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
 }
 
@@ -4444,17 +4456,19 @@ a {
   display: grid;
   place-items: start center;
   width: min(100%, 31rem);
-  min-height: calc(min(calc(100% - 0.8rem), 21.5rem, 78vw) * 852 / 393 / 1.9);
+  min-width: calc(21.5rem + 0.8rem);
+  min-height: calc(21.5rem * var(--device-phone-height-ratio) / 1.9);
 }
 
 .home-trust-slide-device-viewport {
-  --device-stage-phone-width: min(calc(100% - 0.8rem), 21.5rem, 78vw);
+  --device-stage-phone-width: 21.5rem;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   width: 100%;
-  height: calc(min(calc(100% - 0.8rem), 21.5rem, 78vw) * 852 / 393 / 1.9);
-  min-height: calc(min(calc(100% - 0.8rem), 21.5rem, 78vw) * 852 / 393 / 1.9);
+  min-width: calc(21.5rem + 0.8rem);
+  height: calc(21.5rem * var(--device-phone-height-ratio) / 1.9);
+  min-height: calc(21.5rem * var(--device-phone-height-ratio) / 1.9);
   padding: 0;
   overflow: hidden;
 }
@@ -4464,18 +4478,18 @@ a {
 }
 
 .home-trust-slide-device-viewport .home-walkthrough-preview-mask {
-  inset: 0.38rem 0.44rem 0.5rem;
-  border-radius: 2.86rem;
-  clip-path: inset(0 round 2.86rem);
+  inset: 0.32rem 0.3rem 0.38rem;
+  border-radius: 2.48rem;
+  clip-path: inset(0 round 2.48rem);
 }
 
 .home-trust-slide-device-viewport .home-walkthrough-preview-mask .home-walkthrough-preview-frame {
-  border-radius: inherit;
-  clip-path: inherit;
+  border-radius: 0;
+  clip-path: none;
 }
 
 .home-trust-preview-frame {
-  background: #0b141a;
+  background: transparent;
   opacity: 1;
   transition: none;
 }
@@ -4509,7 +4523,7 @@ a {
   }
 
   .hero-home-title {
-    max-width: 14ch;
+    max-width: 18ch;
   }
 
   .hero-home-body {
@@ -4728,32 +4742,32 @@ a {
 
   .hero-home-visual .premium-context-chip-safe {
     left: calc(50% - (var(--hero-stack-device-width) / 2) - var(--hero-stack-chip-overlap));
-    top: 28%;
+    top: 18%;
   }
 
   .hero-home-visual .premium-context-chip-rent {
     right: calc(50% - (var(--hero-stack-device-width) / 2) - var(--hero-stack-chip-overlap));
-    top: 25%;
+    top: 16%;
   }
 
   .hero-home-visual .premium-context-chip-date {
     left: calc(50% - (var(--hero-stack-device-width) / 2) - calc(var(--hero-stack-chip-overlap) + 0.2rem));
-    bottom: 21%;
+    bottom: 14%;
   }
 
   .hero-home-visual .premium-context-chip-trip {
     right: calc(50% - (var(--hero-stack-device-width) / 2) - calc(var(--hero-stack-chip-overlap) - 0.3rem));
-    top: 37%;
+    top: 35%;
   }
 
   .hero-home-visual .premium-context-chip-bills {
     left: calc(50% - (var(--hero-stack-device-width) / 2) - calc(var(--hero-stack-chip-overlap) - 0.6rem));
-    bottom: 12%;
+    bottom: 6%;
   }
 
   .hero-home-visual .premium-context-chip-sync {
     right: calc(50% - (var(--hero-stack-device-width) / 2) - calc(var(--hero-stack-chip-overlap) - 0.2rem));
-    bottom: 16%;
+    bottom: 8%;
   }
 
   .hero-home-visual .premium-context-chip {
@@ -4809,7 +4823,7 @@ a {
   }
 
   .hero-home-visual .premium-hero-visual {
-    --hero-stack-device-width: min(23.5rem, calc(100vw - 2rem));
+    --hero-stack-device-width: min(21.3rem, calc(100vw - 2.2rem));
     min-height: clamp(640px, 184vw, 760px);
   }
 
@@ -4857,32 +4871,32 @@ a {
   }
 
   .hero-home-visual .premium-context-chip-safe {
-    left: -3.45rem;
+    left: -1.25rem;
     top: 12%;
   }
 
   .hero-home-visual .premium-context-chip-rent {
-    right: -3.45rem;
+    right: -1.25rem;
     top: 9%;
   }
 
   .hero-home-visual .premium-context-chip-date {
-    left: -3.65rem;
+    left: -1.32rem;
     bottom: 25%;
   }
 
   .hero-home-visual .premium-context-chip-trip {
-    right: -3.1rem;
+    right: -1.1rem;
     top: 27%;
   }
 
   .hero-home-visual .premium-context-chip-bills {
-    left: -2.75rem;
+    left: -0.94rem;
     bottom: 11%;
   }
 
   .hero-home-visual .premium-context-chip-sync {
-    right: -3.25rem;
+    right: -1.18rem;
     bottom: 13%;
   }
 
@@ -5027,7 +5041,7 @@ a {
   }
 
   .hero-home-title {
-    max-width: 10ch;
+    max-width: 13.2ch;
     font-size: clamp(2.6rem, 10vw, 3.7rem);
   }
 
@@ -5065,18 +5079,22 @@ a {
   }
 
   .home-signature-card-overview-timeline .home-signature-card-device-window {
-    inset: 0.14rem 0 4.4rem;
+    inset: 0;
+    overflow: hidden;
     border-radius: inherit;
+    clip-path: none;
   }
 
   .home-signature-card-money-stories .home-signature-card-device-window,
   .home-signature-card-receipt-recap .home-signature-card-device-window {
-    inset: 0.14rem 0 6.55rem;
+    inset: 0;
+    overflow: hidden;
     border-radius: inherit;
+    clip-path: none;
   }
 
   .home-signature-card-overview-timeline .home-signature-event-timeline {
-    inset: 0 0 4.4rem;
+    inset: 0;
   }
 
   .home-signature-card-map-context .home-signature-card-device-window {
@@ -5089,7 +5107,7 @@ a {
 
   .home-signature-card-phone-money-stories,
   .home-signature-card-phone-receipt-recap {
-    top: 0.04rem;
+    top: 0.2rem;
     width: min(calc(100% - 0.08rem), 23.3rem);
   }
 
@@ -5239,7 +5257,7 @@ a {
 
   .home-trust-slide {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-rows: 9.35rem auto;
     align-items: start;
     align-content: start;
     gap: 0.9rem;
@@ -5251,6 +5269,7 @@ a {
   .home-trust-slide-copy {
     align-content: start;
     max-width: none;
+    min-height: 9.35rem;
     padding: 1.55rem 0.34rem 0 0.94rem;
   }
 
@@ -5270,23 +5289,25 @@ a {
     --trust-device-width: min(calc(100vw - 2.8rem), 25.6rem);
     width: min(100%, calc(var(--trust-device-width) + 1rem));
     justify-self: center;
-    min-height: calc(min(24.5rem, calc(100vw - 2rem)) * 852 / 393 / 1.58);
-    height: calc(min(24.5rem, calc(100vw - 2rem)) * 852 / 393 / 1.58);
+    min-height: calc(min(24.5rem, calc(100vw - 2rem)) * var(--device-phone-height-ratio) / 1.58);
+    height: calc(min(24.5rem, calc(100vw - 2rem)) * var(--device-phone-height-ratio) / 1.58);
     padding-top: 0.85rem;
     overflow: visible;
   }
 
   .home-trust-slide-device-card {
     width: min(100%, calc(var(--trust-device-width) + 1rem));
-    min-height: calc(min(24.5rem, calc(100vw - 2rem)) * 852 / 393 / 1.58);
+    min-width: 0;
+    min-height: calc(min(24.5rem, calc(100vw - 2rem)) * var(--device-phone-height-ratio) / 1.58);
   }
 
   .home-trust-slide-device-viewport {
     --device-stage-phone-width: var(--trust-device-width);
     width: min(100%, calc(var(--trust-device-width) + 1rem));
+    min-width: 0;
     margin-inline: auto;
-    height: calc(min(24.5rem, calc(100vw - 2rem)) * 852 / 393 / 1.58);
-    min-height: calc(min(24.5rem, calc(100vw - 2rem)) * 852 / 393 / 1.58);
+    height: calc(min(24.5rem, calc(100vw - 2rem)) * var(--device-phone-height-ratio) / 1.58);
+    min-height: calc(min(24.5rem, calc(100vw - 2rem)) * var(--device-phone-height-ratio) / 1.58);
     overflow: visible;
   }
 }
@@ -5302,7 +5323,7 @@ a {
   }
 
   .hero-home-visual .premium-hero-visual {
-    --hero-stack-device-width: min(26rem, calc(100vw - 0.2rem));
+    --hero-stack-device-width: min(21.3rem, calc(100vw - 1.2rem));
   }
 
   .hero-home-visual .premium-hero-device {
@@ -5310,27 +5331,27 @@ a {
   }
 
   .hero-home-visual .premium-context-chip-safe {
-    left: -4.1rem;
+    left: -0.58rem;
   }
 
   .hero-home-visual .premium-context-chip-rent {
-    right: -4.1rem;
+    right: -0.58rem;
   }
 
   .hero-home-visual .premium-context-chip-date {
-    left: -4.25rem;
+    left: -0.64rem;
   }
 
   .hero-home-visual .premium-context-chip-trip {
-    right: -3.7rem;
+    right: -0.52rem;
   }
 
   .hero-home-visual .premium-context-chip-bills {
-    left: -3rem;
+    left: -0.44rem;
   }
 
   .hero-home-visual .premium-context-chip-sync {
-    right: -3.85rem;
+    right: -0.58rem;
   }
 }
 
@@ -5347,7 +5368,7 @@ a {
     align-items: start;
     align-content: start;
     justify-items: stretch;
-    grid-template-rows: minmax(10.75rem, auto) auto;
+    grid-template-rows: 10.5rem auto;
     gap: 0.8rem;
     padding: 1.8rem 0 0.72rem;
     overflow: visible;
@@ -5367,7 +5388,7 @@ a {
 
   .home-trust-slide-copy {
     justify-self: stretch;
-    min-height: 10.75rem;
+    min-height: 10.5rem;
     padding: 1.35rem 0.72rem 0 0.72rem;
   }
 
@@ -5387,6 +5408,7 @@ a {
   .home-trust-slide-device-card {
     width: 100%;
     max-width: none;
+    min-width: 0;
     margin-inline: 0;
     min-height: 28.2rem;
   }
@@ -5395,6 +5417,7 @@ a {
     --device-stage-phone-width: var(--trust-device-width);
     width: 100%;
     max-width: none;
+    min-width: 0;
     margin-inline: 0;
     height: 28.2rem;
     min-height: 28.2rem;
@@ -5404,29 +5427,29 @@ a {
 
   .home-trust-slide-device-viewport .home-walkthrough-device-shell {
     margin-inline: auto;
-    border-radius: 3.2rem 3.2rem 0 0;
+    border-radius: 2.48rem 2.48rem 0 0;
   }
 
   .home-trust-slide-device-viewport .home-walkthrough-device-shell::before,
   .home-trust-slide-device-viewport .home-walkthrough-device-shell::after {
-    border-radius: 2.96rem 2.96rem 0 0;
+    display: none;
   }
 
   .home-trust-slide-device-viewport .home-walkthrough-preview-mask {
-    inset: 0.38rem 0.44rem 0;
-    border-radius: 2.86rem 2.86rem 0 0;
-    clip-path: inset(0 round 2.86rem 2.86rem 0 0);
+    inset: 0.32rem 0.3rem 0;
+    border-radius: 2.05rem 2.05rem 0 0;
+    clip-path: inset(0 round 2.05rem 2.05rem 0 0);
   }
 }
 
 @media (max-width: 390px) {
   .home-trust-slide {
     padding-inline: 0;
-    grid-template-rows: minmax(10.1rem, auto) auto;
+    grid-template-rows: 10.25rem auto;
   }
 
   .home-trust-slide-copy {
-    min-height: 10.1rem;
+    min-height: 10.25rem;
     padding-left: 0.58rem;
     padding-right: 0.58rem;
   }
@@ -5443,6 +5466,7 @@ a {
   .home-trust-slide-device-card {
     width: 100%;
     max-width: none;
+    min-width: 0;
     margin-inline: 0;
     min-height: 27.6rem;
   }
@@ -5451,6 +5475,7 @@ a {
     --device-stage-phone-width: var(--trust-device-width);
     width: 100%;
     max-width: none;
+    min-width: 0;
     margin-inline: 0;
     height: 27.6rem;
     min-height: 27.6rem;

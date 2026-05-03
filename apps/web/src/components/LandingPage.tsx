@@ -257,6 +257,7 @@ function PlaceContextSignatureVisual() {
       <div className="home-signature-map-background">
         <div className="home-signature-map-background-camera">
           <svg className="home-signature-map-grid" viewBox="-220 -220 840 1240" preserveAspectRatio="xMidYMid slice">
+            <path d="M -260 -80 L 700 80" fill="none" opacity="0.18" stroke="#CBD5E1" strokeWidth="5" />
             <path d="M -260 180 L 700 340" fill="none" opacity="0.26" stroke="#CBD5E1" strokeWidth="6" />
             <path d="M -260 600 L 700 720" fill="none" opacity="0.2" stroke="#CBD5E1" strokeWidth="5" />
             <path d="M -260 860 L 700 980" fill="none" opacity="0.18" stroke="#CBD5E1" strokeWidth="5" />
@@ -268,6 +269,7 @@ function PlaceContextSignatureVisual() {
         <div className="home-signature-map-surface">
           <div className="home-signature-map-camera">
             <svg className="home-signature-map-grid" viewBox="-220 -220 840 1240" preserveAspectRatio="xMidYMid slice">
+              <path d="M -260 -80 L 700 80" fill="none" opacity="0.2" stroke="#CBD5E1" strokeWidth="5" />
               <path d="M -260 180 L 700 340" fill="none" opacity="0.3" stroke="#CBD5E1" strokeWidth="6" />
               <path d="M -260 600 L 700 720" fill="none" opacity="0.24" stroke="#CBD5E1" strokeWidth="5" />
               <path d="M -260 860 L 700 980" fill="none" opacity="0.22" stroke="#CBD5E1" strokeWidth="5" />
@@ -376,6 +378,7 @@ async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }
               "home-signature-card-phone-receipt-recap"
             )}
             preview={previewSlug}
+            variant="framed"
           />
         ) : (
           <MockupPreviewPhone

@@ -8,8 +8,8 @@ import { mockupPreviews, type MockupPreviewSlug } from "../content/mockup-previe
 type StoryScene = (typeof siteCopy.shared.storyScenes)[number];
 type MockupPreviewCrop = "events" | "eventDetails" | "storiesSignature";
 type PreviewMotionMode = "active" | "static";
-type PreviewVariant = "trust" | "walkthrough";
-const PREVIEW_BUST = "20260502-13";
+type PreviewVariant = "framed" | "trust" | "walkthrough";
+const PREVIEW_BUST = "20260503-11";
 const PREVIEW_FADE_MS = 360;
 const PREVIEW_READY_MESSAGE = "gama-preview-ready";
 
@@ -329,13 +329,15 @@ function DeviceShell({
   crop,
   eager = false,
   onLoad,
-  preview = "overview-screen"
+  preview = "overview-screen",
+  variant
 }: {
   className?: string;
   crop?: MockupPreviewCrop;
   eager?: boolean;
   onLoad?: () => void;
   preview?: MockupPreviewSlug;
+  variant?: PreviewVariant;
 }) {
   return (
     <div className={joinClasses("device-shell device-shell-framed", className)}>
@@ -351,6 +353,7 @@ function DeviceShell({
             title={`Gama ${preview} preview`}
             {...(onLoad ? { onLoad } : {})}
             {...(crop ? { crop } : {})}
+            {...(variant ? { variant } : {})}
           />
         </div>
       </div>
@@ -362,12 +365,21 @@ export function MockupPreviewPhone({
   className,
   crop,
   preview,
+  variant,
 }: {
   className?: string;
   crop?: MockupPreviewCrop;
   preview: MockupPreviewSlug;
+  variant?: PreviewVariant;
 }) {
-  return <DeviceShell className={className ?? ""} preview={preview} {...(crop ? { crop } : {})} />;
+  return (
+    <DeviceShell
+      className={className ?? ""}
+      preview={preview}
+      {...(crop ? { crop } : {})}
+      {...(variant ? { variant } : {})}
+    />
+  );
 }
 
 export function MockupPreviewSurface({
@@ -706,7 +718,7 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
         title="Loaded"
       />
 
-      <DeviceShell className="premium-hero-device" eager onLoad={() => setReady(true)} preview="overview-screen" />
+      <DeviceShell className="premium-hero-device" eager onLoad={() => setReady(true)} preview="overview-screen" variant="framed" />
     </div>
   );
 }

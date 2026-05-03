@@ -64,7 +64,7 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 const previewHtmlCache = new Map<string, Promise<string>>();
 export type PreviewCrop = "events" | "eventDetails" | "storiesSignature";
 export type PreviewMotionMode = "active" | "static";
-export type PreviewVariant = "trust" | "walkthrough";
+export type PreviewVariant = "framed" | "trust" | "walkthrough";
 
 type TailwindConfig = Record<string, unknown>;
 
@@ -265,6 +265,8 @@ function buildSharedStyle(
 ) {
   const preview = mockupPreviews[slug];
   const previewRootBackground = preview.mode === "page" ? "transparent" : preview.background;
+  const previewContentInset = "1.35rem";
+  const previewTopInset = "1.5rem";
   const cropOffsetY = crop === "events" ? -815 : crop === "eventDetails" ? -180 : 0;
   const cropStyle =
     cropOffsetY !== 0
@@ -298,53 +300,101 @@ function buildSharedStyle(
   const trustContentInsetStyle =
     variant === "trust"
       ? `
+        .preview-scale-root > .immersive-dark-top,
+        .preview-scale-root > main,
+        .preview-scale-root .mobile-viewport > .immersive-dark-top,
+        .preview-scale-root .mobile-viewport > main,
         .preview-scale-root .mobile-container > .immersive-dark-top,
         .preview-scale-root .mobile-container > main {
-          padding-left: 1.35rem !important;
-          padding-right: 1.35rem !important;
+          padding-top: ${previewTopInset} !important;
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
         }
 
         .preview-scale-root main.luminous-glass > header {
-          padding-left: 1.35rem !important;
-          padding-right: 1.35rem !important;
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
         }
 
         .preview-scale-root .trust-review-scale,
         .preview-scale-root .trust-add-scale {
           width: 100% !important;
           margin-left: 0 !important;
-          padding-left: 1.35rem !important;
-          padding-right: 1.35rem !important;
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
         }
 
         .preview-scale-root nav.fixed,
         .preview-scale-root nav.absolute {
-          padding-left: 1.35rem !important;
-          padding-right: 1.35rem !important;
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
+        }
+
+        .preview-scale-root .glass-island-dark.rounded-full h1,
+        .preview-scale-root .overview-header-title,
+        .preview-scale-root .trust-nav-pill h1 {
+          line-height: 1 !important;
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+        }
+
+        .preview-scale-root .glass-island-dark.rounded-full,
+        .preview-scale-root .overview-header-pill,
+        .preview-scale-root .trust-nav-pill {
+          align-items: center !important;
+          min-height: 2rem !important;
+          padding-top: 0.42rem !important;
+          padding-bottom: 0.42rem !important;
         }
       `
       : "";
   const walkthroughContentInsetStyle =
     variant === "walkthrough"
       ? `
+        .preview-scale-root > .immersive-dark-top,
+        .preview-scale-root > main,
         .preview-scale-root .mobile-viewport > .immersive-dark-top,
         .preview-scale-root .mobile-viewport > main,
         .preview-scale-root .mobile-container > .immersive-dark-top,
         .preview-scale-root .mobile-container > main {
-          padding-left: 1.35rem !important;
-          padding-right: 1.35rem !important;
+          padding-top: ${previewTopInset} !important;
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
         }
 
         .preview-scale-root nav.fixed,
         .preview-scale-root nav.absolute {
-          padding-left: 1.35rem !important;
-          padding-right: 1.35rem !important;
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
         }
 
         .preview-scale-root main > .absolute.left-3.right-3,
         .preview-scale-root main > .absolute.left-3 {
-          left: 1.35rem !important;
-          right: 1.35rem !important;
+          left: ${previewContentInset} !important;
+          right: ${previewContentInset} !important;
+        }
+
+        .preview-scale-root .glass-island-dark.rounded-full h1,
+        .preview-scale-root .overview-header-title,
+        .preview-scale-root .trust-nav-pill h1 {
+          line-height: 1 !important;
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+        }
+
+        .preview-scale-root .glass-island-dark.rounded-full,
+        .preview-scale-root .overview-header-pill,
+        .preview-scale-root .trust-nav-pill {
+          align-items: center !important;
+          min-height: 2rem !important;
+          padding-top: 0.42rem !important;
+          padding-bottom: 0.42rem !important;
+        }
+
+        .preview-scale-root .glass-island-dark.rounded-full.px-4,
+        .preview-scale-root .overview-header-pill,
+        .preview-scale-root .trust-nav-pill {
+          min-width: 7rem !important;
         }
 
         .preview-scale-root .ios-glass-pill,
@@ -385,18 +435,153 @@ function buildSharedStyle(
         }
       `
       : "";
+  const framedContentInsetStyle =
+    variant === "framed"
+      ? `
+        .preview-scale-root > .immersive-dark-top,
+        .preview-scale-root > main,
+        .preview-scale-root .mobile-viewport > .immersive-dark-top,
+        .preview-scale-root .mobile-viewport > main,
+        .preview-scale-root .mobile-container > .immersive-dark-top,
+        .preview-scale-root .mobile-container > main {
+          padding-top: ${previewTopInset} !important;
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
+        }
+
+        .preview-scale-root nav.fixed,
+        .preview-scale-root nav.absolute {
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
+        }
+
+        .preview-scale-root main > .absolute.left-3.right-3,
+        .preview-scale-root main > .absolute.left-3 {
+          left: ${previewContentInset} !important;
+          right: ${previewContentInset} !important;
+        }
+
+        .preview-scale-root main > .absolute.left-3.right-3 > .bg-white\\/10 {
+          padding: 0 !important;
+          background: transparent !important;
+          border-color: transparent !important;
+        }
+
+        .preview-scale-root .glass-island-dark.rounded-full h1,
+        .preview-scale-root .overview-header-title,
+        .preview-scale-root .trust-nav-pill h1 {
+          line-height: 1 !important;
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+        }
+
+        .preview-scale-root .glass-island-dark.rounded-full,
+        .preview-scale-root .overview-header-pill,
+        .preview-scale-root .trust-nav-pill {
+          align-items: center !important;
+          min-height: 2rem !important;
+          padding-top: 0.42rem !important;
+          padding-bottom: 0.42rem !important;
+        }
+      `
+      : "";
   const overviewWalkthroughStyle =
     variant === "walkthrough" && slug === "overview-screen"
       ? `
         .preview-scale-root .mobile-viewport > .immersive-dark-top,
         .preview-scale-root .mobile-viewport > main {
-          padding-left: 0.72rem !important;
-          padding-right: 0.72rem !important;
+          padding-top: ${previewTopInset} !important;
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
         }
 
         .preview-scale-root .mobile-viewport main > .absolute.left-3.right-3 {
-          left: 0.72rem !important;
-          right: 0.72rem !important;
+          left: ${previewContentInset} !important;
+          right: ${previewContentInset} !important;
+        }
+
+        .preview-scale-root .mobile-viewport > main.pt-24 {
+          padding-top: 7.58rem !important;
+        }
+      `
+      : "";
+  const overviewFramedStyle =
+    variant === "framed" && slug === "overview-screen"
+      ? `
+        .preview-scale-root .mobile-viewport > main.pt-24 {
+          padding-top: 7.42rem !important;
+        }
+      `
+      : "";
+  const accountsWalkthroughInsetStyle =
+    variant === "walkthrough" && slug === "accounts"
+      ? `
+        .preview-scale-root .mobile-container {
+          width: 100% !important;
+          max-width: none !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+        }
+
+        .preview-scale-root .mobile-container > .immersive-dark-top,
+        .preview-scale-root .mobile-container > main {
+          padding-left: ${previewContentInset} !important;
+          padding-right: ${previewContentInset} !important;
+        }
+
+        .preview-scale-root .mobile-container main > .absolute.left-3.right-3 {
+          left: ${previewContentInset} !important;
+          right: ${previewContentInset} !important;
+        }
+      `
+      : "";
+  const accountsBridgeClearanceStyle =
+    (slug === "accounts" || slug === "accounts-trust") && (variant === "walkthrough" || variant === "trust")
+      ? `
+        .preview-scale-root .mobile-container > main.pt-18 {
+          padding-top: ${variant === "trust" ? "5.38rem" : "5.22rem"} !important;
+        }
+      `
+      : "";
+  const billsBridgeClearanceStyle =
+    variant === "walkthrough" && slug === "bills"
+      ? `
+        .preview-scale-root > main.pt-18 {
+          padding-top: 5.36rem !important;
+        }
+      `
+      : "";
+  const cashFlowBridgeClearanceStyle =
+    variant === "walkthrough" && slug === "cash-flow"
+      ? `
+        .preview-scale-root > main.pt-26 {
+          padding-top: 6.45rem !important;
+        }
+      `
+      : "";
+  const eventDetailsFramedStyle =
+    variant === "framed" && slug === "event-details"
+      ? `
+        .preview-scale-root main > .absolute.left-3.right-3 > .bg-white\\/10 {
+          padding: 0.38rem !important;
+          background: rgba(255, 255, 255, 0.1) !important;
+          border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .preview-scale-root main > .max-w-md.mx-auto {
+          padding-left: 0.55rem !important;
+          padding-right: 0.55rem !important;
+        }
+
+        .preview-scale-root .event-details-scroll-shell > .immersive-dark-top {
+          padding-top: 1.32rem !important;
+          padding-left: 1.52rem !important;
+          padding-right: 1.52rem !important;
+        }
+
+        .preview-scale-root .event-details-scroll-shell > .immersive-dark-top > header {
+          max-width: none !important;
+          margin-bottom: 2.75rem !important;
         }
       `
       : "";
@@ -438,9 +623,7 @@ function buildSharedStyle(
     variant === "trust" && slug === "transactions-categorized"
       ? `
         .preview-scale-root .immersive-dark-top > .relative.z-20 {
-          padding-top: 1rem !important;
-          padding-left: 1.35rem !important;
-          padding-right: 1.35rem !important;
+          padding: 0 !important;
         }
 
         .preview-scale-root .immersive-dark-top > .relative.z-20 > header {
@@ -480,15 +663,21 @@ function buildSharedStyle(
         .preview-scale-root > main {
           min-height: 100% !important;
           height: 100% !important;
-          padding-top: 1.25rem !important;
-          padding-left: 1rem !important;
-          padding-right: 1rem !important;
+          padding-top: 1.55rem !important;
+          padding-left: 1.55rem !important;
+          padding-right: 1.55rem !important;
           padding-bottom: 1.2rem !important;
           align-items: stretch !important;
         }
 
+        .preview-scale-root .story-scroll-shell > .w-full:first-child {
+          width: calc(100% - 1.1rem) !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
+        }
+
         .preview-scale-root > main > .absolute.left-3.top-64.bottom-60 {
-          top: 5.8rem !important;
+          top: 6.3rem !important;
           bottom: 1.4rem !important;
         }
 
@@ -498,7 +687,7 @@ function buildSharedStyle(
         }
 
         .preview-scale-root p.text-white\\/90.text-\\[18px\\] {
-          max-width: 16rem !important;
+          max-width: 14.6rem !important;
           font-size: 0.92rem !important;
           line-height: 1.42 !important;
         }
@@ -514,6 +703,10 @@ function buildSharedStyle(
           width: 100% !important;
           padding: 0.58rem 0.78rem !important;
           margin-bottom: 0 !important;
+        }
+
+        .preview-scale-root .story-success-confetti {
+          top: 0.9rem !important;
         }
       `
       : "";
@@ -686,11 +879,24 @@ function buildSharedStyle(
       vertical-align: middle !important;
       flex-shrink: 0 !important;
     }
+    .preview-scale-root svg[preserveaspectratio="none"] circle,
+    .preview-scale-root svg[preserveAspectRatio="none"] circle {
+      transform-box: fill-box !important;
+      transform-origin: center !important;
+      transform: scaleX(0.66) !important;
+    }
     ${viewportStyle}
     ${fixedNavStyle}
     ${trustContentInsetStyle}
     ${walkthroughContentInsetStyle}
+    ${framedContentInsetStyle}
     ${overviewWalkthroughStyle}
+    ${overviewFramedStyle}
+    ${accountsWalkthroughInsetStyle}
+    ${accountsBridgeClearanceStyle}
+    ${billsBridgeClearanceStyle}
+    ${cashFlowBridgeClearanceStyle}
+    ${eventDetailsFramedStyle}
     ${overviewGreenStyle}
     ${billsViewAllStyle}
     ${previewVariantStyle}

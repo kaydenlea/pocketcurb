@@ -35,7 +35,7 @@ function WalkthroughPreview({
       previewSlug={previewSlug}
       title={`Gama ${previewSlug} walkthrough preview`}
       {...(onActivePreviewChange ? { onActivePreviewChange } : {})}
-      {...(previewSlug === "accounts" ? {} : { variant: "walkthrough" as const })}
+      variant="walkthrough"
     />
   );
 }
@@ -49,7 +49,7 @@ function MobileWalkthroughPreviewPhone({ previewSlug }: { previewSlug: MockupPre
             className="device-iframe"
             previewSlug={previewSlug}
             title={`Gama ${previewSlug} mobile walkthrough preview`}
-            {...(previewSlug === "accounts" ? {} : { variant: "walkthrough" as const })}
+            variant="walkthrough"
           />
         </div>
       </div>
@@ -278,11 +278,13 @@ export function ScrollFeatureShowcase({
                   <div className="home-walkthrough-device-card">
                     <div className="home-walkthrough-device-viewport">
                       <div className="home-walkthrough-device-shell" aria-hidden="true">
-                        <WalkthroughPreview
-                          isActive
-                          onActivePreviewChange={handleDisplayedPreviewChange}
-                          previewSlug={activeStep.previewSlug}
-                        />
+                        <div className="home-walkthrough-preview-mask">
+                          <WalkthroughPreview
+                            isActive
+                            onActivePreviewChange={handleDisplayedPreviewChange}
+                            previewSlug={activeStep.previewSlug}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

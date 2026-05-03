@@ -24,7 +24,9 @@ export async function GET(
       : undefined;
   const motion: PreviewMotionMode = motionParam === "static" ? "static" : "active";
   const variant: PreviewVariant | undefined =
-    variantParam === "trust" || variantParam === "walkthrough" ? variantParam : undefined;
+    variantParam === "framed" || variantParam === "trust" || variantParam === "walkthrough"
+      ? variantParam
+      : undefined;
 
   if (!(slug in mockupPreviews)) {
     return new Response("Not found", {
