@@ -105,6 +105,22 @@ describe("POST /api/waitlist", () => {
     await expect(readJson(response)).resolves.toEqual({ status: "duplicate" });
   });
 
+  it("surfaces accepted_email_failed without turning it into a hard route error", async () => {
+    mockedSubmitWaitlistSignup.mockResolvedValue({ status: "accepted_email_failed" });
+
+    const response = await POST(
+      createWaitlistRequest(
+        JSON.stringify({
+          email: "user@example.com",
+          marketingConsent: true
+        })
+      )
+    );
+
+    expect(response.status).toBe(202);
+    await expect(readJson(response)).resolves.toEqual({ status: "accepted_email_failed" });
+  });
+
   it("rejects non-JSON requests before rate limiting or backend work", async () => {
     const response = await POST(createWaitlistRequest("email=user@example.com", { "content-type": "text/plain" }));
 

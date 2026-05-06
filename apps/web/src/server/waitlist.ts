@@ -17,7 +17,25 @@ export type WaitlistRequestContext = {
 
 export type WaitlistSubmissionOutcome =
   | { status: "accepted" }
+  | { status: "accepted_email_failed" }
   | { status: "duplicate" };
+
+type WaitlistStoredSignup = {
+  confirmationEmailSentAt: string | null;
+  email: string;
+  notificationEmailSentAt: string | null;
+};
+
+type WaitlistEmailMessage = {
+  html: string;
+  sentAtColumn: "confirmation_email_sent_at" | "notification_email_sent_at";
+  subject: string;
+  to: string;
+};
+
+type WaitlistStorageOutcome =
+  | { status: "accepted"; storedSignup: WaitlistStoredSignup }
+  | { status: "duplicate"; storedSignup: WaitlistStoredSignup };
 
 export class WaitlistConfigurationError extends Error {
   constructor(message = "Waitlist backend is not configured.") {
@@ -34,7 +52,15 @@ export class WaitlistStorageError extends Error {
 }
 
 export class WaitlistEmailError extends Error {
-  constructor(message = "Waitlist email could not be sent.") {
+  constructor(
+    message = "Waitlist email could not be sent.",
+    readonly details?: {
+      recipient?: string;
+      responseBody?: string;
+      status?: number;
+      subject?: string;
+    }
+  ) {
     super(message);
     this.name = "WaitlistEmailError";
   }
@@ -125,22 +151,28 @@ export async function submitWaitlistSignup(
   const submittedAt = dependencies.now().toISOString();
 
   const storageOutcome = await storeWaitlistSignup(signup, context, submittedAt, config, dependencies);
-  if (storageOutcome.status === "duplicate") {
-    return storageOutcome;
+
+  const emailMessages = buildWaitlistEmailMessages(signup, config, storageOutcome.storedSignup);
+
+  if (storageOutcome.status === "duplicate" && emailMessages.length === 0) {
+    return { status: "duplicate" };
   }
 
   try {
-    await sendWaitlistEmails(signup, config, dependencies);
+    await sendWaitlistEmails(signup.email, emailMessages, config, dependencies);
   } catch (error) {
     const logger = dependencies.logger ?? console;
 
     logger.error("Waitlist signup stored, but email delivery failed.", {
       email: signup.email,
-      error
+      error: error instanceof Error ? error.message : error,
+      ...(error instanceof WaitlistEmailError && error.details ? { emailFailure: error.details } : {})
     });
+
+    return { status: "accepted_email_failed" };
   }
 
-  return { status: "accepted" };
+  return { status: storageOutcome.status };
 }
 
 function buildWaitlistRateLimitKeys(input: WaitlistRateLimitInput): string[] {
@@ -163,14 +195,14 @@ async function storeWaitlistSignup(
   submittedAt: string,
   config: WaitlistRuntimeConfig,
   dependencies: WaitlistDependencies
-): Promise<WaitlistSubmissionOutcome> {
-  const response = await dependencies.fetch(`${config.supabaseUrl}/rest/v1/waitlist_signups`, {
+): Promise<WaitlistStorageOutcome> {
+  const requestInit = {
     method: "POST",
     headers: {
       apikey: config.supabaseServiceRoleKey,
       authorization: `Bearer ${config.supabaseServiceRoleKey}`,
       "content-type": "application/json",
-      prefer: "return=minimal"
+      prefer: "return=representation"
     },
     body: JSON.stringify({
       email: signup.email,
@@ -183,52 +215,247 @@ async function storeWaitlistSignup(
       user_agent: context.userAgent ?? null,
       ip_address: context.ipAddress ?? null
     })
-  });
+  } as const;
+
+  let response: Response;
+
+  try {
+    response = await dependencies.fetch(`${config.supabaseUrl}/rest/v1/waitlist_signups`, requestInit);
+  } catch {
+    throw new WaitlistStorageError();
+  }
 
   if (response.ok) {
-    return { status: "accepted" };
+    return {
+      status: "accepted",
+      storedSignup: await readStoredSignupFromWriteResponse(response)
+    };
   }
 
   if (response.status === 409) {
-    return { status: "duplicate" };
+    return {
+      status: "duplicate",
+      storedSignup: await readExistingWaitlistSignup(signup.email, config, dependencies)
+    };
   }
 
   throw new WaitlistStorageError();
 }
 
-async function sendWaitlistEmails(
+async function readStoredSignupFromWriteResponse(response: Response): Promise<WaitlistStoredSignup> {
+  let body: unknown;
+
+  try {
+    body = (await response.json()) as unknown;
+  } catch {
+    throw new WaitlistStorageError();
+  }
+
+  if (!Array.isArray(body) || body.length !== 1) {
+    throw new WaitlistStorageError();
+  }
+
+  return parseStoredSignup(body[0]);
+}
+
+async function readExistingWaitlistSignup(
+  email: string,
+  config: WaitlistRuntimeConfig,
+  dependencies: WaitlistDependencies
+): Promise<WaitlistStoredSignup> {
+  const params = new URLSearchParams({
+    select: "email,confirmation_email_sent_at,notification_email_sent_at",
+    email: `eq.${email}`,
+    limit: "1"
+  });
+
+  let response: Response;
+
+  try {
+    response = await dependencies.fetch(`${config.supabaseUrl}/rest/v1/waitlist_signups?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        apikey: config.supabaseServiceRoleKey,
+        authorization: `Bearer ${config.supabaseServiceRoleKey}`
+      }
+    });
+  } catch {
+    throw new WaitlistStorageError();
+  }
+
+  if (!response.ok) {
+    throw new WaitlistStorageError();
+  }
+
+  let body: unknown;
+
+  try {
+    body = (await response.json()) as unknown;
+  } catch {
+    throw new WaitlistStorageError();
+  }
+
+  if (!Array.isArray(body) || body.length !== 1) {
+    throw new WaitlistStorageError();
+  }
+
+  return parseStoredSignup(body[0]);
+}
+
+function parseStoredSignup(value: unknown): WaitlistStoredSignup {
+  if (!value || typeof value !== "object") {
+    throw new WaitlistStorageError();
+  }
+
+  const maybeStored = value as Record<string, unknown>;
+  const email = maybeStored.email;
+  const confirmationEmailSentAt = maybeStored.confirmation_email_sent_at;
+  const notificationEmailSentAt = maybeStored.notification_email_sent_at;
+
+  if (typeof email !== "string") {
+    throw new WaitlistStorageError();
+  }
+
+  if (confirmationEmailSentAt !== null && typeof confirmationEmailSentAt !== "string") {
+    throw new WaitlistStorageError();
+  }
+
+  if (notificationEmailSentAt !== null && typeof notificationEmailSentAt !== "string") {
+    throw new WaitlistStorageError();
+  }
+
+  return {
+    email,
+    confirmationEmailSentAt,
+    notificationEmailSentAt
+  };
+}
+
+function buildWaitlistEmailMessages(
   signup: WaitlistSignup,
+  config: WaitlistRuntimeConfig,
+  storedSignup: WaitlistStoredSignup
+): WaitlistEmailMessage[] {
+  const messages: WaitlistEmailMessage[] = [];
+
+  if (!storedSignup.confirmationEmailSentAt) {
+    messages.push({
+      to: signup.email,
+      subject: "You're on the Gama waitlist",
+      html: buildConfirmationEmail(signup),
+      sentAtColumn: "confirmation_email_sent_at"
+    });
+  }
+
+  if (!storedSignup.notificationEmailSentAt) {
+    messages.push({
+      to: config.waitlistNotifyEmail,
+      subject: `New Gama waitlist signup: ${signup.email}`,
+      html: buildInternalNotificationEmail(signup),
+      sentAtColumn: "notification_email_sent_at"
+    });
+  }
+
+  return messages;
+}
+
+async function sendWaitlistEmails(
+  signupEmail: string,
+  messages: WaitlistEmailMessage[],
   config: WaitlistRuntimeConfig,
   dependencies: WaitlistDependencies
 ): Promise<void> {
-  const messages = [
-    {
-      from: config.waitlistFromEmail,
-      to: signup.email,
-      subject: "You're on the Gama waitlist",
-      html: buildConfirmationEmail(signup)
-    },
-    {
-      from: config.waitlistFromEmail,
-      to: config.waitlistNotifyEmail,
-      subject: `New Gama waitlist signup: ${signup.email}`,
-      html: buildInternalNotificationEmail(signup)
-    }
-  ];
-
   for (const message of messages) {
-    const response = await dependencies.fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${config.resendApiKey}`,
-        "content-type": "application/json"
-      },
-      body: JSON.stringify(message)
-    });
+    let response: Response;
+
+    try {
+      response = await dependencies.fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${config.resendApiKey}`,
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          from: config.waitlistFromEmail,
+          to: message.to,
+          subject: message.subject,
+          html: message.html
+        })
+      });
+    } catch {
+      throw new WaitlistEmailError("Waitlist email could not be sent.", {
+        recipient: message.to,
+        subject: message.subject
+      });
+    }
 
     if (!response.ok) {
-      throw new WaitlistEmailError();
+      let responseBody = "";
+
+      try {
+        responseBody = await response.text();
+      } catch {
+        responseBody = "";
+      }
+
+      throw new WaitlistEmailError("Waitlist email could not be sent.", {
+        recipient: message.to,
+        responseBody,
+        status: response.status,
+        subject: message.subject
+      });
     }
+
+    await markWaitlistEmailDelivered(signupEmail, message.sentAtColumn, config, dependencies);
+  }
+}
+
+async function markWaitlistEmailDelivered(
+  signupEmail: string,
+  sentAtColumn: WaitlistEmailMessage["sentAtColumn"],
+  config: WaitlistRuntimeConfig,
+  dependencies: WaitlistDependencies
+): Promise<void> {
+  const params = new URLSearchParams({
+    email: `eq.${signupEmail}`
+  });
+
+  let response: Response;
+
+  try {
+    response = await dependencies.fetch(`${config.supabaseUrl}/rest/v1/waitlist_signups?${params.toString()}`, {
+      method: "PATCH",
+      headers: {
+        apikey: config.supabaseServiceRoleKey,
+        authorization: `Bearer ${config.supabaseServiceRoleKey}`,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        [sentAtColumn]: dependencies.now().toISOString()
+      })
+    });
+  } catch {
+    throw new WaitlistEmailError("Waitlist email delivery state could not be updated.", {
+      recipient: signupEmail,
+      subject: sentAtColumn
+    });
+  }
+
+  if (!response.ok) {
+    let responseBody = "";
+
+    try {
+      responseBody = await response.text();
+    } catch {
+      responseBody = "";
+    }
+
+    throw new WaitlistEmailError("Waitlist email delivery state could not be updated.", {
+      recipient: signupEmail,
+      responseBody,
+      status: response.status,
+      subject: sentAtColumn
+    });
   }
 }
 

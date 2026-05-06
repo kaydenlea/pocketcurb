@@ -6,6 +6,7 @@ type SubmissionState =
   | "idle"
   | "submitting"
   | "accepted"
+  | "acceptedEmailFailed"
   | "duplicate"
   | "invalid"
   | "unavailable"
@@ -35,6 +36,10 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
 
     if (state === "duplicate") {
       return "That email is already on the list. You're all set.";
+    }
+
+    if (state === "acceptedEmailFailed") {
+      return "You're on the list, but the confirmation email did not send.";
     }
 
     if (state === "invalid") {
@@ -88,6 +93,12 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
         return;
       }
 
+      if (response.ok && body?.status === "accepted_email_failed") {
+        setState("acceptedEmailFailed");
+        form.reset();
+        return;
+      }
+
       if (response.ok && body?.status === "duplicate") {
         setState("duplicate");
         form.reset();
@@ -99,7 +110,7 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
         return;
       }
 
-      if (response.status === 502 || response.status === 503) {
+      if (response.status === 429 || response.status === 502 || response.status === 503) {
         setState("unavailable");
         return;
       }
@@ -111,7 +122,7 @@ export function WaitlistSignupForm({ expectations }: WaitlistSignupFormProps) {
   }
 
   const isSubmitting = state === "submitting";
-  const isSuccess = state === "accepted" || state === "duplicate";
+  const isSuccess = state === "accepted" || state === "acceptedEmailFailed" || state === "duplicate";
   const messageTone = isSuccess ? "text-[var(--color-teal)]" : "text-[var(--color-muted)]";
 
   return (

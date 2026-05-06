@@ -2,7 +2,15 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 
-type SubmissionState = "idle" | "submitting" | "accepted" | "duplicate" | "invalid" | "unavailable" | "error";
+type SubmissionState =
+  | "idle"
+  | "submitting"
+  | "accepted"
+  | "acceptedEmailFailed"
+  | "duplicate"
+  | "invalid"
+  | "unavailable"
+  | "error";
 
 type HeroWaitlistFormProps = {
   ctaLabel: string;
@@ -18,6 +26,10 @@ export function HeroWaitlistForm({ ctaLabel }: HeroWaitlistFormProps) {
 
     if (state === "duplicate") {
       return "That email is already on the list. You're all set.";
+    }
+
+    if (state === "acceptedEmailFailed") {
+      return "You're on the list, but the confirmation email did not send.";
     }
 
     if (state === "invalid") {
@@ -64,6 +76,12 @@ export function HeroWaitlistForm({ ctaLabel }: HeroWaitlistFormProps) {
         return;
       }
 
+      if (response.ok && body?.status === "accepted_email_failed") {
+        setState("acceptedEmailFailed");
+        form.reset();
+        return;
+      }
+
       if (response.ok && body?.status === "duplicate") {
         setState("duplicate");
         form.reset();
@@ -87,7 +105,7 @@ export function HeroWaitlistForm({ ctaLabel }: HeroWaitlistFormProps) {
   }
 
   const isSubmitting = state === "submitting";
-  const isSuccess = state === "accepted" || state === "duplicate";
+  const isSuccess = state === "accepted" || state === "acceptedEmailFailed" || state === "duplicate";
   const statusClassName = isSuccess
     ? "hero-waitlist-inline-status hero-waitlist-inline-status-success"
     : "hero-waitlist-inline-status";

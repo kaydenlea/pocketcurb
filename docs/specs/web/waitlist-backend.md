@@ -40,10 +40,11 @@ Fields:
 Responses:
 
 - `202 { "status": "accepted" }`: signup stored and emails sent.
+- `202 { "status": "accepted_email_failed" }`: signup stored, but one or more waitlist emails failed after storage.
 - `202 { "status": "duplicate" }`: email already exists; treat as a successful idempotent signup.
 - `400 { "error": "invalid_waitlist_signup" }`: validation failed.
 - `503 { "error": "waitlist_not_configured" }`: required backend secrets are missing.
-- `502 { "error": "waitlist_unavailable" }`: storage or email provider failed.
+- `502 { "error": "waitlist_unavailable" }`: storage failed before the signup could be safely accepted.
 
 ## Storage
 
@@ -86,7 +87,7 @@ When the visual waitlist form is ready:
 
 1. Import `waitlistSignupSchema` from `@gama/schemas` for client-side validation or type alignment.
 2. Submit form data to `/api/waitlist`.
-3. Show a success state for both `accepted` and `duplicate`.
+3. Show a success state for `accepted`, `accepted_email_failed`, and `duplicate`, but make the email-failed variant explicit to the user.
 4. Show inline validation copy for `400`.
 5. Show a temporary unavailable message for `502` or `503`.
 6. Keep the honeypot field hidden from users and leave it empty.

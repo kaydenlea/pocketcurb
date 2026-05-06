@@ -14,7 +14,7 @@ Implemented files:
 - `packages/schemas/src/__tests__/schemas.unit.test.ts` covers waitlist input validation.
 - `apps/web/app/api/waitlist/route.ts` exposes `POST /api/waitlist`.
 - `apps/web/src/server/waitlist.ts` stores signups in Supabase and sends Resend emails.
-- `apps/web/src/server/waitlist.unit.test.ts` covers storage, duplicate, config, and email error behavior.
+- `apps/web/src/server/waitlist.unit.test.ts` covers storage, duplicate recovery, config, and email error behavior.
 - `supabase/migrations/20260418000100_create_waitlist_signups.sql` defines the waitlist table and service-role-only policy.
 - `scripts/setup-pocketcurb-supabase-env.mjs` helps populate local Supabase env values.
 
@@ -46,7 +46,7 @@ The route:
 2. Validates with `waitlistSignupSchema`.
 3. Reads server-only env from `process.env`.
 4. Inserts into `public.waitlist_signups` through Supabase REST using the service-role key.
-5. Treats Supabase `409` unique-email conflicts as an idempotent duplicate success.
+5. Treats Supabase `409` unique-email conflicts as an idempotent duplicate success and retries only the email types whose delivery state is still unset.
 6. Sends two Resend emails for new signups:
    - confirmation email to the signup email
    - internal notification email to `WAITLIST_NOTIFY_EMAIL`
@@ -102,6 +102,16 @@ Duplicate email:
 { "status": "duplicate" }
 ```
 
+Stored but email delivery failed:
+
+```http
+202 Accepted
+```
+
+```json
+{ "status": "accepted_email_failed" }
+```
+
 Invalid JSON:
 
 ```http
@@ -132,7 +142,7 @@ Missing server env:
 { "error": "waitlist_not_configured" }
 ```
 
-Supabase or Resend failure:
+Supabase storage failure:
 
 ```http
 502 Bad Gateway
@@ -210,6 +220,8 @@ Columns:
 - `referral_source text`
 - `marketing_consent boolean not null`
 - `submitted_at timestamptz not null default timezone('utc', now())`
+- `confirmation_email_sent_at timestamptz`
+- `notification_email_sent_at timestamptz`
 - `user_agent text`
 - `ip_address text`
 - `created_at timestamptz not null default timezone('utc', now())`
@@ -304,7 +316,7 @@ Expected first response:
 { "status": "accepted" }
 ```
 
-Expected duplicate response:
+Expected duplicate response after all delivery state is already complete:
 
 ```json
 { "status": "duplicate" }
@@ -317,7 +329,7 @@ When wiring the landing page form:
 1. Submit to `POST /api/waitlist`.
 2. Send `marketingConsent: true` only after the user explicitly consents.
 3. Include a hidden honeypot input named `website`; keep it empty.
-4. Treat `accepted` and `duplicate` as success states.
+4. Treat `accepted`, `accepted_email_failed`, and `duplicate` as success states, but show a distinct message for `accepted_email_failed`.
 5. Show field-level validation for `400`.
 6. Show temporary unavailable copy for `429`, `502`, or `503`.
 7. Do not expose Supabase or Resend keys to the client.
@@ -332,7 +344,9 @@ Before real public traffic:
 
 Current behavior stores first and emails second. Supabase storage success is the
 primary success condition. If Resend fails after storage succeeds, the route
-still returns `202` and logs the email failure for manual follow-up or retry.
+returns `202 { "status": "accepted_email_failed" }`, logs the email failure for
+manual follow-up, and leaves the delivery-state columns unset so a later
+duplicate retry can send only the missing email types.
 
 Basic rate limiting is applied before storage and email delivery. The initial
 limit is 5 submissions per 10 minutes by IP address and by email address, backed
