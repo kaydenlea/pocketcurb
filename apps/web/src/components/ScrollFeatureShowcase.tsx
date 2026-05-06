@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { mockupPreviews, type MockupPreviewSlug } from "../content/mockup-previews";
 import { EmbeddedPreviewFrame } from "./ProductVisuals";
 
@@ -21,20 +21,17 @@ function joinClasses(...classes: Array<string | false | null | undefined>) {
 }
 
 function WalkthroughPreview({
-  isActive,
-  onActivePreviewChange,
   previewSlug
 }: {
-  isActive?: boolean;
-  onActivePreviewChange?: (previewSlug: MockupPreviewSlug) => void;
   previewSlug: MockupPreviewSlug;
 }) {
   return (
     <EmbeddedPreviewFrame
-      className={joinClasses("home-walkthrough-preview-frame", isActive && "home-walkthrough-preview-frame-active")}
+      className="home-walkthrough-preview-frame home-walkthrough-preview-frame-active"
+      eager
       previewSlug={previewSlug}
+      suspendWhenOffscreen={false}
       title={`Gama ${previewSlug} walkthrough preview`}
-      {...(onActivePreviewChange ? { onActivePreviewChange } : {})}
       variant="walkthrough"
     />
   );
@@ -63,7 +60,6 @@ export function ScrollFeatureShowcase({
   steps: readonly ShowcaseStep[];
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [displayedIndex, setDisplayedIndex] = useState(0);
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const regionRef = useRef<HTMLDivElement | null>(null);
@@ -73,14 +69,6 @@ export function ScrollFeatureShowcase({
 
   activeIndexRef.current = activeIndex;
   scrollProgressRef.current = scrollProgress;
-
-  const handleDisplayedPreviewChange = useCallback((previewSlug: MockupPreviewSlug) => {
-    const nextDisplayedIndex = steps.findIndex((step) => step.previewSlug === previewSlug);
-
-    if (nextDisplayedIndex >= 0) {
-      setDisplayedIndex(nextDisplayedIndex);
-    }
-  }, [steps]);
 
   useEffect(() => {
     const desktopQuery = window.matchMedia(DESKTOP_BREAKPOINT_QUERY);
@@ -207,10 +195,8 @@ export function ScrollFeatureShowcase({
   }
 
   const activeStep = (steps[activeIndex] ?? steps[0])!;
-  const displayedStep = (steps[displayedIndex] ?? activeStep)!;
   const desktopStepCount = Math.max(steps.length - 1, 0);
-  const progressDisplay = `${displayedIndex + 1}/${steps.length}`;
-
+  const progressDisplay = `${activeIndex + 1}/${steps.length}`;
   return (
     <section className="home-walkthrough-band" aria-label="Product walkthrough">
       <div className="site-shell home-walkthrough-shell">
@@ -232,7 +218,7 @@ export function ScrollFeatureShowcase({
                     <div className="home-walkthrough-progress-meta" aria-label="Walkthrough progress">
                       <div className="home-walkthrough-progress-head">
                         <span className="home-walkthrough-progress-count">{progressDisplay}</span>
-                        <span className="home-walkthrough-progress-title">{displayedStep.eyebrow}</span>
+                        <span className="home-walkthrough-progress-title">{activeStep.eyebrow}</span>
                       </div>
                       <div className="home-walkthrough-progress-track" aria-hidden="true">
                         {steps.map((step, index) => {
@@ -247,7 +233,7 @@ export function ScrollFeatureShowcase({
                               className={joinClasses(
                                 "home-walkthrough-progress-segment",
                                 isActive && "home-walkthrough-progress-segment-active",
-                                index === displayedIndex && "home-walkthrough-progress-segment-current",
+                                index === activeIndex && "home-walkthrough-progress-segment-current",
                               )}
                             >
                               <span
@@ -260,13 +246,13 @@ export function ScrollFeatureShowcase({
                       </div>
                     </div>
 
-                    <article key={displayedStep.id} className="home-walkthrough-copy-card" aria-live="polite">
-                      <span className="home-walkthrough-step-index">{displayedStep.stepLabel}</span>
-                      <h3>{displayedStep.title}</h3>
-                      <p>{displayedStep.body}</p>
+                    <article key={activeStep.id} className="home-walkthrough-copy-card" aria-live="polite">
+                      <span className="home-walkthrough-step-index">{activeStep.stepLabel}</span>
+                      <h3>{activeStep.title}</h3>
+                      <p>{activeStep.body}</p>
 
                       <ul className="home-walkthrough-step-highlights">
-                        {displayedStep.highlights.map((highlight) => (
+                        {activeStep.highlights.map((highlight) => (
                           <li key={highlight}>{highlight}</li>
                         ))}
                       </ul>
@@ -279,11 +265,17 @@ export function ScrollFeatureShowcase({
                     <div className="home-walkthrough-device-viewport">
                       <div className="home-walkthrough-device-shell" aria-hidden="true">
                         <div className="home-walkthrough-preview-mask">
-                          <WalkthroughPreview
-                            isActive
-                            onActivePreviewChange={handleDisplayedPreviewChange}
-                            previewSlug={activeStep.previewSlug}
-                          />
+                          {steps.map((step, index) => (
+                            <div
+                              key={step.id}
+                              className={joinClasses(
+                                "home-preview-layer",
+                                index === activeIndex && "home-preview-layer-active",
+                              )}
+                            >
+                              <WalkthroughPreview previewSlug={step.previewSlug} />
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>

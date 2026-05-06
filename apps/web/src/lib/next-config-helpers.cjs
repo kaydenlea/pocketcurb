@@ -5,9 +5,11 @@ function buildContentSecurityPolicy(nodeEnv, options = {}) {
   const { allowEmbeddedPreview = false, allowRemoteAssets = false } = options;
   const previewStyleSources = ["https://fonts.googleapis.com"];
   const previewFontSources = ["https://fonts.gstatic.com"];
+  const previewScriptSources = ["https://cdn.tailwindcss.com"];
   const scriptSources = [
     "'self'",
     "'unsafe-inline'",
+    ...(allowRemoteAssets ? previewScriptSources : []),
     ...(isDevelopment ? ["'unsafe-eval'"] : [])
   ];
   const styleSources = ["'self'", "'unsafe-inline'", ...(allowRemoteAssets ? previewStyleSources : [])];

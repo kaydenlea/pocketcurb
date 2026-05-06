@@ -9,7 +9,7 @@ type StoryScene = (typeof siteCopy.shared.storyScenes)[number];
 type MockupPreviewCrop = "events" | "eventDetails" | "storiesSignature";
 type PreviewMotionMode = "active" | "static";
 type PreviewVariant = "framed" | "trust" | "walkthrough";
-const PREVIEW_BUST = "20260503-11";
+const PREVIEW_BUST = "20260503-12";
 const PREVIEW_FADE_MS = 360;
 const PREVIEW_READY_MESSAGE = "gama-preview-ready";
 
@@ -64,12 +64,14 @@ function PreviewFrameLayer({
   useEffect(() => {
     hasMarkedReadyRef.current = false;
 
+    loadFallbackIdRef.current = window.setTimeout(markReady, eager ? 1200 : 2600);
+
     return () => {
       if (loadFallbackIdRef.current !== undefined) {
         window.clearTimeout(loadFallbackIdRef.current);
       }
     };
-  }, [frame.id, frame.src]);
+  }, [eager, frame.id, frame.src, markReady]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -106,7 +108,11 @@ function PreviewFrameLayer({
       data-preview-frame-status={frame.status}
       loading={eager ? "eager" : "lazy"}
       onLoad={() => {
-        loadFallbackIdRef.current = window.setTimeout(markReady, eager ? 900 : 2400);
+        if (loadFallbackIdRef.current !== undefined) {
+          window.clearTimeout(loadFallbackIdRef.current);
+        }
+
+        loadFallbackIdRef.current = window.setTimeout(markReady, 120);
       }}
       name={readyToken}
       sandbox="allow-scripts"
@@ -114,6 +120,58 @@ function PreviewFrameLayer({
       src={frame.src}
       tabIndex={-1}
       title={title}
+    />
+  );
+}
+
+export function PreviewFramePreloader({
+  previewSlug,
+  crop,
+  motion = "active",
+  variant,
+}: {
+  previewSlug: MockupPreviewSlug;
+  crop?: MockupPreviewCrop;
+  motion?: PreviewMotionMode;
+  variant?: PreviewVariant;
+}) {
+  const src = useMemo(() => {
+    const params = new URLSearchParams();
+
+    if (crop) {
+      params.set("crop", crop);
+    }
+
+    if (motion !== "active") {
+      params.set("motion", motion);
+    }
+
+    if (variant) {
+      params.set("variant", variant);
+    }
+
+    params.set("v", PREVIEW_BUST);
+    return `/preview/${previewSlug}?${params.toString()}`;
+  }, [crop, motion, previewSlug, variant]);
+
+  return (
+    <iframe
+      aria-hidden="true"
+      loading="eager"
+      sandbox="allow-scripts"
+      scrolling="no"
+      src={src}
+      tabIndex={-1}
+      title={`Preload ${previewSlug}`}
+      style={{
+        position: "absolute",
+        width: 1,
+        height: 1,
+        opacity: 0,
+        pointerEvents: "none",
+        border: 0,
+        inset: 0,
+      }}
     />
   );
 }
@@ -197,7 +255,10 @@ export function EmbeddedPreviewFrame({
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        setIsNearViewport(Boolean(entry?.isIntersecting));
+
+        if (entry?.isIntersecting) {
+          setIsNearViewport(true);
+        }
       },
       { rootMargin }
     );
@@ -233,7 +294,7 @@ export function EmbeddedPreviewFrame({
   }, [src]);
 
   useEffect(() => {
-    if (isNearViewport) {
+    if (isNearViewport || !suspendWhenOffscreen) {
       return;
     }
 
@@ -245,7 +306,7 @@ export function EmbeddedPreviewFrame({
         status: "active",
       },
     ]);
-  }, [isNearViewport, src]);
+  }, [isNearViewport, src, suspendWhenOffscreen]);
 
   useEffect(() => {
     if (!frames.some((frame) => frame.status === "outgoing")) {

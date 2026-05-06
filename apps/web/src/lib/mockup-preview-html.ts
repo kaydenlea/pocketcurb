@@ -1,20 +1,55 @@
-import { readFileSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import vm from "node:vm";
-import { compile } from "tailwindcss";
+import { fileURLToPath } from "node:url";
 import { mockupPreviews, type MockupPreviewSlug } from "../content/mockup-previews";
 
-const MOCKUP_DIR = join(process.cwd(), "src", "content", "mockups");
-const TAILWIND_ENTRY = resolve(process.cwd(), "node_modules", "tailwindcss", "index.css");
+const moduleDir = dirname(fileURLToPath(import.meta.url));
+let materialSymbolsBase64: string | undefined;
+
+function resolveAppRoot() {
+  const candidates = [
+    process.cwd(),
+    join(process.cwd(), "apps", "web"),
+    resolve(moduleDir, "../.."),
+    resolve(moduleDir, "../../.."),
+    resolve(moduleDir, "../../../.."),
+    resolve(moduleDir, "../../../../.."),
+  ];
+
+  const appRootCandidate = candidates.find((candidatePath) =>
+    existsSync(join(candidatePath, "src", "content", "mockups", "overview-screen.html")),
+  );
+
+  if (appRootCandidate) {
+    return appRootCandidate;
+  }
+
+  return join(process.cwd(), "apps", "web");
+}
+
+const appRootDir = resolveAppRoot();
+const MOCKUP_DIR = join(appRootDir, "src", "content", "mockups");
 const MATERIAL_SYMBOLS_FONT = join(MOCKUP_DIR, "material-symbols-outlined.woff2");
-const MATERIAL_SYMBOLS_BASE64 = readFileSync(MATERIAL_SYMBOLS_FONT).toString("base64");
+
+function getMaterialSymbolsBase64() {
+  if (materialSymbolsBase64 !== undefined) {
+    return materialSymbolsBase64;
+  }
+
+  try {
+    materialSymbolsBase64 = readFileSync(MATERIAL_SYMBOLS_FONT).toString("base64");
+  } catch {
+    materialSymbolsBase64 = "";
+  }
+
+  return materialSymbolsBase64;
+}
 
 function buildManropeFontFaces(): string {
   try {
     const manifestCandidates = [
-      join(process.cwd(), ".next", "server", "next-font-manifest.json"),
-      join(process.cwd(), ".next", "dev", "server", "next-font-manifest.json"),
+      join(appRootDir, ".next", "server", "next-font-manifest.json"),
+      join(appRootDir, ".next", "dev", "server", "next-font-manifest.json"),
     ];
     const manifestPath = manifestCandidates.find((path) => {
       try {
@@ -66,8 +101,6 @@ export type PreviewCrop = "events" | "eventDetails" | "storiesSignature";
 export type PreviewMotionMode = "active" | "static";
 export type PreviewVariant = "framed" | "trust" | "walkthrough";
 
-type TailwindConfig = Record<string, unknown>;
-
 const materialSymbolCodepoints: Record<string, string> = {
   account_balance_wallet: "e850",
   add: "e145",
@@ -115,86 +148,6 @@ const materialSymbolCodepoints: Record<string, string> = {
   tune: "e429",
 };
 
-function extractTailwindConfig(source: string): TailwindConfig {
-  const match = source.match(/<script id="tailwind-config">([\s\S]*?)<\/script>/i);
-
-  if (!match) {
-    return {};
-  }
-
-  const context = { tailwind: {} as { config?: TailwindConfig } };
-  vm.runInNewContext(match[1] ?? "", context, { timeout: 100 });
-
-  return context.tailwind.config ?? {};
-}
-
-function normalizeTailwindConfig(config: TailwindConfig): TailwindConfig {
-  const clone = structuredClone(config);
-  const theme = (clone.theme ?? {}) as Record<string, unknown>;
-  const extend = (theme.extend ?? {}) as Record<string, unknown>;
-  const fontFamily = (extend.fontFamily ?? {}) as Record<string, unknown>;
-  const stableSans = [
-    '"Gama Mockup Manrope"',
-    "Manrope",
-    '"Segoe UI Variable Display"',
-    '"SF Pro Display"',
-    '"Helvetica Neue"',
-    "Arial",
-    "sans-serif",
-  ];
-  const stableMono = [
-    '"JetBrains Mono"',
-    '"SFMono-Regular"',
-    "Menlo",
-    "Monaco",
-    "Consolas",
-    '"Liberation Mono"',
-    '"Courier New"',
-    "monospace",
-  ];
-
-  for (const [key, value] of Object.entries(fontFamily)) {
-    if (!Array.isArray(value)) {
-      continue;
-    }
-
-    fontFamily[key] = value.includes("JetBrains Mono") ? stableMono : stableSans;
-  }
-
-  extend.fontFamily = fontFamily;
-  theme.extend = extend;
-  clone.theme = theme;
-
-  return clone;
-}
-
-function extractTailwindCandidates(source: string) {
-  const candidates = new Set<string>();
-  const classPattern = /class(?:Name)?\s*=\s*(?:"([^"]+)"|'([^']+)')/g;
-
-  for (const match of source.matchAll(classPattern)) {
-    const classValue = match[1] ?? match[2] ?? "";
-
-    for (const candidate of classValue.split(/\s+/)) {
-      if (candidate.trim()) {
-        candidates.add(candidate.trim());
-      }
-    }
-  }
-
-  return Array.from(candidates);
-}
-
-function stripRuntimeDependencies(source: string) {
-  return source
-    .replace(/<script src="https:\/\/cdn\.tailwindcss\.com[^"]*"><\/script>\s*/gi, "")
-    .replace(/<script id="tailwind-config">[\s\S]*?<\/script>\s*/gi, "")
-    .replace(
-      /<link href="https:\/\/fonts\.googleapis\.com\/css2\?family=Material\+Symbols\+Outlined[^"]*" rel="stylesheet"\/>\s*/gi,
-      "",
-    );
-}
-
 function stabilizeViewport(source: string) {
   if (/<meta[^>]+name=["']viewport["']/i.test(source)) {
     return source.replace(
@@ -222,47 +175,24 @@ function replaceMaterialSymbolLigatures(source: string) {
   );
 }
 
-async function compileTailwindCss(source: string) {
-  const candidates = extractTailwindCandidates(source);
-  const compiler = await compile('@config "./mockup-preview.config.js"; @import "tailwindcss";', {
-    base: MOCKUP_DIR,
-    loadModule: async (id, base) => {
-      const config = normalizeTailwindConfig(extractTailwindConfig(source));
-      const path = resolve(base, id);
-
-      return {
-        path,
-        base: dirname(path),
-        module: config,
-      };
-    },
-    loadStylesheet: async (id, base) => {
-      if (id === "tailwindcss") {
-        return {
-          path: TAILWIND_ENTRY,
-          base: dirname(TAILWIND_ENTRY),
-          content: await readFile(TAILWIND_ENTRY, "utf8"),
-        };
-      }
-
-      const path = resolve(base, id);
-      return {
-        path,
-        base: dirname(path),
-        content: await readFile(path, "utf8"),
-      };
-    },
-  });
-
-  return compiler.build(candidates);
-}
-
 function buildSharedStyle(
   slug: MockupPreviewSlug,
   crop?: PreviewCrop,
   motion: PreviewMotionMode = "active",
   variant?: PreviewVariant,
 ) {
+  const materialSymbolsFontBase64 = getMaterialSymbolsBase64();
+  const materialSymbolsFontFace = materialSymbolsFontBase64
+    ? `
+    @font-face {
+      font-family: "Material Symbols Outlined";
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+      src: url("data:font/woff2;base64,${materialSymbolsFontBase64}") format("woff2");
+    }
+    `
+    : "";
   const preview = mockupPreviews[slug];
   const previewRootBackground = preview.mode === "page" ? "transparent" : preview.background;
   const previewContentInset = "1.35rem";
@@ -796,13 +726,7 @@ function buildSharedStyle(
   return `
     ${MANROPE_FONT_CSS}
 
-    @font-face {
-      font-family: "Material Symbols Outlined";
-      font-style: normal;
-      font-weight: 400;
-      font-display: block;
-      src: url("data:font/woff2;base64,${MATERIAL_SYMBOLS_BASE64}") format("woff2");
-    }
+    ${materialSymbolsFontFace}
     html, body {
       margin: 0 !important;
       padding: 0 !important;
@@ -1084,15 +1008,12 @@ async function buildPreviewHtmlInternal(
   variant?: PreviewVariant,
 ) {
   const source = readFileSync(join(MOCKUP_DIR, mockupPreviews[slug].file), "utf8");
-  const tailwindCss = await compileTailwindCss(source);
   const sharedStyle = buildSharedStyle(slug, crop, motion, variant);
-  const previewSource = replaceMaterialSymbolLigatures(
-    stabilizeViewport(stripRuntimeDependencies(source)),
-  );
+  const previewSource = replaceMaterialSymbolLigatures(stabilizeViewport(source));
   const scalingScript = buildScalingScriptForCrop(slug, crop, motion);
 
   return previewSource
-    .replace("</head>", `<style>${tailwindCss}\n${sharedStyle}</style></head>`)
+    .replace("</head>", `<style>${sharedStyle}</style></head>`)
     .replace("</body>", `${scalingScript}</body>`);
 }
 

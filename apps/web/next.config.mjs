@@ -1,6 +1,9 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import nextConfigHelpers from "./src/lib/next-config-helpers.cjs";
 
 const { buildSecurityHeaders } = nextConfigHelpers;
+const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -8,6 +11,10 @@ const nextConfig = {
   typedRoutes: true,
   poweredByHeader: false,
   trailingSlash: false,
+  outputFileTracingRoot: workspaceRoot,
+  turbopack: {
+    root: workspaceRoot
+  },
   allowedDevOrigins: ["192.168.1.88"],
   async headers() {
     const defaultHeaders = buildSecurityHeaders({
