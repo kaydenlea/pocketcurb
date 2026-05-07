@@ -465,7 +465,8 @@ function buildConfirmationEmail(signup: WaitlistSignup): string {
   return [
     `<p>${greeting}</p>`,
     "<p>You're on the Gama waitlist. We'll only follow up with product updates, alpha access, or research invitations tied to the waitlist.</p>",
-    "<p>Thanks for helping shape a calmer way to make daily money decisions.</p>"
+    "<p>Gama is built to make everyday spending, events, and shared plans feel clearer before the moment happens.</p>",
+    "<p>Thanks for helping shape a calmer way to budget the moments that matter.</p>"
   ].join("");
 }
 
