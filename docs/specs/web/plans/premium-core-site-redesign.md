@@ -145,6 +145,7 @@ Copy, metadata, tests, and proof all align with the redesigned public surfaces.
 - fresh-context same-tool review was used after implementation because no second model was requested in this session
 - review focus areas were unsupported-claim risk, responsive layout quality, reduced-motion safety, CTA honesty, and preservation of the existing SEO platform layer
 - the home-page polish follow-up focused specifically on heading balance, copy density, editorial card rhythm, and device-preview readability in the product-glimpse section
+- a later branch polish follow-up stayed inside the existing scope but refined the preview stack and mockup fidelity: shared device loading states, scroll-showcase step behavior, trust-carousel preview containment, social preview composition, and multiple mockup-level layout and alignment corrections
 - the supplied inspiration was used only for composition principles: rounded section shells, visual-first device staging, and calmer density. It was not used as truth for pricing, testimonials, or feature breadth
 - no re-plan trigger was hit; the redesign stayed within the planned file scope and did not require external assets or new dependencies
 
@@ -163,3 +164,4 @@ Copy, metadata, tests, and proof all align with the redesigned public surfaces.
 - `pnpm --dir apps/web test`: passed
 - `pnpm --dir apps/web build`: passed after rerunning outside the sandbox because the first sandboxed attempt hit Windows `spawn EPERM`
 - manual review completed for route roles, heading hierarchy, CTA flow, reduced-motion handling, and desktop/tablet/mobile layout intent
+- later branch polish iterations were rechecked repeatedly with `pnpm.cmd --filter @gama/web typecheck` while refining preview loading, scroll behavior, and mockup fidelity without changing route scope
