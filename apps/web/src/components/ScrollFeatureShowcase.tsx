@@ -16,6 +16,26 @@ type ShowcaseStep = {
 
 const DESKTOP_BREAKPOINT_QUERY = "(min-width: 920px)";
 
+function getNavigationType() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const [navigationEntry] = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
+
+  if (navigationEntry?.type) {
+    return navigationEntry.type;
+  }
+
+  const legacyNavigation = performance.navigation;
+
+  if (legacyNavigation?.type === 1) {
+    return "reload";
+  }
+
+  return null;
+}
+
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
@@ -195,14 +215,6 @@ export function ScrollFeatureShowcase({
     };
 
     const handleBreakpointChange = () => {
-      if (!desktopQuery.matches) {
-        if (activeIndexRef.current !== 0) {
-          setActiveIndex(0);
-        }
-
-        setScrollProgress(0);
-      }
-
       requestUpdate();
     };
 
@@ -263,40 +275,96 @@ export function ScrollFeatureShowcase({
       return;
     }
 
-    const sectionRect = section.getBoundingClientRect();
+    let frame = 0;
+    let stableFrames = 0;
+    let lastScrollY = window.scrollY;
+    const syncStartedAt = performance.now();
+    const navigationType = getNavigationType();
 
-    if (sectionRect.bottom <= 0 || sectionRect.top >= window.innerHeight) {
-      return;
-    }
+    const applyResolvedProgress = () => {
+      const currentSection = sectionRef.current;
+      const currentRegion = regionRef.current;
 
-    const rect = region.getBoundingClientRect();
-    boundsRef.current = {
-      top: window.scrollY + rect.top,
-      scrollableDistance: Math.max(region.offsetHeight - window.innerHeight, 1),
+      if (!currentSection || !currentRegion) {
+        return;
+      }
+
+      const currentSectionRect = currentSection.getBoundingClientRect();
+
+      if (currentSectionRect.bottom <= 0 || currentSectionRect.top >= window.innerHeight) {
+        return;
+      }
+
+      const rect = currentRegion.getBoundingClientRect();
+      boundsRef.current = {
+        top: window.scrollY + rect.top,
+        scrollableDistance: Math.max(currentRegion.offsetHeight - window.innerHeight, 1),
+      };
+
+      const { top, scrollableDistance } = boundsRef.current;
+      const activationStart = top;
+      const activationEnd = top + scrollableDistance;
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < activationStart || currentScrollY > activationEnd) {
+        return;
+      }
+
+      const progressDistance = Math.max(activationEnd - activationStart, 1);
+      const consumed = Math.min(Math.max(currentScrollY - activationStart, 0), progressDistance);
+      const progress = consumed / progressDistance;
+      const nextIndex = Math.min(steps.length - 1, Math.floor(progress * Math.max(steps.length, 1)));
+
+      setScrollProgress(progress);
+      scrollProgressRef.current = progress;
+      desiredIndexRef.current = nextIndex;
+
+      if (readyIndicesRef.current[nextIndex]) {
+        setActiveIndex(nextIndex);
+        activeIndexRef.current = nextIndex;
+      }
     };
 
-    const { top, scrollableDistance } = boundsRef.current;
-    const activationStart = top;
-    const activationEnd = top + scrollableDistance;
-    const currentScrollY = window.scrollY;
+    const settleAndSyncReloadProgress = () => {
+      const currentSection = sectionRef.current;
 
-    if (currentScrollY < activationStart || currentScrollY > activationEnd) {
-      return;
+      if (!desktopQuery.matches || !currentSection) {
+        return;
+      }
+
+      const currentSectionRect = currentSection.getBoundingClientRect();
+
+      if (currentSectionRect.bottom <= 0 || currentSectionRect.top >= window.innerHeight) {
+        return;
+      }
+
+      const currentScrollY = window.scrollY;
+
+      if (Math.abs(currentScrollY - lastScrollY) < 0.5) {
+        stableFrames += 1;
+      } else {
+        stableFrames = 0;
+      }
+
+      lastScrollY = currentScrollY;
+
+      if (stableFrames >= 3 || performance.now() - syncStartedAt > 420) {
+        applyResolvedProgress();
+        return;
+      }
+
+      frame = requestAnimationFrame(settleAndSyncReloadProgress);
+    };
+
+    if (navigationType === "reload") {
+      frame = requestAnimationFrame(settleAndSyncReloadProgress);
+    } else {
+      applyResolvedProgress();
     }
 
-    const progressDistance = Math.max(activationEnd - activationStart, 1);
-    const consumed = Math.min(Math.max(currentScrollY - activationStart, 0), progressDistance);
-    const progress = consumed / progressDistance;
-    const nextIndex = Math.min(steps.length - 1, Math.floor(progress * Math.max(steps.length, 1)));
-
-    setScrollProgress(progress);
-    scrollProgressRef.current = progress;
-    desiredIndexRef.current = nextIndex;
-
-    if (readyIndicesRef.current[nextIndex]) {
-      setActiveIndex(nextIndex);
-      activeIndexRef.current = nextIndex;
-    }
+    return () => {
+      cancelAnimationFrame(frame);
+    };
   }, [allPreviewsReady, steps.length]);
 
   if (steps.length === 0) {

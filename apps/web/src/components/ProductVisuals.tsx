@@ -22,6 +22,21 @@ type PreviewFrameState = {
   status: PreviewFrameStatus;
 };
 
+function isReloadNavigation() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const [navigationEntry] = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
+
+  if (navigationEntry?.type) {
+    return navigationEntry.type === "reload";
+  }
+
+  const legacyNavigation = performance.navigation;
+  return legacyNavigation?.type === 1;
+}
+
 function joinClasses(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
@@ -185,7 +200,7 @@ export function EmbeddedPreviewFrame({
   motion = "active",
   onLoad,
   onActivePreviewChange,
-  rootMargin = "65% 0px",
+  rootMargin = "220% 0px",
   suspendWhenOffscreen = true,
   variant,
 }: {
@@ -204,7 +219,9 @@ export function EmbeddedPreviewFrame({
   const hostRef = useRef<HTMLDivElement | null>(null);
   const nextFrameIdRef = useRef(1);
   const lastNotifiedReadySrcRef = useRef<string | null>(null);
-  const [isNearViewport, setIsNearViewport] = useState(eager || !suspendWhenOffscreen);
+  const [isNearViewport, setIsNearViewport] = useState(
+    eager || !suspendWhenOffscreen || isReloadNavigation(),
+  );
   const src = useMemo(() => {
     const params = new URLSearchParams();
 
@@ -393,7 +410,7 @@ export function EmbeddedPreviewFrame({
           className={className}
           data-preview-placeholder="true"
           role="img"
-          style={{ background: "transparent" }}
+          style={{ background: mockupPreviews[previewSlug].background }}
         />
       )}
     </div>
@@ -514,7 +531,7 @@ function StorySceneFrame({ scene }: { scene: StoryScene }) {
     return (
       <div className="story-visual-card">
         <div className="story-visual-stage">
-          <DeviceShell className="story-visual-phone" preview={scene.previewSlug} />
+          <DeviceShell className="story-visual-phone" preview={scene.previewSlug} suspendWhenOffscreen={false} />
           <div className="story-visual-floating story-visual-floating-left">
             <MiniInsightCard
               eyebrow="Safe-to-Spend"
@@ -562,7 +579,7 @@ function StorySceneFrame({ scene }: { scene: StoryScene }) {
           </div>
           <div className="receipt-preview-foot">Curated before sharing</div>
         </div>
-        <DeviceShell className="story-visual-side-phone" preview={scene.previewSlug} />
+        <DeviceShell className="story-visual-side-phone" preview={scene.previewSlug} suspendWhenOffscreen={false} />
       </div>
     );
   }
@@ -595,6 +612,7 @@ function StorySceneFrame({ scene }: { scene: StoryScene }) {
       <DeviceShell
         className="story-visual-side-phone story-visual-side-phone-raised"
         preview={scene.previewSlug}
+        suspendWhenOffscreen={false}
       />
     </div>
   );
@@ -810,7 +828,7 @@ export function ProductHeroVisual({ compact = false }: { compact?: boolean }) {
         eager
         onLoad={() => setReady(true)}
         preview="overview-screen"
-        variant="framed"
+        variant="walkthrough"
       />
     </div>
   );

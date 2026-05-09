@@ -453,11 +453,6 @@ function buildSharedStyle(
         .preview-scale-root .mobile-viewport > main.pt-24 {
           padding-top: 7.58rem !important;
         }
-
-        .preview-scale-root .mobile-viewport .ios-emerald-glass p.text-\\[10px\\].font-extrabold {
-          position: static !important;
-          top: auto !important;
-        }
       `
       : "";
   const overviewFramedStyle =
@@ -465,6 +460,24 @@ function buildSharedStyle(
       ? `
         .preview-scale-root .mobile-viewport > main.pt-24 {
           padding-top: 7.42rem !important;
+        }
+      `
+      : "";
+  const overviewStatusPillStyle =
+    slug === "overview-screen"
+      ? `
+        .preview-scale-root .ios-emerald-glass {
+          align-items: center !important;
+        }
+
+        .preview-scale-root .ios-emerald-glass p.text-\\[10px\\].font-extrabold {
+          position: static !important;
+          top: auto !important;
+          margin: 0 !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          line-height: 1 !important;
+          transform: translateY(${motion === "static" ? "-0.028em" : "0.045em"}) !important;
         }
       `
       : "";
@@ -546,6 +559,7 @@ function buildSharedStyle(
         .preview-scale-root .ios-emerald-glass {
           background: rgba(116, 196, 76, 0.22) !important;
           border-color: rgba(116, 196, 76, 0.14) !important;
+          align-items: center !important;
         }
 
         .preview-scale-root .chart-glow-emerald {
@@ -562,6 +576,32 @@ function buildSharedStyle(
 
         .preview-scale-root #spendingGradient stop[stop-color="#10b981"] {
           stop-color: #74c44c !important;
+        }
+
+        .preview-scale-root .flex.h-8.items-center.gap-1\\.5.bg-white\\/5 p.text-\\[8px\\].font-bold,
+        .preview-scale-root .flex.h-8.items-center.bg-black\\/50 button {
+          position: static !important;
+          top: auto !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          line-height: 1 !important;
+        }
+      `
+      : "";
+  const accountsStatusPillStyle =
+    slug === "accounts" || slug === "accounts-trust"
+      ? `
+        .preview-scale-root .ios-emerald-glass {
+          align-items: center !important;
+        }
+
+        .preview-scale-root .ios-emerald-glass p.text-\\[10px\\].font-extrabold {
+          margin: 0 !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          line-height: 1 !important;
+          transform: translateY(-0.028em) !important;
         }
       `
       : "";
@@ -764,6 +804,9 @@ function buildSharedStyle(
       overflow-x: hidden !important;
       background: ${previewRootBackground} !important;
     }
+    body > :not(script):not(style) {
+      transition: opacity 240ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
     html:not([data-preview-ready="true"]) body > :not(script):not(style) {
       opacity: 0 !important;
     }
@@ -851,12 +894,14 @@ function buildSharedStyle(
     ${framedContentInsetStyle}
     ${overviewWalkthroughStyle}
     ${overviewFramedStyle}
+    ${overviewStatusPillStyle}
     ${accountsWalkthroughInsetStyle}
     ${accountsBridgeClearanceStyle}
     ${billsBridgeClearanceStyle}
     ${cashFlowBridgeClearanceStyle}
     ${eventDetailsFramedStyle}
     ${overviewGreenStyle}
+    ${accountsStatusPillStyle}
     ${billsViewAllStyle}
     ${previewVariantStyle}
     ${storySignatureStyle}
