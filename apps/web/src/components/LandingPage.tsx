@@ -360,7 +360,11 @@ async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }
         `home-signature-card-${card.id}`
       )}
     >
-      <ViewportMotionGate className="home-signature-card-device-window" rootMargin="28% 0px">
+      <ViewportMotionGate
+        className="home-signature-card-device-window"
+        pauseAnimationsWhenOutOfView={false}
+        rootMargin="28% 0px"
+      >
         {cardId === "overview-timeline" ? (
           <EventTimelineSignatureVisual />
         ) : cardId === "map-context" ? (
@@ -369,6 +373,7 @@ async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }
           <MockupPreviewPhone
             className={joinClasses("home-signature-card-phone", "home-signature-card-phone-money-stories")}
             preview={previewSlug}
+            suspendWhenOffscreen={false}
           />
         ) : cardId === "receipt-recap" ? (
           <MockupPreviewPhone
@@ -378,12 +383,14 @@ async function SignatureFeatureCard({ card }: { card: HomeSignatureFeatureCard }
               "home-signature-card-phone-receipt-recap"
             )}
             preview={previewSlug}
+            suspendWhenOffscreen={false}
             variant="framed"
           />
         ) : (
           <MockupPreviewPhone
             className={joinClasses("home-signature-card-phone", `home-signature-card-phone-${cardId}`)}
             preview={previewSlug}
+            suspendWhenOffscreen={false}
           />
         )}
       </ViewportMotionGate>
@@ -412,7 +419,27 @@ export async function LandingPage() {
       <section className="hero-freeform hero-home">
           <div className="hero-freeform-inner">
             <div className="hero-home-copy">
-              <span className="site-kicker">{siteCopy.home.hero.eyebrow}</span>
+              <span className="site-kicker hero-home-kicker">
+                <span className="hero-home-kicker-icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none">
+                    <path
+                      d="M4.6 13.2L8.2 9.6L10.7 12.1L15.4 7.4"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.7"
+                    />
+                    <path
+                      d="M12.6 7.4H15.4V10.2"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.7"
+                    />
+                  </svg>
+                </span>
+                <span className="hero-home-kicker-copy">{siteCopy.home.hero.eyebrow}</span>
+              </span>
               <h1 className="hero-home-title">{siteCopy.home.hero.title}</h1>
               <p className="hero-home-body">{siteCopy.home.hero.body}</p>
 
